@@ -1,102 +1,102 @@
-Codigo_asignatura,Semana,Actividad
-13866,5,Primer examen parcial (10%)  / mid-term exam (10%)
-13866,11,Segundo examen parcial (30%)  / mid-term exam (10%)
-13868,8,Entrega de ejercicios semanales / Delivery of weekly exercises
-13868,9,Examen parcial / Mid-term exam
-13868,10,Entrega de ejercicios semanales / Delivery of weekly exercises
-13868,11,Entrega de ejercicios semanales / Delivery of weekly exercises
-13868,12,Entrega de ejercicios semanales / Delivery of weekly exercises
-13868,15,Entrega del proyecto final / Final Project delivery
-13869,6,Laboratorio Sesión 1- Lab Session 1
-13869,7,Laboratorio Sesión 2- Lab Session 2
-13869,8,Examen parcial 1- Partial Exam 1
-13869,9,Laboratorio Sesión 3- Lab Session 3
-13869,12,Laboratorio Sesión 4- Lab Session 4
-13873,7,"PRIMER EXAMEN PARCIAL (Temas: Tipos Abstractos de Datos (TADs), TADs LINEALES Y ANÁLISIS DE ALGORITMOS)First Mid-Term exam (Topics: Abstract Data Types (ADTs), Linear data structures, Analysis of algorithms)"
-13873,9,"PRIMERA PRUEBA DE LABORATORIO SOBRE ESTRUCTURAS LINEALES Y ANÁLISIS DE ALGORITMOS. FIRST LAB TEST ABOUT LINEARDATA STRUCTURES AND ANALYSIS OF ALGORITHMS"
-13873,12,"SEGUNDO EXAMEN PARCIAL (Temas: RECURSIÓN, ÁRBOLES, ANÁLISIS DE ALGORITMOS)Second Mid-Term exam (Topics: RECURSION, TREES, Analysis of algorithms)"
-13873,14,"SEGUNDA PRUEBA DE LABORATORIO SOBRE ESTRUCTURAS NO LINEALES (ÁRBOLES) Y ANÁLISIS DE ALGORITMOS. SECOND LAB TESTABOUT TREES AND ANALYSIS OF ALGORITHMS"
-13874,7,Entrega primera práctica. Programación en ensamblador / Delivery first practice. Assembler programming
-13874,13,Entrega segunda práctica. Microprogramación/ Delivery second practice. Microprogramming.
-13874,5,Miniexam 1
-13874,9,Miniexam 2
-13874,13,Miniexam 3
-13881,2,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)"
-13881,3,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)"
-13881,4,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)"
-13881,5,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)"
-13881,6,Ejercicio de teoría / Theory test
-13881,6,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)"
-13881,7,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)"
-13881,8,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)"
-13881,9,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)"
-13881,10,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)"
-13881,11,Examen de Laboratorio / Laboratory test
-13881,12,"Tercer trabajo práctico: Diseño físico y afinamiento (entrega en la semana 13) /Third assignment: Physical Design and DB Tunning (due in week 14th)"
-13881,13,"Tercer trabajo práctico: Diseño físico y afinamiento (entrega en la semana 13) /Third assignment: Physical Design and DB Tunning (due in week 14th)"
-13882,4,"Entrega Práctica 1. Tecnologías Web: HTML 5/CSSSubmission First Laboratory. Web Technologies: HTML 5/CSS"
-13882,8,"Entrega Práctica 2. Tecnologías Web: JavaScriptSubmission Second Laboratory. Web Technologies: JavaScript"
-13882,10,"Entrega Caso Práctico. Metodología de Diseño: PrototipadoSubmission Case Study. Design Methodology: Prototyping"
-13882,14,"Entrega Caso Práctico. Diseño e Implementación de Interfaces de Usuario WebSubmission Case Study. Design and Development of Web User Interfaces"
-13884,2,"Test de concepto corto (tc1), capítulos 1 & 2.  Short concept test (tc1), chapters 1 & 2"
-13884,3,"Prueba de conocimiento (PC1), capítulos 1 & 2. Knowledge test (PC1), chapters 1 & 2"
-13884,5,"Test de concepto corto (tc2), capítulo 3.  Short concept test (tc2), covering chapter 3"
-13884,6,"Prueba de conocimiento (PC2), capítulo 3.  Knowledge test (PC2), covering chapter 3"
-13884,10,"Test de concepto corto (tc3), capítulo 4.  Short concept test (tc3), covering chapter 4"
-13884,11,"Prueba de conocimiento (PC3), capítulo 3.  Knowledge test (PC3), covering chapter 4"
-13884,13,"Test de concepto corto (tc4), capítulo 5.  Short concept test (tc4), covering chapter 5"
-13884,15,"Prueba de conocimiento (PC4), capítulo 3.  Knowledge test (PC4), covering chapter 5"
-13888,3,"Lab: Rendimiento y EnergíaLab: Performance and Energy"
-13888,5,"Lab: Memoria CachéLab: Cache Memory"
-13888,6,"Examen parcial 1Partial exam 1"
-13888,9,"Entrega de proyectoProject delivery"
-13888,10,Lab: OpenMP
-13888,11,"Examen parcial 2Partial Exam 2"
-13888,12,"Lab: Consistencia de memoriaLab: Memory consistency"
-13892,4,Entregable 1: Tema 3 oferta y coste
-13892,5,"Entregable 2: Tema 6 Gestión de la configuración del software, Tema 7 Gestión de Calidad"
-13892,6,Entregable 3: Tema 4 Estudio de viabilidad y requisitos
-13892,8,"Entregable 4: Tema 5 casos de uso de alto nivel y priorización de los mismosEntregable 5: Tema 8 estimación"
-13892,10,Entregable 6: Tema 9 planificación
-13892,14,"Entregable 7: Tema 10 análisis y Tema 11 Diseño (iteración 1)Entregable 8: Tema 10 análisis y Tema 11 Diseño (iteración 2) y actualización de la ejecución de los planes de Gestión de laconfiguración y Gestión de la calidad"
-15754,7,Entrega de ejercicio 1
-15754,10,Entrega de ejercicio 2
-15754,12,Entrega de ejercicio 3
-15754,14,Entrega de ejercicio 4 y proyecto final
-15970,6,"Validación I. Examen de evaluación continua.Validation I. Midterm I."
-15970,14,"Validación II. Examen de evaluación continua.Validation II. Midterm II."
-15971,8,Primer control / First mid-term exam
-15971,13,Segundo control / Second mid-term exam
-15973,8,Prueba de evaluación continua/ Continuous assessment
-15973,9,Prueba de evaluación continua/ Continuous assessment
-15973,12,Prueba de evaluación continua/ Continuous assessment
-15973,13,Prueba de evaluación continua/ Continuous assessment
-15973,14,Prueba de evaluación continua/ Continuous assessment
-15973,15,Prueba de evaluación continua/ Continuous assessment
-15974,5,"Examen individual teórico parcial del bloque I: Ingeniería de requisitos /Individual theoretical mid-term exam block I: Requirements engineering"
-15974,6,"1a Entrega del proyecto final en grupo (y presentación) /1st final project delivery (and presentation)"
-15974,10,"Examen individual teórico parcial del bloque II: Modelado conceptual /Individual theoretical mid-term exam block II: Conceptual modelling"
-15974,13,"2a Entrega del proyecto final en grupo (y presentación) /2nd final project delivery (and presentation)"
-15974,13,"Examen individual teórico parcial del bloque III: Modelado arquitectónico /Individual theoretical mid-term exam block III: Architectural modelling"
-15974,14,"Entrega de dos ejercicios individuales prácticos /Delivery of the individual practical exercises"
-15976,6,Evaluación de un problema / Evaluation of a problem
-15976,7,Evaluación de un test / Evaluation of a test
-15976,8,Entrega primera práctica / First lab assignment
-15976,13,Evaluación de un problema / Evaluation of a problem
-15976,14,Evaluación de un test / Evaluation of a test
-15976,15,Entrega segunda práctica / Second lab assignment
-17881,13,"Entrega de caso final práctico (incluyendo presentación y/o video de demo)Nota: considere el número absoluto de semana en el cuatrimestre.Final project delivery (including presentation and/or video)Remark: consider the absolute number of the week within the semester."
-18179,3,"TEST 1. Aspectos éticos y legales en la profesión de Ingeniería del SoftwareTEST 1. Legal and ethical issues in the profession of Software Engineering"
-18179,3,"Ejercicio Guiado 1. Aspectos Éticos y Legales de la profesión de Ingeniería del Software.Guided Exercise 1. Legal and ethical issues in the profession of Software Engineering"
-18179,5,"TEST 2. Prácticas genéricas del desarrollo ágil.TEST 2. Agile Software Development Techniques."
-18179,7,"TEST 3. Desarrollo Dirigido por Pruebas, Clases de Equivalencia y Valores LímiteTEST 3. Test Driven Development, Equivalence Classes and Boundary Values"
-18179,9,"Ejercicio Guiado 2. Propiedad Colectiva de código y estándar de codificación. Desarrollo dirigido por pruebas y técnicas de prueba.Guided Exercise 2. Collective code ownership & Coding Standards. Test Driven Development & testing techniques."
-18179,11,"TEST 4. Análisis sintáctico y pruebas estructuralesTEST 4. Syntax Analysis and structural testing"
-19472,4,"Entrega primer ejercicio de programación de sistemas ubicuosSubmission of the first exercise of ubiquitous systems programming"
-19472,8,"Entrega segundo ejercicio de programación de sistemas ubicuosSubmission of the second exercise of ubiquitous systems programming"
-19472,6,"Entrega P1 (Ideación y diseño)Submission of P1 (Ideation and design)"
-19472,11,"Entrega P2 (Prototipado)Submission of P2 (Prototyping)"
-19472,14,"Entrega P3 (Evaluación) y defensa del proyectoSubmission of P3 (Evaluation) and defense of the project"
-19476,2,Cuaderno de Ejercicios 1 / Workbook 1 Delivery
-19476,8,Cuaderno de Ejercicios 2 / Workbook 2 Delivery
-19476,14,Cuaderno de Ejercicios 3 / Workbook 3 Delivery
+Codigo_asignatura,Nombre,Créditos,Curso,Cuatrimestre,Tipo de asignatura,Semana,Actividad,Tipo de actividad
+13866,Cálculo,6.0,1,1erCuatrimestre,Formación Básica,5,Primer examen parcial (10%)  / mid-term exam (10%),Examen
+13866,Cálculo,6.0,1,1erCuatrimestre,Formación Básica,11,Segundo examen parcial (30%)  / mid-term exam (10%),Examen
+13868,Programación,6.0,1,1erCuatrimestre,Formación Básica,8,Entrega de ejercicios semanales / Delivery of weekly exercises,Ejercicio
+13868,Programación,6.0,1,1erCuatrimestre,Formación Básica,9,Examen parcial / Mid-term exam,Examen
+13868,Programación,6.0,1,1erCuatrimestre,Formación Básica,10,Entrega de ejercicios semanales / Delivery of weekly exercises,Ejercicio
+13868,Programación,6.0,1,1erCuatrimestre,Formación Básica,11,Entrega de ejercicios semanales / Delivery of weekly exercises,Ejercicio
+13868,Programación,6.0,1,1erCuatrimestre,Formación Básica,12,Entrega de ejercicios semanales / Delivery of weekly exercises,Ejercicio
+13868,Programación,6.0,1,1erCuatrimestre,Formación Básica,15,Entrega del proyecto final / Final Project delivery,Práctica
+13869,Tecnología de Computadores,6.0,1,2oCuatrimestre,Formación Básica,6,Laboratorio Sesión 1- Lab Session 1,Laboratorio
+13869,Tecnología de Computadores,6.0,1,2oCuatrimestre,Formación Básica,7,Laboratorio Sesión 2- Lab Session 2,Laboratorio
+13869,Tecnología de Computadores,6.0,1,2oCuatrimestre,Formación Básica,8,Examen parcial 1- Partial Exam 1,Examen
+13869,Tecnología de Computadores,6.0,1,2oCuatrimestre,Formación Básica,9,Laboratorio Sesión 3- Lab Session 3,Laboratorio
+13869,Tecnología de Computadores,6.0,1,2oCuatrimestre,Formación Básica,12,Laboratorio Sesión 4- Lab Session 4,Laboratorio
+13873,Estructura de datos y algoritmos,6.0,1,2oCuatrimestre,Formación Básica,7,"PRIMER EXAMEN PARCIAL (Temas: Tipos Abstractos de Datos (TADs), TADs LINEALES Y ANÁLISIS DE ALGORITMOS)First Mid-Term exam (Topics: Abstract Data Types (ADTs), Linear data structures, Analysis of algorithms)",Examen
+13873,Estructura de datos y algoritmos,6.0,1,2oCuatrimestre,Formación Básica,9,"PRIMERA PRUEBA DE LABORATORIO SOBRE ESTRUCTURAS LINEALES Y ANÁLISIS DE ALGORITMOS. FIRST LAB TEST ABOUT LINEARDATA STRUCTURES AND ANALYSIS OF ALGORITHMS",Laboratorio
+13873,Estructura de datos y algoritmos,6.0,1,2oCuatrimestre,Formación Básica,12,"SEGUNDO EXAMEN PARCIAL (Temas: RECURSIÓN, ÁRBOLES, ANÁLISIS DE ALGORITMOS)Second Mid-Term exam (Topics: RECURSION, TREES, Analysis of algorithms)",Examen
+13873,Estructura de datos y algoritmos,6.0,1,2oCuatrimestre,Formación Básica,14,"SEGUNDA PRUEBA DE LABORATORIO SOBRE ESTRUCTURAS NO LINEALES (ÁRBOLES) Y ANÁLISIS DE ALGORITMOS. SECOND LAB TESTABOUT TREES AND ANALYSIS OF ALGORITHMS",Laboratorio
+13874,Estructura de Computadores,6.0,2o,1erCuatrimestre,Formación Básica,7,Entrega primera práctica. Programación en ensamblador / Delivery first practice. Assembler programming,Práctica
+13874,Estructura de Computadores,6.0,2o,1erCuatrimestre,Formación Básica,13,Entrega segunda práctica. Microprogramación/ Delivery second practice. Microprogramming.,Práctica
+13874,Estructura de Computadores,6.0,2o,1erCuatrimestre,Formación Básica,5,Miniexam 1,Otros
+13874,Estructura de Computadores,6.0,2o,1erCuatrimestre,Formación Básica,9,Miniexam 2,Otros
+13874,Estructura de Computadores,6.0,2o,1erCuatrimestre,Formación Básica,13,Miniexam 3,Otros
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,2,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,3,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,4,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,5,"Primer trabajo práctico: Diseño Relacional y Carga Masiva (entrega en la semana 5) /First assignment: Relational Design and DB Population (due in week 5th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,6,Ejercicio de teoría / Theory test,Ejercicio
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,6,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,7,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,8,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,9,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,10,"Segundo trabajo práctico: Consultas, procedimientos, vistas, diseño externo y disparadores (entrega en la semana 10) /Second assignment: Queries, procedures, views, external design and triggering (due in week 10th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,11,Examen de Laboratorio / Laboratory test,Laboratorio
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,12,"Tercer trabajo práctico: Diseño físico y afinamiento (entrega en la semana 13) /Third assignment: Physical Design and DB Tunning (due in week 14th)",Práctica
+13881,Ficheros y bases de datos,6.0,2o,2oCuatrimestre,Formación Básica,13,"Tercer trabajo práctico: Diseño físico y afinamiento (entrega en la semana 13) /Third assignment: Physical Design and DB Tunning (due in week 14th)",Práctica
+13882,Interfaces de Usuario,6.0,3o,1erCuatrimestre,Obligatoria,4,"Entrega Práctica 1. Tecnologías Web: HTML 5/CSSSubmission First Laboratory. Web Technologies: HTML 5/CSS",Práctica
+13882,Interfaces de Usuario,6.0,3o,1erCuatrimestre,Obligatoria,8,"Entrega Práctica 2. Tecnologías Web: JavaScriptSubmission Second Laboratory. Web Technologies: JavaScript",Práctica
+13882,Interfaces de Usuario,6.0,3o,1erCuatrimestre,Obligatoria,10,"Entrega Caso Práctico. Metodología de Diseño: PrototipadoSubmission Case Study. Design Methodology: Prototyping",Práctica
+13882,Interfaces de Usuario,6.0,3o,1erCuatrimestre,Obligatoria,14,"Entrega Caso Práctico. Diseño e Implementación de Interfaces de Usuario WebSubmission Case Study. Design and Development of Web User Interfaces",Práctica
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,2,"Test de concepto corto (tc1), capítulos 1 & 2.  Short concept test (tc1), chapters 1 & 2",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,3,"Prueba de conocimiento (PC1), capítulos 1 & 2. Knowledge test (PC1), chapters 1 & 2",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,5,"Test de concepto corto (tc2), capítulo 3.  Short concept test (tc2), covering chapter 3",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,6,"Prueba de conocimiento (PC2), capítulo 3.  Knowledge test (PC2), covering chapter 3",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,10,"Test de concepto corto (tc3), capítulo 4.  Short concept test (tc3), covering chapter 4",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,11,"Prueba de conocimiento (PC3), capítulo 3.  Knowledge test (PC3), covering chapter 4",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,13,"Test de concepto corto (tc4), capítulo 5.  Short concept test (tc4), covering chapter 5",Examen
+13884,Redes de Ordenadores,6.0,3o,1erCuatrimestre,Obligatoria,15,"Prueba de conocimiento (PC4), capítulo 3.  Knowledge test (PC4), covering chapter 5",Examen
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,3,"Lab: Rendimiento y EnergíaLab: Performance and Energy",Laboratorio
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,5,"Lab: Memoria CachéLab: Cache Memory",Laboratorio
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,6,"Examen parcial 1Partial exam 1",Examen
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,9,"Entrega de proyectoProject delivery",Práctica
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,10,Lab: OpenMP,Laboratorio
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,11,"Examen parcial 2Partial Exam 2",Examen
+13888,Arquitectura de Computadores,6.0,3o,1erCuatrimestre,Obligatoria,12,"Lab: Consistencia de memoriaLab: Memory consistency",Laboratorio
+13892,Dirección de proyectos de desarrollo de software,6.0,4o,1erCuatrimestre,Obligatoria,4,Entregable 1: Tema 3 oferta y coste,Otros
+13892,Dirección de proyectos de desarrollo de software,6.0,4o,1erCuatrimestre,Obligatoria,5,"Entregable 2: Tema 6 Gestión de la configuración del software, Tema 7 Gestión de Calidad",Otros
+13892,Dirección de proyectos de desarrollo de software,6.0,4o,1erCuatrimestre,Obligatoria,6,Entregable 3: Tema 4 Estudio de viabilidad y requisitos,Otros
+13892,Dirección de proyectos de desarrollo de software,6.0,4o,1erCuatrimestre,Obligatoria,8,"Entregable 4: Tema 5 casos de uso de alto nivel y priorización de los mismosEntregable 5: Tema 8 estimación",Otros
+13892,Dirección de proyectos de desarrollo de software,6.0,4o,1erCuatrimestre,Obligatoria,10,Entregable 6: Tema 9 planificación,Otros
+13892,Dirección de proyectos de desarrollo de software,6.0,4o,1erCuatrimestre,Obligatoria,14,"Entregable 7: Tema 10 análisis y Tema 11 Diseño (iteración 1)Entregable 8: Tema 10 análisis y Tema 11 Diseño (iteración 2) y actualización de la ejecución de los planes de Gestión de laconfiguración y Gestión de la calidad",Otros
+15754,Sistemas Distribuidos,6.0,3o,2oCuatrimestre,Obligatoria,7,Entrega de ejercicio 1,Ejercicio
+15754,Sistemas Distribuidos,6.0,3o,2oCuatrimestre,Obligatoria,10,Entrega de ejercicio 2,Ejercicio
+15754,Sistemas Distribuidos,6.0,3o,2oCuatrimestre,Obligatoria,12,Entrega de ejercicio 3,Ejercicio
+15754,Sistemas Distribuidos,6.0,3o,2oCuatrimestre,Obligatoria,14,Entrega de ejercicio 4 y proyecto final,Ejercicio
+15970,Lógica,6.0,1,2oCuatrimestre,Formación Básica,6,"Validación I. Examen de evaluación continua.Validation I. Midterm I.",Examen
+15970,Lógica,6.0,1,2oCuatrimestre,Formación Básica,14,"Validación II. Examen de evaluación continua.Validation II. Midterm II.",Examen
+15971,Matemática Discreta,6.0,1,2oCuatrimestre,Formación Básica,8,Primer control / First mid-term exam,Examen
+15971,Matemática Discreta,6.0,1,2oCuatrimestre,Formación Básica,13,Segundo control / Second mid-term exam,Examen
+15973,Criptografía y seguridad informática,6.0,3o,1erCuatrimestre,Obligatoria,8,Prueba de evaluación continua/ Continuous assessment,Examen
+15973,Criptografía y seguridad informática,6.0,3o,1erCuatrimestre,Obligatoria,9,Prueba de evaluación continua/ Continuous assessment,Examen
+15973,Criptografía y seguridad informática,6.0,3o,1erCuatrimestre,Obligatoria,12,Prueba de evaluación continua/ Continuous assessment,Examen
+15973,Criptografía y seguridad informática,6.0,3o,1erCuatrimestre,Obligatoria,13,Prueba de evaluación continua/ Continuous assessment,Examen
+15973,Criptografía y seguridad informática,6.0,3o,1erCuatrimestre,Obligatoria,14,Prueba de evaluación continua/ Continuous assessment,Examen
+15973,Criptografía y seguridad informática,6.0,3o,1erCuatrimestre,Obligatoria,15,Prueba de evaluación continua/ Continuous assessment,Examen
+15974,Ingeniería del Software,6.0,2o,1erCuatrimestre,Formación Básica,5,"Examen individual teórico parcial del bloque I: Ingeniería de requisitos /Individual theoretical mid-term exam block I: Requirements engineering",Examen
+15974,Ingeniería del Software,6.0,2o,1erCuatrimestre,Formación Básica,6,"1a Entrega del proyecto final en grupo (y presentación) /1st final project delivery (and presentation)",Práctica
+15974,Ingeniería del Software,6.0,2o,1erCuatrimestre,Formación Básica,10,"Examen individual teórico parcial del bloque II: Modelado conceptual /Individual theoretical mid-term exam block II: Conceptual modelling",Examen
+15974,Ingeniería del Software,6.0,2o,1erCuatrimestre,Formación Básica,13,"2a Entrega del proyecto final en grupo (y presentación) /2nd final project delivery (and presentation)",Práctica
+15974,Ingeniería del Software,6.0,2o,1erCuatrimestre,Formación Básica,13,"Examen individual teórico parcial del bloque III: Modelado arquitectónico /Individual theoretical mid-term exam block III: Architectural modelling",Examen
+15974,Ingeniería del Software,6.0,2o,1erCuatrimestre,Formación Básica,14,"Entrega de dos ejercicios individuales prácticos /Delivery of the individual practical exercises",Ejercicio
+15976,Heurística y Optimización,6.0,3o,1erCuatrimestre,Obligatoria,6,Evaluación de un problema / Evaluation of a problem,Otros
+15976,Heurística y Optimización,6.0,3o,1erCuatrimestre,Obligatoria,7,Evaluación de un test / Evaluation of a test,Examen
+15976,Heurística y Optimización,6.0,3o,1erCuatrimestre,Obligatoria,8,Entrega primera práctica / First lab assignment,Práctica
+15976,Heurística y Optimización,6.0,3o,1erCuatrimestre,Obligatoria,13,Evaluación de un problema / Evaluation of a problem,Otros
+15976,Heurística y Optimización,6.0,3o,1erCuatrimestre,Obligatoria,14,Evaluación de un test / Evaluation of a test,Examen
+15976,Heurística y Optimización,6.0,3o,1erCuatrimestre,Obligatoria,15,Entrega segunda práctica / Second lab assignment,Práctica
+17881,Hojas de cálculo. Nivel avanzado,1.5,3o,2oCuatrimestre,Obligatoria,13,"Entrega de caso final práctico (incluyendo presentación y/o video de demo)Nota: considere el número absoluto de semana en el cuatrimestre.Final project delivery (including presentation and/or video)Remark: consider the absolute number of the week within the semester.",Práctica
+18179,Desarrollo de Software,6.0,2o,2oCuatrimestre,Formación Básica,3,"TEST 1. Aspectos éticos y legales en la profesión de Ingeniería del SoftwareTEST 1. Legal and ethical issues in the profession of Software Engineering",Examen
+18179,Desarrollo de Software,6.0,2o,2oCuatrimestre,Formación Básica,3,"Ejercicio Guiado 1. Aspectos Éticos y Legales de la profesión de Ingeniería del Software.Guided Exercise 1. Legal and ethical issues in the profession of Software Engineering",Ejercicio
+18179,Desarrollo de Software,6.0,2o,2oCuatrimestre,Formación Básica,5,"TEST 2. Prácticas genéricas del desarrollo ágil.TEST 2. Agile Software Development Techniques.",Práctica
+18179,Desarrollo de Software,6.0,2o,2oCuatrimestre,Formación Básica,7,"TEST 3. Desarrollo Dirigido por Pruebas, Clases de Equivalencia y Valores LímiteTEST 3. Test Driven Development, Equivalence Classes and Boundary Values",Examen
+18179,Desarrollo de Software,6.0,2o,2oCuatrimestre,Formación Básica,9,"Ejercicio Guiado 2. Propiedad Colectiva de código y estándar de codificación. Desarrollo dirigido por pruebas y técnicas de prueba.Guided Exercise 2. Collective code ownership & Coding Standards. Test Driven Development & testing techniques.",Ejercicio
+18179,Desarrollo de Software,6.0,2o,2oCuatrimestre,Formación Básica,11,"TEST 4. Análisis sintáctico y pruebas estructuralesTEST 4. Syntax Analysis and structural testing",Examen
+19472,Sistemas Interactivos y Ubicuos,6.0,3o,2oCuatrimestre,Obligatoria,4,"Entrega primer ejercicio de programación de sistemas ubicuosSubmission of the first exercise of ubiquitous systems programming",Ejercicio
+19472,Sistemas Interactivos y Ubicuos,6.0,3o,2oCuatrimestre,Obligatoria,8,"Entrega segundo ejercicio de programación de sistemas ubicuosSubmission of the second exercise of ubiquitous systems programming",Ejercicio
+19472,Sistemas Interactivos y Ubicuos,6.0,3o,2oCuatrimestre,Obligatoria,6,"Entrega P1 (Ideación y diseño)Submission of P1 (Ideation and design)",Práctica
+19472,Sistemas Interactivos y Ubicuos,6.0,3o,2oCuatrimestre,Obligatoria,11,"Entrega P2 (Prototipado)Submission of P2 (Prototyping)",Práctica
+19472,Sistemas Interactivos y Ubicuos,6.0,3o,2oCuatrimestre,Obligatoria,14,"Entrega P3 (Evaluación) y defensa del proyectoSubmission of P3 (Evaluation) and defense of the project",Práctica
+19476,Fundamentos de internet de las cosas,6.0,4o,2oCuatrimestre,Obligatoria,2,Cuaderno de Ejercicios 1 / Workbook 1 Delivery,Ejercicio
+19476,Fundamentos de internet de las cosas,6.0,4o,2oCuatrimestre,Obligatoria,8,Cuaderno de Ejercicios 2 / Workbook 2 Delivery,Ejercicio
+19476,Fundamentos de internet de las cosas,6.0,4o,2oCuatrimestre,Obligatoria,14,Cuaderno de Ejercicios 3 / Workbook 3 Delivery,Ejercicio
