@@ -84,5 +84,3 @@ if __name__ == "__main__":
     csv_path = "Dataset_Traducido/Dataset_limpio.csv"
     tabla.to_csv(csv_path, index=False)
     print("Exported the table to the csv file: " + csv_path)
-
-    # [0-9][0-9][0-9][0-9][0-9]-[a-zA-Z0-9]*,[a-zA-Z0-9]*
