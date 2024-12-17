@@ -51,7 +51,7 @@ if __name__ == "__main__":
     # REQUISITO: debe tener instalado Java 8 o superior
     os.environ["JAVA_HOME"] = "C:\Program Files (x86)\Java\jre-1.8"
     # Ruta del archivo PDF
-    pdf_path = "Dataset/"
+    pdf_path = "01-Analisis/Datos_De_Prueba/"
     # Dar acceso a los datasets de prueba
 
     # Extraer tablas desde el PDF y almacenarlas en una lista
@@ -70,12 +70,8 @@ if __name__ == "__main__":
     print(tabla)
     
     # Exportar las tablas a distintos archivos csv
-    csv_path = "Dataset_Traducido/"
+    csv_path = "01-Analisis/Datos_Procesados/"
     tabla.to_csv(csv_path + "Dataset_completo.csv", index=False)
-
-    # Exportar las tablas a un archivo Excel
-    excel_path = "Deposito_Datasets.xlsx"
-    exportar_a_excel(tabla, excel_path)
     
 
     

@@ -1,40 +1,8 @@
 Código,Curso,Tipo de asignatura,Cuatrimestre,Nombre,Créditos
-10898,Curso,Cursos de Humanidades,1erCuatrimestre,Ciudadanos y administración de justicia,3
-10901,Curso,Cursos de Humanidades,2oCuatrimestre,Discapacidad y derechos humanos,3
-10907,Curso,Cursos de Humanidades,1erCuatrimestre,El Derecho en el Cine,3
-10916,Curso,Cursos de Humanidades,2oCuatrimestre,Consecuencias de la globalización y relaciones laborales,3
-10926,Curso,Cursos de Humanidades,1erCuatrimestre,Futuro del trabajo: revolución 4.0,3
-11008,Curso,Cursos de Humanidades,1erCuatrimestre,Entre dos guerras mundiales (1914-1945),3
-11038,Curso,Cursos de Humanidades,1erCuatrimestre,I.A. y el Futuro del Sector Financiero,3
-11040,Curso,Cursos de Humanidades,1erCuatrimestre,Debates sobre dilemas tecnológicos,3
-11187,Curso,Cursos de Humanidades,1erCuatrimestre,La Guerra Fría (1945-1990),3
-11197,Curso,Cursos de Humanidades,1erCuatrimestre,Mediación y gestión de conflictos,3
-11206,Curso,Cursos de Humanidades,1erCuatrimestre,Sociología de la profesión de ingeniero,3
-11259,Curso,Cursos de Humanidades,1erCuatrimestre,Ciencia ciudadana y sostenibilidad,3
-11335,Curso,Cursos de Humanidades,1erCuatrimestre,Historia del Automóvil,3
-11419,Curso,Cursos de Humanidades,1erCuatrimestre,La agenda 2030 y nuevo derecho social,3
-11682,Curso,Cursos de Humanidades,2oCuatrimestre,Liderazgo Inclusivo,3
-11683,Curso,Cursos de Humanidades,1erCuatrimestre,"Los años 60 y el ""New Journalism""",3
-11687,Curso,Cursos de Humanidades,1erCuatrimestre,Pobreza y Rentas Básicas en España,3
-11688,Curso,Cursos de Humanidades,1erCuatrimestre,Seguridad Vial,3
-11689,Curso,Cursos de Humanidades,1erCuatrimestre,Tecnoética aplicada a la ingeniería,3
-11691,Curso,Cursos de Humanidades,1erCuatrimestre,Usos actuales y futuros de los drones,3
-11714,Curso,Cursos de Humanidades,2oCuatrimestre,Arte y Tecnología,3
-12712,Curso,Cursos de Humanidades,1erCuatrimestre,Comprendiendo el Universo,3
-12752,Curso,Cursos de Humanidades,2oCuatrimestre,"Felicidad, ciencia y educación",3
-12766,Curso,Cursos de Humanidades,1erCuatrimestre,Historia de la tecnología aeroespacial,3
-12788,Curso,Cursos de Humanidades,1erCuatrimestre,La guerra de España en Europa,3
-12789,Curso,Cursos de Humanidades,1erCuatrimestre,La Guerra en la Historia,3
-12854,Curso,Cursos de Humanidades,1erCuatrimestre,Tecnologías apropiadas y desarrollo,3
-12858,Curso,Cursos de Humanidades,1erCuatrimestre,Vida cotidiana en la Grecia antigua,3
-19457,Curso,Cursos de Humanidades,1erCuatrimestre,Calling Bullshit,3
-19458,Curso,Cursos de Humanidades,1erCuatrimestre,Cómo entrenar a tu electrón,3
-19459,Curso,Cursos de Humanidades,1erCuatrimestre,Música: Un viaje desde las ondas hasta la emoción,3
-19460,Curso,Cursos de Humanidades,1erCuatrimestre,Ingeniería para la Paz,3
-19461,Curso,Cursos de Humanidades,1erCuatrimestre,Pobreza energética en España,3
-19462,Curso,Cursos de Humanidades,2oCuatrimestre,Seguridad y el analista de inteligencia,3
 10501,Curso,Cursos de Humanidades,2oCuatrimestre,Las minorías en la historia de España,3
 10529,Curso,Cursos de Humanidades,2oCuatrimestre,Expresión Americana. Libertad al margen de la Ley,3
+10901,Curso,Cursos de Humanidades,1erCuatrimestre,Discapacidad y derechos humanos,3
+10916,Curso,Cursos de Humanidades,1erCuatrimestre,Consecuencias de la globalización y relaciones laborales,3
 10983,Curso,Cursos de Humanidades,2oCuatrimestre,El reinado de Juan Carlos I (1975-2014),3
 11072,Curso,Cursos de Humanidades,2oCuatrimestre,Ephemera,3
 11073,Curso,Cursos de Humanidades,2oCuatrimestre,El Siglo de la Física,3
@@ -49,15 +17,17 @@ Código,Curso,Tipo de asignatura,Cuatrimestre,Nombre,Créditos
 11297,Curso,Cursos de Humanidades,2oCuatrimestre,Derechos Humanos y Desarrollo sostenible,3
 11336,Curso,Cursos de Humanidades,2oCuatrimestre,Historia del Español,3
 11337,Curso,Cursos de Humanidades,2oCuatrimestre,Historia del Ferrocarril en España,3
-11338,Curso,Cursos de Humanidades,2oCuatrimestre,Historia y Memoria Digital de España Contemporánea,3
 11489,Curso,Cursos de Humanidades,2oCuatrimestre,La Materia del Arte,3
 11681,Curso,Cursos de Humanidades,2oCuatrimestre,Las TIC: hacia un futuro sostenible,3
+11682,Curso,Cursos de Humanidades,1erCuatrimestre,Liderazgo Inclusivo,3
 11686,Curso,Cursos de Humanidades,2oCuatrimestre,Mujeres en la Ciencia,3
 11692,Curso,Cursos de Humanidades,2oCuatrimestre,¿Qué significa todo esto? Una introducción a  la filosofía,3
+11714,Curso,Cursos de Humanidades,1erCuatrimestre,Arte y Tecnología,3
 11717,Curso,Cursos de Humanidades,2oCuatrimestre,Biomedicina para Principiantes,3
 12696,Curso,Cursos de Humanidades,2oCuatrimestre,Agua y energía en zonas empobrecidas,3
 12710,Curso,Cursos de Humanidades,2oCuatrimestre,"Ciencia, tecnología y género",3
 12749,Curso,Cursos de Humanidades,2oCuatrimestre,Ética para Ingenieros,3
+12752,Curso,Cursos de Humanidades,1erCuatrimestre,"Felicidad, ciencia y educación",3
 12764,Curso,Cursos de Humanidades,2oCuatrimestre,Historia de la aviación: AIRBUS/BOEING,3
 12804,Curso,Cursos de Humanidades,2oCuatrimestre,Las Ideas de la Ciencia,3
 12810,Curso,Cursos de Humanidades,2oCuatrimestre,Las raíces de Europa: cultura y política,3
@@ -65,37 +35,68 @@ Código,Curso,Tipo de asignatura,Cuatrimestre,Nombre,Créditos
 12826,Curso,Cursos de Humanidades,2oCuatrimestre,Mujeres en la Ciencia,3
 12841,Curso,Cursos de Humanidades,2oCuatrimestre,República en España (1931-1939),3
 12884,Curso,Cursos de Humanidades,2oCuatrimestre,Conflicto y cine en Oriente Medio,3
-13866,1,Formación Básica,1erCuatrimestre,Cálculo,6
-13867,1,Formación Básica,1erCuatrimestre,Física,6
-13868,1,Formación Básica,1erCuatrimestre,Programación,6
-13870,1,Formación Básica,1erCuatrimestre,Álgebra Lineal,6
+19462,Curso,Cursos de Humanidades,1erCuatrimestre,Seguridad y el analista de inteligencia,3
+10898,Curso,Cursos de Humanidades,1erCuatrimestre,Ciudadanos y administración de justicia,3
+10907,Curso,Cursos de Humanidades,1erCuatrimestre,El Derecho en el Cine,3
+10926,Curso,Cursos de Humanidades,1erCuatrimestre,Futuro del trabajo: revolución 4.0,3
+11008,Curso,Cursos de Humanidades,1erCuatrimestre,Entre dos guerras mundiales (1914-1945),3
+11038,Curso,Cursos de Humanidades,1erCuatrimestre,I.A. y el Futuro del Sector Financiero,3
+11040,Curso,Cursos de Humanidades,1erCuatrimestre,Debates sobre dilemas tecnológicos,3
+11187,Curso,Cursos de Humanidades,1erCuatrimestre,La Guerra Fría (1945-1990),3
+11197,Curso,Cursos de Humanidades,1erCuatrimestre,Mediación y gestión de conflictos,3
+11206,Curso,Cursos de Humanidades,1erCuatrimestre,Sociología de la profesión de ingeniero,3
+11259,Curso,Cursos de Humanidades,1erCuatrimestre,Ciencia ciudadana y sostenibilidad,3
+11335,Curso,Cursos de Humanidades,1erCuatrimestre,Historia del Automóvil,3
+11419,Curso,Cursos de Humanidades,1erCuatrimestre,La agenda 2030 y nuevo derecho social,3
+11683,Curso,Cursos de Humanidades,1erCuatrimestre,"Los años 60 y el ""New Journalism""",3
+11687,Curso,Cursos de Humanidades,1erCuatrimestre,Pobreza y Rentas Básicas en España,3
+11688,Curso,Cursos de Humanidades,1erCuatrimestre,Seguridad Vial,3
+11689,Curso,Cursos de Humanidades,1erCuatrimestre,Tecnoética aplicada a la ingeniería,3
+11691,Curso,Cursos de Humanidades,1erCuatrimestre,Usos actuales y futuros de los drones,3
+12712,Curso,Cursos de Humanidades,1erCuatrimestre,Comprendiendo el Universo,3
+12766,Curso,Cursos de Humanidades,1erCuatrimestre,Historia de la tecnología aeroespacial,3
+12788,Curso,Cursos de Humanidades,1erCuatrimestre,La guerra de España en Europa,3
+12789,Curso,Cursos de Humanidades,1erCuatrimestre,La Guerra en la Historia,3
+12854,Curso,Cursos de Humanidades,1erCuatrimestre,Tecnologías apropiadas y desarrollo,3
+12858,Curso,Cursos de Humanidades,1erCuatrimestre,Vida cotidiana en la Grecia antigua,3
+19457,Curso,Cursos de Humanidades,1erCuatrimestre,Calling Bullshit,3
+19458,Curso,Cursos de Humanidades,1erCuatrimestre,Cómo entrenar a tu electrón,3
+19459,Curso,Cursos de Humanidades,1erCuatrimestre,Música: Un viaje desde las ondas hasta la emoción,3
+19460,Curso,Cursos de Humanidades,1erCuatrimestre,Ingeniería para la Paz,3
+19461,Curso,Cursos de Humanidades,1erCuatrimestre,Pobreza energética en España,3
 13869,1,Formación Básica,2oCuatrimestre,Tecnología de Computadores,6
 15969,1,Formación Básica,2oCuatrimestre,Principios físicos de la ingeniería informática,6
 15970,1,Formación Básica,2oCuatrimestre,Lógica,6
 15971,1,Formación Básica,2oCuatrimestre,Matemática Discreta,6
-14360,1,Formación Básica,1erCuatrimestre,Técnicas de expresión oral y escrita,3
+13866,1,Formación Básica,1erCuatrimestre,Cálculo,6
+13867,1,Formación Básica,1erCuatrimestre,Física,6
+13868,1,Formación Básica,1erCuatrimestre,Programación,6
+13870,1,Formación Básica,1erCuatrimestre,Álgebra Lineal,6
 13873,1,Formación Básica,2oCuatrimestre,Estructura de datos y algoritmos,6
+14360,1,Formación Básica,1erCuatrimestre,Técnicas de expresión oral y escrita,3
+15975,2o,Formación Básica,2oCuatrimestre,Cálculo diferencial aplicado,6
 13875,2o,Formación Básica,1erCuatrimestre,Fundamentos de gestión empresarial,6
 13876,2o,Formación Básica,1erCuatrimestre,Estadística,6
-15975,2o,Formación Básica,2oCuatrimestre,Cálculo diferencial aplicado,6
-13874,2o,Formación Básica,1erCuatrimestre,Estructura de Computadores,6
-13877,2o,Formación Básica,1erCuatrimestre,Teoría de autómatas y lenguajes formales,6
-15974,2o,Formación Básica,1erCuatrimestre,Ingeniería del Software,6
 13878,2o,Formación Básica,2oCuatrimestre,Sistemas Operativos,6
 13881,2o,Formación Básica,2oCuatrimestre,Ficheros y bases de datos,6
 13883,2o,Formación Básica,2oCuatrimestre,Inteligencia Artificial,6
 18179,2o,Formación Básica,2oCuatrimestre,Desarrollo de Software,6
-13882,3o,Obligatoria,1erCuatrimestre,Interfaces de Usuario,6
-13884,3o,Obligatoria,1erCuatrimestre,Redes de Ordenadores,6
-13888,3o,Obligatoria,1erCuatrimestre,Arquitectura de Computadores,6
-15973,3o,Obligatoria,1erCuatrimestre,Criptografía y seguridad informática,6
-15976,3o,Obligatoria,1erCuatrimestre,Heurística y Optimización,6
+13874,2o,Formación Básica,1erCuatrimestre,Estructura de Computadores,6
+13877,2o,Formación Básica,1erCuatrimestre,Teoría de autómatas y lenguajes formales,6
+15974,2o,Formación Básica,1erCuatrimestre,Ingeniería del Software,6
 13890,3o,Obligatoria,2oCuatrimestre,Procesadores del Lenguaje,6
 15754,3o,Obligatoria,2oCuatrimestre,Sistemas Distribuidos,6
 15757,3o,Obligatoria,2oCuatrimestre,Aprendizaje Automático,6
 17881,3o,Obligatoria,2oCuatrimestre,Hojas de cálculo. Nivel avanzado,1.5
 19081,3o,Obligatoria,2oCuatrimestre,Competencias digitales para el uso de la información,1.5
 19472,3o,Obligatoria,2oCuatrimestre,Sistemas Interactivos y Ubicuos,6
+13882,3o,Obligatoria,1erCuatrimestre,Interfaces de Usuario,6
+13884,3o,Obligatoria,1erCuatrimestre,Redes de Ordenadores,6
+13888,3o,Obligatoria,1erCuatrimestre,Arquitectura de Computadores,6
+15973,3o,Obligatoria,1erCuatrimestre,Criptografía y seguridad informática,6
+15976,3o,Obligatoria,1erCuatrimestre,Heurística y Optimización,6
+19475,4o,Obligatoria,2oCuatrimestre,Desarrollo y operación de sistemas software,6
+19476,4o,Obligatoria,2oCuatrimestre,Fundamentos de internet de las cosas,6
 13457,4o,Obligatoria,1erCuatrimestre,Creatividad e Innovación,3
 13468,4o,Obligatoria,1erCuatrimestre,Negociación,3
 13471,4o,Obligatoria,1erCuatrimestre,Organización del trabajo personal y del tiempo,3
@@ -112,14 +113,12 @@ Código,Curso,Tipo de asignatura,Cuatrimestre,Nombre,Créditos
 18999,4o,Obligatoria,1erCuatrimestre,AGILE: cómo abordar la complejidad y transformar la cultura empresarial,3
 19473,4o,Obligatoria,1erCuatrimestre,Arquitectura de Datos,6
 19474,4o,Obligatoria,1erCuatrimestre,Ingeniería de la Ciberseguridad,6
-19475,4o,Obligatoria,2oCuatrimestre,Desarrollo y operación de sistemas software,6
-19476,4o,Obligatoria,2oCuatrimestre,Fundamentos de internet de las cosas,6
-13898,4o,Obligatoria,1erCuatrimestre,Redes de neuronas artificiales,6
-15756,4o,Obligatoria,1erCuatrimestre,Tecnologías informáticas para la web,6
-19483,4o,Obligatoria,1erCuatrimestre,Integración y visualización de datos,6
-19485,4o,Obligatoria,1erCuatrimestre,Programación Funcional,6
 15763,4o,Obligatoria,2oCuatrimestre,Teoría avanzada de la computación,6
 18204,4o,Obligatoria,2oCuatrimestre,Técnicas de desarrollo de software,6
 19482,4o,Obligatoria,2oCuatrimestre,Ingeniería para la transformación digital,3
 19487,4o,Obligatoria,2oCuatrimestre,Seguridad en dispositivos móviles,6
 19492,4o,Obligatoria,2oCuatrimestre,Visión Artificial,3
+13898,4o,Obligatoria,1erCuatrimestre,Redes de neuronas artificiales,6
+15756,4o,Obligatoria,1erCuatrimestre,Tecnologías informáticas para la web,6
+19483,4o,Obligatoria,1erCuatrimestre,Integración y visualización de datos,6
+19485,4o,Obligatoria,1erCuatrimestre,Programación Funcional,6

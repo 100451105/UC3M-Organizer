@@ -23,7 +23,7 @@ def expandir_rangos(semana):
 
 if __name__ == "__main__":
     # Ruta del csv
-    csv_path = "Dataset_Traducido/Dataset_completo.csv"
+    csv_path = "01-Analisis/Datos_Procesados/Dataset_completo.csv"
     # Leer el csv
     tabla = pandas.read_csv(csv_path)
     
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     print("Cleaned the Semana column")
 
     # Segundo preprocesado: Asignar a cada código de asignatura distintas características (nombre, créditos, etc.)
-    asignaturas = pandas.read_csv("Dataset_Traducido/Asignaturas.csv")
+    asignaturas = pandas.read_csv("01-Analisis/Datos_Procesados/Asignaturas.csv")
     # Juntamos la tabla con la de asignaturas en base al código de asignatura
     asignaturas.rename(columns={'Código': 'Codigo_asignatura'}, inplace=True)
     asignaturas.reset_index(drop=True, inplace=True)
@@ -81,6 +81,6 @@ if __name__ == "__main__":
     print("Categorized the activities.")
     
     # Exportar las tablas a distintos archivos csv
-    csv_path = "Dataset_Traducido/Dataset_limpio.csv"
+    csv_path = "01-Analisis/Datos_Procesados/Dataset_limpio.csv"
     tabla.to_csv(csv_path, index=False)
     print("Exported the table to the csv file: " + csv_path)

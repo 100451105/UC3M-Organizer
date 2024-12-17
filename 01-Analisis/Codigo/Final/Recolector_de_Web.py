@@ -109,7 +109,7 @@ if __name__ == "__main__":
 
     # Una vez tenemos el diccionario con los datos de las asignaturas, procedemos a crear un archivo csv con los datos
     # Para ello, utilizamos la librería csv
-    with open("Dataset_Traducido/Asignaturas.csv", "w", encoding="utf-8") as file:
+    with open("01-Analisis/Datos_Procesados/Asignaturas.csv", "w", encoding="utf-8") as file:
         csv.DictWriter(file, fieldnames=["Código", "Curso", "Tipo de asignatura", "Cuatrimestre", "Nombre", "Créditos"]).writeheader()
         for codigo, datos in asignaturas_dict.items():
             csv.DictWriter(file, fieldnames=["Código", "Curso", "Tipo de asignatura", "Cuatrimestre", "Nombre", "Créditos"]).writerow({"Código": codigo, "Curso": datos[0], "Tipo de asignatura": datos[1], "Cuatrimestre": datos[2], "Nombre": datos[3], "Créditos": datos[4]})
