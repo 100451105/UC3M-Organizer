@@ -1,0 +1,8 @@
+version: '3'
+services:
+  database:
+    build: ./BaseDeDatos
+    environment:
+    - MYSQL_ROOT_PASSWORD=t2jMtVJOpIxf0Xl47i9ImpwxvXV7U1HM
+    ports:
+    - "3306:3306"
