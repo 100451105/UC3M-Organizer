@@ -1,0 +1,81 @@
+- read_users
+    - 200 X
+    - 503 X
+- read_users_of_subject
+    - 200 X
+    - 503 X
+- create_user
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- update_user
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- delete_user
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- read_subjects
+    - 200 X
+    - 503 X
+- read_subjects_of_user
+    - 200 X
+    - 503 X
+- create_subject
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- update_subject
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- delete_subject
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- assign_user_to_subject
+    - 200 X
+    - 401 X
+    - 402 X
+    - 503 X
+    - 505 X
+    - 400 X
+- assign_coordinator_to_subject
+    - 200 X
+    - 401 X
+    - 503 X
+    - 505 X
+    - 400 X
+- read_activities
+    - 200 X
+    - 503 X
+- read_activities_of_subject
+    - 200 X
+    - 503 X
+- read_activities_of_user
+    - 200 X
+    - 503 X
+- create_activity
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- update_activity
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+- delete_activity
+    - 200 X
+    - 503 X
+    - 505 X
+    - 400 X
+
+Total Tests = 62
