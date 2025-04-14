@@ -174,49 +174,27 @@ class Database:
         cursor.close()
         return 200, userId
     
-    def create_subject(self,credits,semester,year):
-        """ Crear asignatura """
+    def update_subject(self,credits,semester,year,name,subjectId):
+        """ Crear/Actualizar asignatura """
         connection = self.get_connection()
         if not connection:
             return 503, None
         cursor = connection.cursor(dictionary=True)
         try:
             cursor.execute("SET @p_newIdSubject = NULL;")
-            cursor.execute("CALL usp_CreateOrUpdateSubject(%s,%s,%s,NULL,@p_newIdSubject);",(credits,semester,year))
-            cursor.execute("SELECT @p_newIdSubject as subjectId;")
-            result = cursor.fetchone()
-            subjectId = result["subjectId"] if result else None
-            connection.commit()
-        except mysql.connector.Error as err:
-            connection.rollback()
-            cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower), None
-            else:
-                return 505, None
-        cursor.close()
-        return 200, subjectId
-    
-    def update_subject(self,credits,semester,year,subjectId):
-        """ Actualizar asignatura """
-        connection = self.get_connection()
-        if not connection:
-            return 503, None
-        cursor = connection.cursor(dictionary=True)
-        try:
-            cursor.execute("SET @p_newIdSubject = NULL;")
-            cursor.execute("CALL usp_CreateOrUpdateSubject(%s,%s,%s,%s,@p_newIdSubject);",(credits,semester,year,subjectId))
+            cursor.execute("CALL usp_CreateOrUpdateSubject(%s,%s,%s,%s,%s,@p_newIdSubject);",(credits,semester,year,name,subjectId))
             cursor.execute("SELECT @p_newIdSubject as subjectId;")
             result = cursor.fetchone()
             subjectId = result["subjectId"] if result else None            
             connection.commit()
         except mysql.connector.Error as err:
+            print(err)
             connection.rollback()
             cursor.close()
             if err.errno == 45000:
                 return int(err.msg.lower)
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200, subjectId
     

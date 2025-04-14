@@ -617,6 +617,8 @@ class TestCreateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.post("/subjects/", json=payload)
         self.assertEqual(response.status_code, 200)
@@ -630,12 +632,14 @@ class TestCreateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.post("/subjects/", json=payload)
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
 
-    @patch("database_controller.Database.create_subject")
+    @patch("database_controller.Database.update_subject")
     def test_create_subject_unknown_error(self, mock_create_subject):
         """Test: Crear un usuario habiendo un error inesperado en base de datos"""
 
@@ -644,12 +648,14 @@ class TestCreateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.post("/subjects/", json=payload)
         self.assertEqual(response.status_code, 505)
         self.assertEqual(response.json()["detail"], "Unknown Error")
     
-    @patch("database_controller.Database.create_subject")
+    @patch("database_controller.Database.update_subject")
     def test_create_subject_unknown_code(self, mock_create_subject):
         """Test: Crear un usuario habiendo un error con codigo desconocido"""
 
@@ -658,6 +664,8 @@ class TestCreateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.post("/subjects/", json=payload)
         self.assertEqual(response.status_code, 400)
@@ -676,7 +684,8 @@ class TestUpdateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
-            "subjectId": 1
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.put("/subjects/", json=payload)
         self.assertEqual(response.status_code, 200)
@@ -690,7 +699,8 @@ class TestUpdateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
-            "subjectId": 1
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.put("/subjects/", json=payload)
         self.assertEqual(response.status_code, 503)
@@ -704,7 +714,8 @@ class TestUpdateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
-            "subjectId": 1
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.put("/subjects/", json=payload)
         self.assertEqual(response.status_code, 505)
@@ -719,7 +730,8 @@ class TestUpdateSubject(unittest.TestCase):
             "credits": 12, 
             "semester": 2, 
             "year": 1,
-            "subjectId": 1
+            "subjectId": 1,
+            "name": "Asignatura para probar"
         }
         response = client.put("/subjects/", json=payload)
         self.assertEqual(response.status_code, 400)

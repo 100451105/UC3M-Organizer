@@ -27,7 +27,8 @@ ALTER TABLE person ADD CONSTRAINT fk_person_id FOREIGN KEY (Id) REFERENCES user_
 
 -- subject
 CREATE TABLE subject (
-    IdSubject INT AUTO_INCREMENT PRIMARY KEY,
+    IdSubject INT PRIMARY KEY,
+    Name NVARCHAR(1024) NOT NULL,
     Credits INT NOT NULL,
     Semester INT NOT NULL CHECK(Semester IN (1,2)),
     Year INT NOT NULL CHECK(Year > 0),
@@ -69,7 +70,8 @@ SELECT
     p.Id AS UserID, 
     p.Username, 
     p.Type AS UserType, 
-    s.IdSubject AS SubjectID, 
+    s.IdSubject AS SubjectID,
+    s.Name AS SubjectName, 
     s.Credits AS SubjectCredits, 
     s.Semester,
     s.Year
@@ -86,6 +88,7 @@ SELECT
     a.EstimatedHours,
     a.EndOfActivity,
     a.IdSubject AS SubjectID,
+    s.Name AS SubjectName, 
     s.Credits AS SubjectCredits, 
     s.Semester,
     s.Year
@@ -154,6 +157,7 @@ CREATE PROCEDURE usp_CreateOrUpdateSubject(
     IN p_Credits INT, 
     IN p_Semester INT,
     IN p_Year INT,
+    IN p_Name NVARCHAR(1024),
     IN p_IdSubject INT,
     OUT p_newIdSubject INT
 )
@@ -162,7 +166,8 @@ BEGIN
         UPDATE subject SET 
             Credits = p_Credits, 
             Semester = p_Semester,
-            Year = p_Year
+            Year = p_Year,
+            Name = p_Name
         WHERE IdSubject = p_IdSubject;
         SET p_newIdSubject = p_IdSubject;
     ELSE
@@ -170,14 +175,18 @@ BEGIN
             Credits, 
             Semester,
             Year,
+            IdSubject,
+            Name,
             IdAdministrator
         ) VALUES (
             p_Credits, 
             p_Semester,
             p_Year,
-            p_AdminId
+            p_IdSubject,
+            p_Name,
+            NULL
         );
-        SET p_newIdSubject = LAST_INSERT_ID();
+        SET p_newIdSubject = p_IdSubject;
     END IF;
 END //
 
@@ -272,7 +281,7 @@ DELIMITER ;
 -- Examples to test
 INSERT INTO user_authorization (Username, Password) VALUES ('admin','password');
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Estudiante');
-INSERT INTO subject (Credits, Semester, Year, IdAdministrator) VALUES (6,1,3,NULL);
-INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (1,1);
-INSERT INTO activity (Name, Description, Type, EstimatedHours, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-01-12',1);
+INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
+INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-01-12',198237);
 INSERT INTO calendar (Day, DayType, FreeHours) VALUES (1,'Normal',0);

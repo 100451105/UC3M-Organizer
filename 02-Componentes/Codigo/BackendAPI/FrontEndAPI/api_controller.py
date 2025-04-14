@@ -34,6 +34,7 @@ class UpdateSubject(BaseModel):
     credits: confloat(ge=0,le=12,multiple_of=0.1)
     semester: conint(ge=1,le=2)
     year: conint(ge=1,le=4)
+    name: constr(min_length=0,max_length=1024)
     subjectId: int
 
 class CreateActivity(BaseModel):
@@ -145,8 +146,8 @@ def read_subjects_of_user(userId: int = None):
     return result
 
 @app.post("/subjects/", description= "CreateSubject", tags=["Subjects"])
-def create_subject(item: CreateSubject):
-    result = db.create_subject(item.credits, item.semester, item.year)
+def create_subject(item: UpdateSubject):
+    result = db.update_subject(item.credits, item.semester, item.year, item.name, item.subjectId)
     match result[0]:
         case 200:
             return {"result": result[0], "affected": result[1]}
@@ -159,7 +160,7 @@ def create_subject(item: CreateSubject):
 
 @app.put("/subjects/", description= "UpdateSubject", tags=["Subjects"])
 def update_subject(item: UpdateSubject):
-    result = db.update_subject(item.credits, item.semester, item.year, item.subjectId)
+    result = db.update_subject(item.credits, item.semester, item.year, item.name, item.subjectId)
     match result[0]:
         case 200:
             return {"result": result[0], "affected": result[1]}
@@ -186,7 +187,6 @@ def delete_subject(item: DeleteSubject):
 @app.post("/subjects/assign/user/", description= "AssignUserToSubject", tags=["Subjects"])
 def assign_user_to_subject(item: AssignUserToSubject):
     result = db.assign_user_to_subject(item.userId,item.subjectId)
-    print(result)
     match result:
         case 200:
             return {"result": result, "message": "Assigned user to subject succesfully"}
@@ -208,7 +208,7 @@ def assign_coordinator_to_subject(item: AssignCoordinatorToSubject):
         case 200:
             return {"result": result, "message": "Assigned coordinator to subject succesfully"}
         case 401:
-            return HTTPException(status_code=401, detail="Subject doesn't exist")
+            raise HTTPException(status_code=401, detail="Subject doesn't exist")
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:
