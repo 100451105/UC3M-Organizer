@@ -1,7 +1,15 @@
 import mysql.connector
 from mysql.connector import Error
+import json
+from datetime import date
 import time
 import os
+
+""" Auxiliary functions in order to help JSON deserialization"""
+def date_converter(obj):
+    if isinstance(obj, date):
+        return obj.isoformat()  # Convierte el objeto 'date' a una cadena ISO
+    raise TypeError(f"Type {obj.__class__.__name__} not serializable")
 
 """ Clase de Base de Datos que alberga todos los procesos necesarios para operar con ella"""
 class Database:
@@ -78,6 +86,54 @@ class Database:
         else:
             cursor.execute("SELECT * FROM activity;")
             result = cursor.fetchall()
+        cursor.close()
+        return result
+    
+    def get_calendar(self, calendarDate=None):
+        """  Leer días del calendario (uno o varios) """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        if calendarDate:
+            cursor.execute("SELECT * FROM calendar WHERE CalendarDate = %s;",(calendarDate,))
+            result = cursor.fetchone()
+        else:
+            cursor.execute("SELECT * FROM calendar WHERE CalendarDate BETWEEN CURDATE() AND CURDATE() + INTERVAL 31 DAY ORDER BY CalendarDate;")
+            result = cursor.fetchall()
+        cursor.close()
+        return result
+    
+    def get_calendar_scheduled_based_on_date(self, calendarDate):
+        """  Leer días del organizador en base a la fecha """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate = %s;",(calendarDate,))
+        result = cursor.fetchone()
+        cursor.close()
+        return result
+    
+    def get_calendar_scheduled_based_on_activity(self, activityId):
+        """  Leer días del organizador en base al activityId """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate WHERE s.IdActivity = %s;",(activityId,))
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+    
+    def get_calendar_scheduled_based_on_subject(self, subjectId):
+        """  Leer días del organizador en base al subjectId """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours, a.IdSubject as Subject FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate LEFT JOIN activity a ON s.IdActivity = a.IdActivity WHERE a.IdSubject = %s;",(subjectId,))
+        result = cursor.fetchall()
         cursor.close()
         return result
     
@@ -198,7 +254,7 @@ class Database:
         cursor.close()
         return 200, subjectId
     
-    def create_activity(self,name,description,type,hours,subjectId,endOfAct=None):
+    def create_activity(self,name,description,type,hours,subjectId,strategy,startOfAct=None,endOfAct=None):
         """ Crear actividad """
         connection = self.get_connection()
         if not connection:
@@ -206,10 +262,16 @@ class Database:
         cursor = connection.cursor(dictionary=True)
         try:
             cursor.execute("SET @p_newId = NULL;")
-            if endOfAct:
-                cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,%s,NULL,@p_newId);",(name,description,type,hours,subjectId,endOfAct))
+            if startOfAct:
+                if endOfAct:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,%s,%s,%s,NULL,@p_newId);",(name,description,type,hours,subjectId,endOfAct,startOfAct,strategy))
+                else:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,NULL,%s,%s,NULL,@p_newId);",(name,description,type,hours,subjectId,startOfAct,strategy))
             else:
-                cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,NULL,NULL,@p_newId);",(name,description,type,hours,subjectId))
+                if endOfAct:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,%s,NULL,%s,NULL,@p_newId);",(name,description,type,hours,subjectId,endOfAct,strategy))
+                else:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,NULL,NULL,%s,NULL,@p_newId);",(name,description,type,hours,subjectId,strategy))
             cursor.execute("SELECT @p_newId as activityId;")
             result = cursor.fetchone()
             activityId = result["activityId"] if result else None
@@ -224,7 +286,7 @@ class Database:
         cursor.close()
         return 200, activityId
     
-    def update_activity(self,name,description,type,hours,subjectId,activityId,endOfAct=None):
+    def update_activity(self,name,description,type,hours,subjectId,activityId,strategy,startOfAct=None,endOfAct=None):
         """ Actualizar actividad """
         connection = self.get_connection()
         if not connection:
@@ -232,10 +294,16 @@ class Database:
         cursor = connection.cursor(dictionary=True)
         try:
             cursor.execute("SET @p_newId = NULL;")
-            if endOfAct:
-                cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,%s,%s,@p_newId);",(name,description,type,hours,subjectId,endOfAct,activityId))
+            if startOfAct:
+                if endOfAct:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,%s,%s,%s,%s,@p_newId);",(name,description,type,hours,subjectId,endOfAct,startOfAct,strategy,activityId))
+                else:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,NULL,%s,%s,%s,@p_newId);",(name,description,type,hours,subjectId,startOfAct,strategy,activityId))
             else:
-                cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,NULL,%s,@p_newId);",(name,description,type,hours,subjectId,activityId))
+                if endOfAct:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,%s,NULL,%s,%s,@p_newId);",(name,description,type,hours,subjectId,endOfAct,strategy,activityId))
+                else:
+                    cursor.execute("CALL usp_CreateOrUpdateActivity(%s,%s,%s,%s,%s,NULL,NULL,%s,%s,@p_newId);",(name,description,type,hours,subjectId,strategy,activityId))
             cursor.execute("SELECT @p_newId as activityId;")
             result = cursor.fetchone()
             activityId = result["activityId"] if result else None
@@ -249,6 +317,27 @@ class Database:
                 return 505, None
         cursor.close()
         return 200, activityId
+    
+    def create_calendar_days(self,days):
+        """ Crear/Actualizar dias del calendario """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        try:
+            days_json = json.dumps([day.dict() for day in days], default=date_converter)
+            cursor.execute("CALL usp_CreateOrUpdateCalendarDays(%s);",(days_json,))          
+            connection.commit()
+        except mysql.connector.Error as err:
+            print(err)
+            connection.rollback()
+            cursor.close()
+            if err.errno == 45000:
+                return int(err.msg.lower)
+            else:
+                return 505
+        cursor.close()
+        return 200
     
     def assign_user_to_subject(self,userId,subjectId):
         """ Asignar asignatura a un usuario """
@@ -288,10 +377,32 @@ class Database:
         cursor.close()
         return 200
     
+    def assign_activity_to_day(self,scheduledActivities):
+        """ Asignar actividad al calendario """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        try:
+            activities_json = json.dumps([activity.dict() for activity in scheduledActivities],default=date_converter)
+            cursor.execute("CALL usp_AssignActivityToDay(%s);",(activities_json,))
+            connection.commit()
+        except mysql.connector.Error as err:
+            print(err)
+            connection.rollback()
+            cursor.close()
+            if err.errno == 45000:
+                return int(err.msg.lower)
+            else:
+                return 505
+        cursor.close()
+        return 200
+    
     """ Delete operations:
     - User
     - Subject
     - Activity
+    - Scheduler
     """
 
     def delete_user(self,userId):
@@ -350,6 +461,40 @@ class Database:
                 return 505
         cursor.close()
         return 200
+    
+    def delete_scheduled_activities(self,activities):
+        """ Borrar una actividad de scheduler """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        try:
+            conditions = []
+            params = []
+            activities_dicts = [{**activity.dict(),
+                                 "calendarDate": activity.calendarDate.strftime("%Y-%m-%d")} for activity in activities]
+            for activity in activities_dicts:
+                conditions.append("(CalendarDate = %s AND IdActivity = %s)")
+                params.extend([activity["calendarDate"], activity["activityId"]])
+            
+            query = f"""
+                DELETE FROM schedule
+                WHERE {" OR ".join(conditions)}
+            """
+            cursor.execute(query,params)
+            connection.commit()
+        except mysql.connector.Error as err:
+            connection.rollback()
+            cursor.close()
+            print(err)
+            if err.errno == 45000:
+                return int(err.msg.lower)
+            else:
+                return 505
+        cursor.close()
+        return 200
+    
+    
 
 
 db = Database()

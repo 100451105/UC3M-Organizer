@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, confloat, conint, constr
-from typing import Literal, Optional
-from datetime import datetime
+from typing import Literal, Optional, List
+from datetime import date
 import database_controller as Database
 
 app = FastAPI()
@@ -41,9 +41,11 @@ class CreateActivity(BaseModel):
     name: constr(min_length=0,max_length=1024)
     description: constr(min_length=0,max_length=1024)
     type: Literal["Examen","Actividad","Laboratorio","Clase","Otros"]
-    hours: conint(ge=0)
+    estimatedHours: conint(ge=0)
+    strategy: Literal["Agresiva","Calmada","Completa"]
     subjectId: int
-    endOfActivity: datetime = None
+    startOfActivity: date = None
+    endOfActivity: date = None
 
     class Config:
         extra = "forbid"
@@ -52,9 +54,26 @@ class UpdateActivity(BaseModel):
     name: constr(min_length=0,max_length=1024)
     description: constr(min_length=0,max_length=1024)
     type: Literal["Examen","Actividad","Laboratorio","Clase","Otros"]
-    hours: conint(ge=0)
+    estimatedHours: conint(ge=0)
+    strategy: Literal["Agresiva","Calmada","Completa"]
     subjectId: int
-    endOfActivity: datetime = None
+    startOfActivity: date = None
+    endOfActivity: date = None
+    activityId: int
+
+class CreateCalendarDay(BaseModel):
+    calendarDate: date
+    dayType: Literal["Festivo","Normal"]
+    weekDay: Literal["Lunes","Martes","Miercoles","Jueves","Viernes","Sabado","Domingo"]
+    status: Literal["Ocupado","Libre"]
+
+class CreateCalendarScheduledActivities(BaseModel):
+    calendarDate: date
+    hours: conint(ge=1)
+    activityId: int
+
+class DeleteCalendarScheduledActivities(BaseModel):
+    calendarDate: date
     activityId: int
 
 class AssignUserToSubject(BaseModel):
@@ -121,7 +140,7 @@ def delete_user(item: DeleteUser):
     result = db.delete_user(item.userId)
     match result:
         case 200:
-            return {"result": result, "message": "User succesfully deleted"}
+            return {"result": result, "message": "User successfully deleted"}
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:
@@ -176,7 +195,7 @@ def delete_subject(item: DeleteSubject):
     result = db.delete_subject(item.subjectId)
     match result:
         case 200:
-            return {"result": result, "message": "Subject succesfully deleted"}
+            return {"result": result, "message": "Subject successfully deleted"}
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:
@@ -189,7 +208,7 @@ def assign_user_to_subject(item: AssignUserToSubject):
     result = db.assign_user_to_subject(item.userId,item.subjectId)
     match result:
         case 200:
-            return {"result": result, "message": "Assigned user to subject succesfully"}
+            return {"result": result, "message": "Assigned user to subject successfully"}
         case 401:
             raise HTTPException(status_code=401, detail="User doesn't exist")
         case 402:
@@ -206,7 +225,7 @@ def assign_coordinator_to_subject(item: AssignCoordinatorToSubject):
     result = db.assign_coordinator_to_subject(item.adminId,item.subjectId)
     match result:
         case 200:
-            return {"result": result, "message": "Assigned coordinator to subject succesfully"}
+            return {"result": result, "message": "Assigned coordinator to subject successfully"}
         case 401:
             raise HTTPException(status_code=401, detail="Subject doesn't exist")
         case 503:
@@ -241,7 +260,7 @@ def read_activities_of_user(userId: int):
 
 @app.post("/activities/", description= "CreateActivity", tags=["Activities"])
 def create_activity(item: CreateActivity):
-    result = db.create_activity(item.name, item.description, item.type, item.hours, item.subjectId, item.endOfActivity)
+    result = db.create_activity(item.name, item.description, item.type, item.estimatedHours, item.subjectId, item.strategy, item.startOfActivity, item.endOfActivity)
     match result[0]:
         case 200:
             return {"result": result[0], "affected": result[1]}
@@ -254,7 +273,7 @@ def create_activity(item: CreateActivity):
 
 @app.put("/activities/", description= "UpdateActivity", tags=["Activities"])
 def update_activity(item: UpdateActivity):
-    result = db.update_activity(item.name, item.description, item.type, item.hours, item.subjectId, item.activityId, item.endOfActivity)
+    result = db.update_activity(item.name, item.description, item.type, item.estimatedHours, item.subjectId, item.activityId, item.strategy, item.startOfActivity, item.endOfActivity)
     match result[0]:
         case 200:
             return {"result": result[0], "affected": result[1]}
@@ -270,7 +289,7 @@ def delete_activity(item: DeleteActivity):
     result = db.delete_activity(item.activityId)
     match result:
         case 200:
-            return {"result": result, "message": "Activity succesfully deleted"}
+            return {"result": result, "message": "Activity successfully deleted"}
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:
@@ -279,3 +298,74 @@ def delete_activity(item: DeleteActivity):
             raise HTTPException(status_code=400, detail="Unknown Code")
         
 
+""" Scheduler Endpoints """  
+@app.get("/scheduler/calendar/", description= "GetCalendar", tags=["Scheduler"])
+def read_calendar(calendarDate: Optional[date] = None):
+    result = db.get_calendar(calendarDate)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/scheduler/date/", description= "GetSchedulerCalendarBasedOnDate", tags=["Scheduler"])
+def read_calendar_scheduled_on_date(calendarDate: date):
+    result = db.get_calendar_scheduled_based_on_date(calendarDate)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/scheduler/activity/", description= "GetSchedulerCalendarBasedOnActivity", tags=["Scheduler"])
+def read_calendar_scheduled_on_activity(activityId: int):
+    result = db.get_calendar_scheduled_based_on_activity(activityId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/scheduler/subject/", description= "GetSchedulerCalendarBasedOnSubject", tags=["Scheduler"])
+def read_calendar_scheduled_on_subject(subjectId: int):
+    result = db.get_calendar_scheduled_based_on_subject(subjectId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.post("/scheduler/days/", description= "CreateCalendarDays", tags=["Scheduler"])
+def create_calendar_days(days: List[CreateCalendarDay]):
+    result = db.create_calendar_days(days)
+    match result:
+        case 200:
+            return {"result": result, "message": "Successfully created/updated the calendar days"}
+        case 503:
+            raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+        case 505:
+            raise HTTPException(status_code=505, detail="Unknown Error")
+        case _:
+            raise HTTPException(status_code=400, detail="Unknown Code")
+        
+@app.post("/scheduler/days/activities/", description= "CreateCalendarScheduledActivities", tags=["Scheduler"])
+def create_calendar_scheduled_activities(days: List[CreateCalendarScheduledActivities]):
+    result = db.assign_activity_to_day(days)
+    match result:
+        case 200:
+            return {"result": result, "message": "Assigned activities to the scheduler successfully"}
+        case 401:
+            raise HTTPException(status_code=401, detail="One of the activityIds given does not exist")
+        case 402:
+            raise HTTPException(status_code=402, detail="One of the calendarDates given does not exist")
+        case 503:
+            raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+        case 505:
+            raise HTTPException(status_code=505, detail="Unknown Error")
+        case _:
+            raise HTTPException(status_code=400, detail="Unknown Code")
+    
+@app.post("/scheduler/activities/delete/", description= "DeleteCalendarScheduledActivities", tags=["Scheduler"])
+def delete_calendar_scheduled_activities(activities: List[DeleteCalendarScheduledActivities]):
+    result = db.delete_scheduled_activities(activities)
+    match result:
+        case 200:
+            return {"result": result, "message": "Deleted scheduled activities successfully"}
+        case 503:
+            raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+        case 505:
+            raise HTTPException(status_code=505, detail="Unknown Error")
+        case _:
+            raise HTTPException(status_code=400, detail="Unknown Code")

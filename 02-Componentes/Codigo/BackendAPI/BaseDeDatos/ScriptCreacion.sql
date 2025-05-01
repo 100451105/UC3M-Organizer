@@ -51,6 +51,9 @@ CREATE TABLE activity (
     Name NVARCHAR(1024) NOT NULL,
     Description NVARCHAR(1024) NOT NULL,
     Type ENUM('Examen','Actividad','Laboratorio','Clase','Otros') NOT NULL,
+    StartOfActivity DATE,
+    Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado') NOT NULL,
+    Strategy ENUM('Agresiva','Calmada','Completa'),
     EstimatedHours INT NOT NULL CHECK(EstimatedHours >= 0),
     EndOfActivity DATE,
     IdSubject INT NOT NULL
@@ -59,10 +62,21 @@ ALTER TABLE activity ADD CONSTRAINT fk_activity_subjectId FOREIGN KEY (IdSubject
 
 -- calendar
 CREATE TABLE calendar (
-    Day INT PRIMARY KEY,
+    CalendarDate DATE PRIMARY KEY,
     DayType ENUM('Festivo','Normal') NOT NULL,
-    FreeHours INT NOT NULL CHECK(FreeHours >= 0)
+    WeekDay ENUM('Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo') NOT NULL,
+    Status ENUM('Ocupado','Libre') NOT NULL
 );
+
+-- schedule
+CREATE TABLE schedule (
+    CalendarDate DATE,
+    Hours INT NOT NULL CHECK(Hours >= 1),
+    IdActivity INT,
+    CONSTRAINT pk_pps PRIMARY KEY (CalendarDate,IdActivity)
+);
+ALTER TABLE schedule ADD CONSTRAINT fk_schedule_activityId FOREIGN KEY (IdActivity) REFERENCES activity(IdActivity) ON DELETE CASCADE;
+ALTER TABLE schedule ADD CONSTRAINT fk_schedule_calendarDate FOREIGN KEY (CalendarDate) REFERENCES calendar(CalendarDate) ON DELETE CASCADE;
 
 -- Views for different optimized searchs
 CREATE VIEW vPersonSubjectInfo AS
@@ -86,6 +100,9 @@ SELECT
     a.Type AS ActivityType,
     a.Description,
     a.EstimatedHours,
+    a.StartOfActivity,
+    a.Status,
+    a.Strategy,
     a.EndOfActivity,
     a.IdSubject AS SubjectID,
     s.Name AS SubjectName, 
@@ -108,6 +125,28 @@ SELECT
     sai.SubjectID as FromSubjectID
 FROM vPersonSubjectInfo psi
 JOIN vSubjectActivityInfo sai ON psi.SubjectID = sai.SubjectID;
+
+CREATE VIEW vActivitiesPerDay AS
+SELECT
+    c.CalendarDate,
+    c.DayType,
+    c.WeekDay,
+    c.Status,
+    CONCAT('[',
+        GROUP_CONCAT(
+            JSON_OBJECT(
+                'Activity', s.IdActivity,
+                'Hours', s.Hours,
+                'Subject', a.IdSubject
+            )
+        ),
+    ']') AS Activities
+FROM
+    calendar c
+LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate
+LEFT JOIN activity a ON s.IdActivity = a.IdActivity
+GROUP BY
+    c.CalendarDate, c.DayType, c.WeekDay, c.Status;
 
 -- Store Procedures for create/update operations
 DELIMITER //
@@ -197,6 +236,8 @@ CREATE PROCEDURE usp_CreateOrUpdateActivity(
     IN p_Hours INT,
     IN p_SubjectId INT,
     IN p_End DATE,
+    IN p_Start DATE,
+    IN p_Strategy ENUM('Agresiva','Calmada','Completa'),
     IN p_Id INT,
     OUT p_newId INT
 )
@@ -207,6 +248,8 @@ BEGIN
             Description = p_Description,
             Type = p_Type,
             EstimatedHours = p_Hours,
+            StartOfActivity = p_Start,
+            Strategy = p_Strategy,
             EndOfActivity = p_End,
             IdSubject = p_SubjectId
         WHERE IdActivity = p_Id;
@@ -217,6 +260,9 @@ BEGIN
             Description, 
             Type,
             EstimatedHours,
+            StartOfActivity,
+            Status,
+            Strategy,
             EndOfActivity,
             IdSubject
         ) VALUES (
@@ -224,11 +270,58 @@ BEGIN
             p_Description,
             p_Type,
             p_Hours,
+            p_Start,
+            'Organizar',
+            p_Strategy,
             p_End,
             p_SubjectId
         );
         SET p_newId = LAST_INSERT_ID();
     END IF;
+END //
+
+DELIMITER //
+
+CREATE PROCEDURE usp_CreateOrUpdateCalendarDays(
+    IN p_Calendar JSON
+)
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_CalendarDate DATE;
+    DECLARE v_DayType ENUM('Festivo','Normal');
+    DECLARE v_WeekDay ENUM('Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo');
+    DECLARE v_Status ENUM('Ocupado','Libre');
+    -- Collection of JSON input
+    DECLARE cur CURSOR FOR 
+        SELECT 
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.calendarDate')) AS DATE) AS CalendarDate,
+            JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.dayType')) AS DayType,
+            JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.weekDay')) AS WeekDay,
+            JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.status')) AS Status
+        FROM JSON_TABLE(p_Calendar, "$[*]"
+            COLUMNS (
+                value JSON PATH "$"
+            )
+        ) u;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO v_CalendarDate, v_DayType, v_WeekDay, v_Status;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        -- Insertion of day in the calendar
+        INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status)
+        VALUES (v_CalendarDate, v_DayType, v_WeekDay, v_Status)
+        ON DUPLICATE KEY UPDATE
+            CalendarDate = VALUES(CalendarDate),
+            DayType = VALUES(DayType),
+            WeekDay = VALUES(WeekDay),
+            Status = VALUES(Status);
+
+    END LOOP;
+
+    CLOSE cur;
 END //
 
 DELIMITER //
@@ -250,7 +343,7 @@ BEGIN
         SET MESSAGE_TEXT = '402';
     END IF;
 
-    -- Verificar if it is already assigned
+    -- Verify if it is already assigned
     IF NOT EXISTS (
         SELECT 1 FROM personPerSubject 
         WHERE PersonId = p_PersonId AND SubjectId = p_SubjectId
@@ -276,6 +369,72 @@ BEGIN
         IdAdministrator = p_CoordinatorId 
     WHERE IdSubject = p_SubjectId;
 END //
+
+DELIMITER //
+
+CREATE PROCEDURE usp_ChangeStatusOfActivity(
+    IN p_ActivityId INT, 
+    IN p_Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado')
+)
+BEGIN
+    -- Verify activity
+    IF NOT EXISTS (SELECT 1 FROM activity WHERE IdActivity = p_ActivityId) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '401';
+    END IF;
+    UPDATE activity SET 
+        Status = p_Status
+    WHERE IdActivity = p_ActivityId;
+END //
+
+DELIMITER //
+
+CREATE PROCEDURE usp_AssignActivityToDay(
+    IN p_Schedule JSON
+)
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_CalendarDate DATE;
+    DECLARE v_Hours INT;
+    DECLARE v_IdActivity INT;
+    -- Collection of JSON input
+    DECLARE cur CURSOR FOR 
+        SELECT 
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.calendarDate')) AS DATE) AS CalendarDate,
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.hours')) AS UNSIGNED) AS Hours,
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.activityId')) AS UNSIGNED) AS IdActivity
+        FROM JSON_TABLE(p_Schedule, "$[*]"
+            COLUMNS (
+                value JSON PATH "$"
+            )
+        ) u;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO v_CalendarDate, v_Hours, v_IdActivity;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        -- Verify activity
+        IF NOT EXISTS (SELECT 1 FROM activity WHERE IdActivity = v_IdActivity) THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '401';
+        END IF;
+        -- Verify activity
+        IF NOT EXISTS (SELECT 1 FROM calendar WHERE CalendarDate = v_CalendarDate) THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '402';
+        END IF;
+        -- Insertion of day in the calendar
+        INSERT INTO schedule (CalendarDate, Hours, IdActivity)
+        VALUES (v_CalendarDate, v_Hours, v_IdActivity)
+        ON DUPLICATE KEY UPDATE
+            Hours = VALUES(Hours);
+
+    END LOOP;
+
+    CLOSE cur;
+END //
 DELIMITER ;
 
 -- Examples to test
@@ -283,5 +442,6 @@ INSERT INTO user_authorization (Username, Password) VALUES ('admin','password');
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Estudiante');
 INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
-INSERT INTO activity (Name, Description, Type, EstimatedHours, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-01-12',198237);
-INSERT INTO calendar (Day, DayType, FreeHours) VALUES (1,'Normal',0);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-04-21','Organizar','Agresiva','2025-05-05',198237);
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-04-28','Normal','Lunes','Libre');
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-04-28',2,1);
