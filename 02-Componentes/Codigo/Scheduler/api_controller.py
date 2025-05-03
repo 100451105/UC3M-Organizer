@@ -1,0 +1,69 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, conint, model_validator
+from typing import Literal, List
+from datetime import date
+import scheduler as SchedulerController
+
+app = FastAPI()
+
+""" Payload definition """
+class Activity(BaseModel):
+    estimatedHours: conint(ge=0)
+    strategy: Literal["Agresiva","Calmada","Completa"]
+    startOfActivity: date = None
+    endOfActivity: date
+
+    class Config:
+        extra = "forbid"
+
+class Calendar(BaseModel):
+    calendarDate: date
+    dayType: Literal["Festivo","Normal"]
+    totalHoursBusy: conint(ge=0)
+
+class ScheduleActivity(BaseModel):
+    activity: Activity
+    calendar: List[Calendar]
+
+    @model_validator(mode="after")
+    def check_calendar_days(self) -> 'ScheduleActivity':
+        """ Checks the amount of calendar days that needs to be on the payload"""
+        activity = self.activity
+        calendar = self.calendar
+
+        if activity.startOfActivity:
+            expected = (activity.endOfActivity - activity.startOfActivity).days + 1 + 4
+            if len(calendar) != expected:
+                raise ValueError(f"Call expected {expected} days on the Calendar list. It was given {len(calendar)}.")
+        else:
+            if len(calendar) != 22:
+                raise ValueError(f"Call expected 22 days on the Calendar list. It was given {len(calendar)}.")
+        
+        return self
+
+""" Scheduler Logic Endpoints """
+@app.post("/scheduler/logic/activity/", description= "CreateCalendarScheduledActivities", tags=["Scheduler"])
+def create_calendar_scheduled_activities(information: ScheduleActivity):
+    scheduler = SchedulerController.Scheduler()
+    result, solutions = scheduler.search_day_to_assign(
+            activity=information.activity.dict(),
+            calendar=[calendar.dict() for calendar in information.calendar])
+    match result:
+        case 200:
+            return {
+                "result": result, 
+                "message": "Assigned activity to the scheduler successfully.",
+                "solutions": solutions
+                }
+        case 201:
+            return {
+                "result": result, 
+                "message": "Assigned activity to the scheduler successfully. However, the endOfActivity given had to be changed in order to schedule it properly.",
+                "solutions": solutions
+                }
+        case 401:
+            raise HTTPException(status_code=401, detail="Could not assign the activity to the scheduler successfully.")
+        case 505:
+            raise HTTPException(status_code=505, detail="Unknown Error")
+        case _:
+            raise HTTPException(status_code=400, detail="Unknown Code")

@@ -7,7 +7,7 @@ import database_controller as Database
 app = FastAPI()
 db = Database.db
 
-""" Definimos los payloads que esperamos para cada base de datos"""
+""" Payload definition """
 class CreateUser(BaseModel):
     username: constr(min_length=0,max_length=100)
     password: constr(min_length=0,max_length=100)

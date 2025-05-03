@@ -1,0 +1,5 @@
+ortools==9.8.3296
+python-dateutil
+fastapi
+uvicorn
+pydantic
