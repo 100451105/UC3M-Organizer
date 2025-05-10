@@ -3,4 +3,4 @@ WORKDIR /app
 COPY . .
 RUN pip install --no-cache-dir -r Tests/requirements.txt
 ENV PYTHONPATH=/app
-CMD ["python", "-m", "unittest", "discover", "-s", "Tests", "-p", "*.py", "-v"]
+ENTRYPOINT ["python", "-m", "unittest", "-v"]

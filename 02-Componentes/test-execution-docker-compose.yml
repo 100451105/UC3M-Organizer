@@ -4,8 +4,22 @@ services:
   test-api:
     build:
       context: .
-      dockerfile: api_Dockerfile
+      dockerfile: Dockerfile
     container_name: test_execution_api_container
+    command: Tests.api_tests
     volumes:
       - .:/app
     working_dir: /app
+    environment:
+      - PYTHONUNBUFFERED=1
+  test-scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: test_execution_scheduler_container
+    command: Tests.scheduler_tests
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - PYTHONUNBUFFERED=1

@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, conint, model_validator
 from typing import Literal, List
 from datetime import date
@@ -56,11 +58,11 @@ def create_calendar_scheduled_activities(information: ScheduleActivity):
                 "solutions": solutions
                 }
         case 201:
-            return {
+            return JSONResponse(status_code=201,content=jsonable_encoder({
                 "result": result, 
                 "message": "Assigned activity to the scheduler successfully. However, the endOfActivity given had to be changed in order to schedule it properly.",
                 "solutions": solutions
-                }
+                }))
         case 401:
             raise HTTPException(status_code=401, detail="Could not assign the activity to the scheduler successfully.")
         case 505:

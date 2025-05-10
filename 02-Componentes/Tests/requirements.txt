@@ -3,3 +3,4 @@ uvicorn
 pydantic
 httpx
 mysql-connector-python
+ortools==9.8.3296

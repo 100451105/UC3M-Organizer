@@ -1,0 +1,120 @@
+{
+  "activity": {
+    "estimatedHours": 16,
+    "strategy": "Calmada",
+    "startOfActivity": "2025-05-01",
+    "endOfActivity": "2025-05-07"
+  },
+  "calendar": [
+    {
+      "calendarDate": "2025-05-10",
+      "dayType": "Festivo",
+      "totalHoursBusy": 8
+    },
+    {
+      "calendarDate": "2025-05-09",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-05-08",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-05-07",
+      "dayType": "Normal",
+      "totalHoursBusy": 1
+    },
+    {
+      "calendarDate": "2025-05-06",
+      "dayType": "Normal",
+      "totalHoursBusy": 3
+    },
+    {
+      "calendarDate": "2025-05-05",
+      "dayType": "Normal",
+      "totalHoursBusy": 2
+    },
+    {
+      "calendarDate": "2025-05-04",
+      "dayType": "Festivo",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-05-03",
+      "dayType": "Festivo",
+      "totalHoursBusy": 5
+    },
+    {
+      "calendarDate": "2025-05-02",
+      "dayType": "Festivo",
+      "totalHoursBusy": 6
+    },
+    {
+      "calendarDate": "2025-05-01",
+      "dayType": "Festivo",
+      "totalHoursBusy": 8
+    },
+    {
+      "calendarDate": "2025-04-30",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-29",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-28",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-27",
+      "dayType": "Festivo",
+      "totalHoursBusy": 8
+    },
+    {
+      "calendarDate": "2025-04-26",
+      "dayType": "Festivo",
+      "totalHoursBusy": 8
+    },
+    {
+      "calendarDate": "2025-04-25",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-24",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-23",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-22",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-21",
+      "dayType": "Normal",
+      "totalHoursBusy": 4
+    },
+    {
+      "calendarDate": "2025-04-20",
+      "dayType": "Festivo",
+      "totalHoursBusy": 7
+    },
+    {
+      "calendarDate": "2025-04-19",
+      "dayType": "Festivo",
+      "totalHoursBusy": 8
+    }
+  ]
+}

@@ -59,7 +59,7 @@ class Scheduler():
     def __aggresive_strategy(self, activity, calendar, busy_days):
         model = cp_model.CpModel()
         solver = cp_model.CpSolver()
-        solver.parameters.log_search_progress = True
+        solver.parameters.log_search_progress = False
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 
@@ -93,7 +93,7 @@ class Scheduler():
     def __calm_strategy(self, activity, calendar, busy_days):
         model = cp_model.CpModel()
         solver = cp_model.CpSolver()
-        solver.parameters.log_search_progress = True
+        solver.parameters.log_search_progress = False
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 
@@ -123,7 +123,7 @@ class Scheduler():
     def __complete_strategy(self, activity, calendar, busy_days):
         model = cp_model.CpModel()
         solver = cp_model.CpSolver()
-        solver.parameters.log_search_progress = True
+        solver.parameters.log_search_progress = False
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 
@@ -152,7 +152,6 @@ class Scheduler():
             [activity["endOfActivity"] - timedelta(days=i) for i in range(1,4)]
         if activity["startOfActivity"]:
             end_date_margin = [f for f in end_date_margin if activity["startOfActivity"] <= f <= activity["endOfActivity"] + timedelta(days=4)]
-        print(end_date_margin)
         busy_days = {}
         for day in calendar:
             busy_days[day["calendarDate"]] = day["totalHoursBusy"]

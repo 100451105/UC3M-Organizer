@@ -1,0 +1,24 @@
+Id, Strategy, StartDate State, ReturnCode, Redirection, Number Of Solutions
+01, Aggresive, NULL, 200, None, Only 1
+02, Aggresive, NULL, 200, None, More than 1
+03, Aggresive, NULL, 201, Later, Only 1
+04, Aggresive, NULL, 201, Earlier, Only 1
+05, Aggresive, Not NULL, 200, None, Only 1
+06, Aggresive, Not NULL, 201, Later, Only 1
+07, Aggresive, Not NULL, 401, Earlier, Only 1
+08, Calm, NULL, 200, None, Only 1
+09, Calm, NULL, 200, None, More than 1
+10, Calm, NULL, 201, Later, Only 1
+11, Calm, NULL, 201, Earlier, Only 1
+12, Calm, Not NULL, 200, None, Only 1
+13, Calm, Not NULL, 201, Later, Only 1
+14, Calm, Not NULL, 401, Earlier, Only 1
+15, Complete, NULL, 200, None, Only 1
+16, Complete, NULL, 200, None, More than 1
+17, Complete, NULL, 201, Later, Only 1
+18, Complete, NULL, 201, Earlier, Only 1
+19, Complete, Not NULL, 200, None, Only 1
+20, Complete, Not NULL, 201, Later, Only 1
+21, Complete, Not NULL, 401, Earlier, Only 1
+22, Aggresive, NULL, 505, None, 0
+23, Aggresive, NULL, 400, None, 0
