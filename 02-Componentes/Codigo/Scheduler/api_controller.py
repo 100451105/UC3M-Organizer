@@ -34,12 +34,12 @@ class ScheduleActivity(BaseModel):
         calendar = self.calendar
 
         if activity.startOfActivity:
-            expected = (activity.endOfActivity - activity.startOfActivity).days + 1 + 4
+            expected = (activity.endOfActivity - activity.startOfActivity).days + 1 + 3
             if len(calendar) != expected:
                 raise ValueError(f"Call expected {expected} days on the Calendar list. It was given {len(calendar)}.")
         else:
-            if len(calendar) != 22:
-                raise ValueError(f"Call expected 22 days on the Calendar list. It was given {len(calendar)}.")
+            if len(calendar) != 21:
+                raise ValueError(f"Call expected 21 days on the Calendar list. It was given {len(calendar)}.")
         
         return self
 

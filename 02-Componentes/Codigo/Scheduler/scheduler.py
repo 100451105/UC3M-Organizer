@@ -151,7 +151,7 @@ class Scheduler():
             [activity["endOfActivity"] + timedelta(days=i) for i in range(1,4)] + \
             [activity["endOfActivity"] - timedelta(days=i) for i in range(1,4)]
         if activity["startOfActivity"]:
-            end_date_margin = [f for f in end_date_margin if activity["startOfActivity"] <= f <= activity["endOfActivity"] + timedelta(days=4)]
+            end_date_margin = [f for f in end_date_margin if activity["startOfActivity"] <= f <= activity["endOfActivity"] + timedelta(days=3)]
         busy_days = {}
         for day in calendar:
             busy_days[day["calendarDate"]] = day["totalHoursBusy"]
@@ -195,8 +195,7 @@ class Scheduler():
                 return 505
         
         # Output set up
-        if schedulerOutput and (schedulerOutput[1] == activity["endOfActivity"]):
-            # Assigned correctly
+        if schedulerOutput:
             solutions = []
             for solution in schedulerOutput[0]:
                 newSchedule = []
@@ -218,31 +217,12 @@ class Scheduler():
                     "schedule": newSchedule,
                     "modifiedCalendar": newCalendar
                 })
-            return 200, solutions
-        elif schedulerOutput and (schedulerOutput[1] != activity["endOfActivity"]):
-            # Assigned correctly with endDate change
-            solutions = []
-            for solution in schedulerOutput[0]:
-                newSchedule = []
-                newCalendar = []
-                for schedule in solution:
-                    date = schedule["calendarDate"]
-                    max_hours = 4 if schedule["dayType"] == "Normal" else 8
-                    newSchedule.append({
-                        "calendarDate": date,
-                        "assignedHours": schedule["assignedHours"]
-                    })
-                    newCalendar.append({
-                        "calendarDate": date,
-                        "dayType": schedule["dayType"],
-                        "status": "Ocupado" if schedule["assignedHours"] == max_hours else "Libre"
-                    })
-                solutions.append({
-                    "newEndDate": schedulerOutput[1],
-                    "schedule": newSchedule,
-                    "modifiedCalendar": newCalendar
-                })
-            return 201, solutions
+            if (schedulerOutput[1] == activity["endOfActivity"]):
+                # Assigned correctly
+                return 200, solutions
+            else:
+                # Assigned correctly with endDate change
+                return 201, solutions   
         else:
             # Not possible to assign
             return 401, None
