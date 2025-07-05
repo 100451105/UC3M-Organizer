@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+
+    /* Cabecera de página */
+    .header-content {
+        position: absolute;
+        left: 0.5%;
+        top: 5%;
+        width: 23.39vh;
+        height: 11.3vh;
+        display: flex;
+        align-items: center;
+    }
+
+    .header-logo {
+        max-width:  11.3vh;
+        max-height: 11.3vh;
+        object-fit: contain;
+    }
+
+    .header-title {
+        margin-left: 1.98vh;
+        font-size: 4.44vh;
+        width: 16.41vh;
+        height: 3.11vh;
+        display: flex;
+        align-items: center;
+        color: white;
+        font-family: 'Montserrat', sans-serif;
+        -webkit-text-stroke: 0.06vh black;
+    }
+
+    /* Inicio de sesión / registro */
+
+    .login-section {
+        position: absolute;
+        top: 20%;
+        left: 15%;
+        width: 70vw;
+        height: 70vh;
+        border: 0.37vh solid theme('colors.main-dark-blue');
+        border-radius: 4.44vh;
+        display: flex;
+        overflow: hidden;
+    }
+
+    .login-separator {
+        width: 0.37vh;
+        background-color: theme('colors.main-dark-blue');
+    }
+}

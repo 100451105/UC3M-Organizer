@@ -1,0 +1,28 @@
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx,ts,tsx}"
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "main-dark-blue": "#171796",
+        "main-blue": "#3949AB",
+        "main-blue-button": "#0000D5",
+        "main-light-blue":"#1E88E5",
+        "main-green": "#43A047",
+        "main-turquoise": "#00897B",
+        "main-yellow": "#F9A825",
+        "main-red": "#C62828",
+        "main-purple": "#9C27B0",
+        "main-brown": "#5E35B1",
+      },
+      fontFamily: {
+        montserrat: ['Montserrat', 'sans-serif'],
+      }
+    },
+  },
+  plugins: [],
+}
+
