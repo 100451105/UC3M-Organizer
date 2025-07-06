@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+  database:
+    build: 
+      context: ./Codigo/BackendAPI/BaseDeDatos
+    container_name: database_mysql
+    restart: always
+    environment:
+    - MYSQL_ROOT_PASSWORD=q30Gw1nnq560qOlVrWnJ
+    - MYSQL_DATABASE=central_database
+    expose:
+      - "3306"
+    networks:
+      - internal_network
+  fastapi_backend:
+    build: ./Codigo/BackendAPI/FrontEndAPI
+    container_name: backend_api
+    restart: always
+    depends_on:
+      - database
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_USER=data_admin
+      - DATABASE_PASSWORD=q30Gw1nnq560qOlVrWnJ
+      - DATABASE_NAME=central_database
+    expose:
+      - "8000"
+    networks:
+      - internal_network
+  scheduler:
+    build:
+      context: ./Codigo/Scheduler
+      dockerfile: Dockerfile
+    container_name: scheduler
+    restart: always
+    volumes:
+      - ./Codigo/Scheduler:/app
+    working_dir: /app
+    expose:
+      - "8001"
+    networks:
+      - internal_network
+  logic_system_api:
+    build:
+      context: ./Codigo/LogicSystemAPI
+      dockerfile: Dockerfile
+    container_name: main_logic_api
+    restart: always
+    depends_on:
+      - scheduler
+      - fastapi_backend
+    volumes:
+      - ./Codigo/LogicSystemAPI:/app
+    working_dir: /app
+    ports:
+      - "8002:8000"
+    networks:
+      - internal_network
+      - external_network
+  frontend:
+    build:
+      context: ./Codigo/FrontEnd
+      dockerfile: Dockerfile
+    container_name: web_frontend
+    restart: always
+    depends_on:
+      - logic_system_api
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Codigo/FrontEnd:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    networks:
+      - external_network
+
+
+networks:
+  internal_network:
+    driver: bridge
+    internal: true
+  
+  external_network:
+    driver: bridge

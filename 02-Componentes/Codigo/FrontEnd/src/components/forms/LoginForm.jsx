@@ -1,17 +1,36 @@
 import {useState} from "react";
+import axios from "axios";
 
 export default function LoginForm() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleLogin = (e) => {
-        e.PreventDefault();
+    const handleLogin = async (e) => {
+        e.preventDefault();
         // Validación
-
+        if (!email) {
+            return alert("Por favor, introduce el correo electrónico para iniciar sesión.");
+        }
+        if (!password) {
+            return alert("Por favor, introduce la contraseña para iniciar sesión.");
+        }
         // Envío de datos al backend
         try {
-            console.log("Email:", email);
-            console.log("Password:", password);
+            console.log("Enviando datos de inicio de sesión:", { email, password });
+            const response = await axios.post("http://localhost:8002/user/login/", {
+                email: email,
+                password: password
+            });
+            if (response.status === 200) {
+                const userInfo = response.data;
+                // Aquí puedes manejar la información del usuario, como guardarla en el estado global o localStorage
+                console.log("Inicio de sesión exitoso:", userInfo);
+                alert("Inicio de sesión exitoso");
+            }
+            else {
+                console.error("Error al iniciar sesión:", response.statusText);
+                alert("Error al iniciar sesión. Por favor, verifica tus credenciales.");
+            }
         } catch (error) {
             console.error("Error al iniciar sesión:", error);
         }

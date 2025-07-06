@@ -1,0 +1,5 @@
+python-dateutil
+fastapi
+uvicorn
+pydantic
+requests
