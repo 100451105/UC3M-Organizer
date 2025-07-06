@@ -44,14 +44,14 @@ class Database:
     
     """ Operaciones permitidas en base de datos de lectura (casos de uso basicos) """
     
-    def get_users(self, userId=None):
+    def get_users(self, username=None):
         """  Leer usuarios (uno o todos) """
         connection = self.get_connection()
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
-        if userId:
-            cursor.execute("SELECT * FROM person WHERE Id = %s;",(userId))
+        if username:
+            cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
             result = cursor.fetchone()
         else:
             cursor.execute("SELECT * FROM person;")
@@ -198,10 +198,11 @@ class Database:
             userId = result["userId"] if result else None
             connection.commit()
         except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower), None
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
@@ -223,8 +224,8 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower), None
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
@@ -247,8 +248,8 @@ class Database:
             print(err)
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
@@ -279,8 +280,8 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower), None
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
@@ -311,8 +312,8 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower), None
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
@@ -332,10 +333,10 @@ class Database:
             print(err)
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -351,10 +352,10 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -370,10 +371,10 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -391,10 +392,10 @@ class Database:
             print(err)
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -417,10 +418,10 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -436,10 +437,10 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -455,10 +456,10 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     
@@ -487,10 +488,10 @@ class Database:
             connection.rollback()
             cursor.close()
             print(err)
-            if err.errno == 45000:
-                return int(err.msg.lower)
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
             else:
-                return 505
+                return 505, None
         cursor.close()
         return 200
     

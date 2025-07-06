@@ -12,18 +12,20 @@ USE central_database;
 
 -- user_authorization
 CREATE TABLE user_authorization (
-    Id INT AUTO_INCREMENT PRIMARY KEY,
-    Username NVARCHAR(100) NOT NULL,
-    Password NVARCHAR(100) NOT NULL
+    Id INT AUTO_INCREMENT,
+    Username NVARCHAR(100),
+    Password NVARCHAR(100) NOT NULL,
+    CONSTRAINT pk_user_auth PRIMARY KEY (Id, Username)
 );
 
 -- person
 CREATE TABLE person (
-    Id INT PRIMARY KEY,
-    Username NVARCHAR(100) NOT NULL,
-    Type ENUM('Profesor','Estudiante','Administrador','Otros') NOT NULL
+    Id INT,
+    Username NVARCHAR(100),
+    Type ENUM('Profesor','Estudiante','Administrador','Otros') NOT NULL,
+    CONSTRAINT pk_person PRIMARY KEY (Id, Username)
 );
-ALTER TABLE person ADD CONSTRAINT fk_person_id FOREIGN KEY (Id) REFERENCES user_authorization(Id) ON DELETE CASCADE;
+ALTER TABLE person ADD CONSTRAINT fk_person_id_username FOREIGN KEY (Id, Username) REFERENCES user_authorization(Id, Username) ON DELETE CASCADE;
 
 -- subject
 CREATE TABLE subject (
@@ -171,6 +173,11 @@ BEGIN
         WHERE Id = p_Id;
         SET p_newId = p_Id;
     ELSE
+        -- Check if the username already exists
+        IF EXISTS (SELECT 1 FROM user_authorization WHERE Username = p_Username) THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '401';
+        END IF;
         INSERT INTO user_authorization (
             Username, 
             Password
@@ -438,7 +445,7 @@ END //
 DELIMITER ;
 
 -- Examples to test
-INSERT INTO user_authorization (Username, Password) VALUES ('admin','password');
+INSERT INTO user_authorization (Username, Password) VALUES ('admin@alumnos.uc3m.es','password');
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Estudiante');
 INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);

@@ -2,6 +2,12 @@ import {useState} from "react";
 import axios from "axios";
 
 export default function LoginForm() {
+    const errorMessages = {
+        401: "El correo electrónico no existe. Por favor, verifica el correo electrónico e inténtalo de nuevo.",
+        402: "La contraseña es incorrecta. Por favor, verifica la contraseña e inténtalo de nuevo.",
+        503: "Error de conexión con la base de datos. Por favor, inténtalo de nuevo más tarde.",
+    };
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
@@ -21,18 +27,26 @@ export default function LoginForm() {
                 email: email,
                 password: password
             });
+            console.log("Respuesta del servidor:", response.status);
             if (response.status === 200) {
                 const userInfo = response.data;
-                // Aquí puedes manejar la información del usuario, como guardarla en el estado global o localStorage
                 console.log("Inicio de sesión exitoso:", userInfo);
                 alert("Inicio de sesión exitoso");
             }
-            else {
-                console.error("Error al iniciar sesión:", response.statusText);
-                alert("Error al iniciar sesión. Por favor, verifica tus credenciales.");
-            }
         } catch (error) {
-            console.error("Error al iniciar sesión:", error);
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    const message = "Error al iniciar sesión:\n" + (errorMessages[error.response.status] || "Error desconocido. Por favor, inténtalo de nuevo.");
+                    console.error(message);
+                    alert(message);
+                } else if (error.request) {
+                    console.error("No se recibió respuesta del servidor:", error.request);
+                    alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
+                } else {
+                    console.error("Error al configurar la solicitud:", error.message);
+                    alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
+                }
+            }
         }
     };
 

@@ -1,19 +1,52 @@
 import {useState} from "react";
+import axios from "axios";
 
 export default function RegisterForm() {
+    const errorMessages = {
+        401: "Ya existe una cuenta con ese correo electrónico. Por favor, utiliza otro o inicia sesión en esa cuenta.",
+        503: "Error de conexión con la base de datos. Por favor, inténtalo de nuevo más tarde.",
+        505: "Error interno del servidor. Por favor, inténtalo de nuevo más tarde.",
+    };
+
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    const handleRegister = (e) => {
-        e.PreventDefault();
+    const handleRegister = async (e) => {
+        e.preventDefault();
         // Validación
-
+        if (!email) {
+            return alert("Por favor, introduce el correo electrónico para crear una cuenta.");
+        }
+        if (!password) {
+            return alert("Por favor, introduce la contraseña para crear una cuenta.");
+        }
         // Envío de datos al backend
         try {
-            console.log("Email:", email);
-            console.log("Password:", password);
+            console.log("Enviando datos de inicio de sesión:", { email, password });
+            const response = await axios.post("http://localhost:8002/user/register/", {
+                email: email,
+                password: password
+            });
+            console.log("Respuesta del servidor:", response.status);
+            if (response.status === 200) {
+                const userInfo = response.data;
+                console.log("Cuenta creada exitosamente:", userInfo);
+                alert("Cuenta creada exitosamente");
+            }
         } catch (error) {
-            console.error("Error al registrarse:", error);
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    const message = "Error al crear una cuenta:\n" + (errorMessages[error.response.status] || "Error desconocido. Por favor, inténtalo de nuevo.");
+                    console.error(message);
+                    alert(message);
+                } else if (error.request) {
+                    console.error("No se recibió respuesta del servidor:", error.request);
+                    alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
+                } else {
+                    console.error("Error al configurar la solicitud:", error.message);
+                    alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
+                }
+            }
         }
     };
 

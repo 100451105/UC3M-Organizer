@@ -96,8 +96,8 @@ class DeleteActivity(BaseModel):
 """ User Endpoints """
 
 @app.get("/users/", description= "GetUsers", tags=["Users"])
-def read_users(userId: Optional[int] = None):
-    result = db.get_users(userId)
+def read_users(username: Optional[constr(min_length=0,max_length=100)] = None):
+    result = db.get_users(username)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
@@ -115,6 +115,8 @@ def create_user(item: CreateUser):
     match result[0]:
         case 200:
             return {"result": result[0], "affected": result[1]}
+        case 401:
+            raise HTTPException(status_code=401, detail="Username already exists")
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:
