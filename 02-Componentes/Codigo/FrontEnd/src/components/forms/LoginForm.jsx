@@ -1,7 +1,8 @@
-import {useState} from "react";
 import axios from "axios";
+import {useState} from "react";
+import Loading from "../common/Loading";
 
-export default function LoginForm() {
+export default function LoginForm({ setLoadingState }) {
     const errorMessages = {
         401: "El correo electrónico no existe. Por favor, verifica el correo electrónico e inténtalo de nuevo.",
         402: "La contraseña es incorrecta. Por favor, verifica la contraseña e inténtalo de nuevo.",
@@ -13,11 +14,16 @@ export default function LoginForm() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoadingState(true);
+        // Mostrar el componente de carga
+        document.body
         // Validación
         if (!email) {
+            setLoadingState(false);
             return alert("Por favor, introduce el correo electrónico para iniciar sesión.");
         }
         if (!password) {
+            setLoadingState(false);
             return alert("Por favor, introduce la contraseña para iniciar sesión.");
         }
         // Envío de datos al backend
@@ -28,12 +34,16 @@ export default function LoginForm() {
                 password: password
             });
             console.log("Respuesta del servidor:", response.status);
+            setLoadingState(false);
             if (response.status === 200) {
+                // Redirigir a la página principal
                 const userInfo = response.data;
                 console.log("Inicio de sesión exitoso:", userInfo);
                 alert("Inicio de sesión exitoso");
+                window.location.href = "/main"; 
             }
         } catch (error) {
+            setLoadingState(false);
             if (axios.isAxiosError(error)) {
                 if (error.response) {
                     const message = "Error al iniciar sesión:\n" + (errorMessages[error.response.status] || "Error desconocido. Por favor, inténtalo de nuevo.");
@@ -79,7 +89,7 @@ export default function LoginForm() {
             />
             <button 
                 type="submit"
-                className="w-[18.59vw] h-[5vh] bg-main-blue-button text-white text-[2.96vh] 
+                className="w-[18.59vw] h-[5vh] custom-button text-[2.96vh] 
                 font-montserrat font-normal border-[0.37vh] border-main-dark-blue 
                 rounded-[3.98vh]"
             >

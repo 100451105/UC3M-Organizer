@@ -15,9 +15,11 @@ export default function RegisterForm() {
         e.preventDefault();
         // Validación
         if (!email) {
+            setLoadingState(false);
             return alert("Por favor, introduce el correo electrónico para crear una cuenta.");
         }
         if (!password) {
+            setLoadingState(false);
             return alert("Por favor, introduce la contraseña para crear una cuenta.");
         }
         // Envío de datos al backend
@@ -28,12 +30,17 @@ export default function RegisterForm() {
                 password: password
             });
             console.log("Respuesta del servidor:", response.status);
+            setLoadingState(false);
             if (response.status === 200) {
+                // Redirigir a la página principal
                 const userInfo = response.data;
-                console.log("Cuenta creada exitosamente:", userInfo);
-                alert("Cuenta creada exitosamente");
+                console.log("Inicio de sesión exitoso:", userInfo);
+                alert("Inicio de sesión exitoso");
+                
+                window.location.href = "/main"; 
             }
         } catch (error) {
+            setLoadingState(false);
             if (axios.isAxiosError(error)) {
                 if (error.response) {
                     const message = "Error al crear una cuenta:\n" + (errorMessages[error.response.status] || "Error desconocido. Por favor, inténtalo de nuevo.");
@@ -47,6 +54,7 @@ export default function RegisterForm() {
                     alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
                 }
             }
+            
         }
     };
 
@@ -79,7 +87,7 @@ export default function RegisterForm() {
             />
             <button 
                 type="submit"
-                className="w-[18.59vw] h-[5vh] bg-main-blue-button text-white text-[2.96vh] 
+                className="w-[18.59vw] h-[5vh] custom-button text-[2.96vh] 
                 font-montserrat font-normal border-[0.37vh] border-main-dark-blue 
                 rounded-[3.98vh]"
             >
