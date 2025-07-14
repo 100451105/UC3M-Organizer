@@ -51,11 +51,23 @@ class Database:
             return 503
         cursor = connection.cursor(dictionary=True)
         if username:
-            cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
+            cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
             result = cursor.fetchone()
         else:
             cursor.execute("SELECT * FROM person;")
             result = cursor.fetchall()
+        cursor.close()
+        return result
+    
+    def get_users_through_id(self, userId):
+        """  Leer usuarios a través del id """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        if userId:
+            cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Id = %s;",(userId,))
+            result = cursor.fetchone()
         cursor.close()
         return result
     
@@ -89,6 +101,17 @@ class Database:
         cursor.close()
         return result
     
+    def get_activities_main_info(self):
+        """  Leer actividades (todas y solo la información principal) """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT ActivityId, ActivityName, ActivityType, StartOfActivity, EndOfActivity, SubjectId, SubjectName FROM vSubjectActivityInfo WHERE Status = 'Asignado';")
+        result = cursor.fetchall()
+        cursor.close()
+        return result
+    
     def get_calendar(self, calendarDate=None):
         """  Leer días del calendario (uno o varios) """
         connection = self.get_connection()
@@ -96,10 +119,10 @@ class Database:
             return 503
         cursor = connection.cursor(dictionary=True)
         if calendarDate:
-            cursor.execute("SELECT * FROM calendar WHERE CalendarDate = %s;",(calendarDate,))
-            result = cursor.fetchone()
+            cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate BETWEEN STR_TO_DATE(CONCAT(IF(MONTH(%s) >= 9, YEAR(%s), YEAR(%s) - 1),'-09-01'), '%Y-%m-%d') AND STR_TO_DATE(CONCAT(IF(MONTH(%s) >= 9, YEAR(%s) + 1, YEAR(%s)),'-10-31'), '%Y-%m-%d') ORDER BY CalendarDate;",(calendarDate,calendarDate,calendarDate,calendarDate,calendarDate,calendarDate))
+            result = cursor.fetchall()
         else:
-            cursor.execute("SELECT * FROM calendar WHERE CalendarDate BETWEEN CURDATE() AND CURDATE() + INTERVAL 31 DAY ORDER BY CalendarDate;")
+            cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate = CURDATE();")
             result = cursor.fetchall()
         cursor.close()
         return result
@@ -143,7 +166,7 @@ class Database:
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT SubjectID, SubjectCredits, Semester, Year FROM vPersonSubjectInfo WHERE UserID = %s;",(userId))
+        cursor.execute("SELECT SubjectID, SubjectName, SubjectCredits, Semester, Year FROM vPersonSubjectInfo WHERE UserID = %s;",(userId,))
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -154,7 +177,7 @@ class Database:
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT UserID, Username, UserType FROM vPersonSubjectInfo WHERE SubjectID = %s GROUP BY UserID, Username, UserType;",(subjectId))
+        cursor.execute("SELECT UserID, Username, UserType FROM vPersonSubjectInfo WHERE SubjectID = %s GROUP BY UserID, Username, UserType;",(subjectId,))
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -165,7 +188,7 @@ class Database:
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, EndOfActivity FROM vSubjectActivityInfo WHERE SubjectID = %s;",(subjectId))
+        cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, EndOfActivity FROM vSubjectActivityInfo WHERE SubjectID = %s;",(subjectId,))
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -176,7 +199,7 @@ class Database:
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, EndOfActivity FROM vUserInterestedActivities WHERE UserID = %s",(userId))
+        cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, StartOfActivity, EndOfActivity, FromSubjectId, FromSubjectName FROM vUserInterestedActivities WHERE UserID = %s",(userId,))
         result = cursor.fetchall()
         cursor.close()
         return result
@@ -348,6 +371,25 @@ class Database:
         cursor = connection.cursor(dictionary=True)
         try:
             cursor.execute("CALL usp_AssignSubjectToUser(%s,%s);",(userId,subjectId))
+            connection.commit()
+        except mysql.connector.Error as err:
+            connection.rollback()
+            cursor.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        return 200
+    
+    def change_subject_vision_of_user(self,userId,seeAllSubjects):
+        """ Asignar asignatura a un usuario """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        try:
+            cursor.execute("CALL usp_ChangeSubjectVisionOfUser(%s,%s);",(userId,seeAllSubjects))
             connection.commit()
         except mysql.connector.Error as err:
             connection.rollback()

@@ -9,12 +9,16 @@ GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 USE central_database;
 
+-- Set UTC timezone
+SET time_zone = '+00:00';
+
 
 -- user_authorization
 CREATE TABLE user_authorization (
     Id INT AUTO_INCREMENT,
     Username NVARCHAR(100),
     Password NVARCHAR(100) NOT NULL,
+    SeeAllSubjects BOOLEAN NOT NULL DEFAULT FALSE,
     CONSTRAINT pk_user_auth PRIMARY KEY (Id, Username)
 );
 
@@ -123,8 +127,10 @@ SELECT
     sai.ActivityType,
     sai.Description, 
     sai.EstimatedHours,
+    sai.StartOfActivity,
     sai.EndOfActivity,
-    sai.SubjectID as FromSubjectID
+    sai.SubjectID as SubjectID,
+    sai.SubjectName as SubjectName
 FROM vPersonSubjectInfo psi
 JOIN vSubjectActivityInfo sai ON psi.SubjectID = sai.SubjectID;
 
@@ -138,15 +144,17 @@ SELECT
         GROUP_CONCAT(
             JSON_OBJECT(
                 'Activity', s.IdActivity,
+                'ActivityName', a.ActivityName,
                 'Hours', s.Hours,
-                'Subject', a.IdSubject
+                'Subject', a.SubjectID,
+                'SubjectName', a.SubjectName
             )
         ),
     ']') AS Activities
 FROM
     calendar c
 LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate
-LEFT JOIN activity a ON s.IdActivity = a.IdActivity
+LEFT JOIN vSubjectActivityInfo a ON s.IdActivity = a.ActivityID AND a.Status = 'Asignado'
 GROUP BY
     c.CalendarDate, c.DayType, c.WeekDay, c.Status;
 
@@ -180,10 +188,12 @@ BEGIN
         END IF;
         INSERT INTO user_authorization (
             Username, 
-            Password
+            Password,
+            SeeAllSubjects
         ) VALUES (
             p_Username, 
-            p_Password
+            p_Password,
+            0
         );
         SET p_newId = LAST_INSERT_ID();
         INSERT INTO person (
@@ -362,6 +372,23 @@ END //
 
 DELIMITER //
 
+CREATE PROCEDURE usp_ChangeSubjectVisionOfUser(
+    IN p_Username INT, 
+    IN p_SeeAllSubjects BOOLEAN
+)
+BEGIN
+    -- Verify user
+    IF NOT EXISTS (SELECT 1 FROM person WHERE Username = p_Username) THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = '401';
+    END IF;
+    UPDATE user_authorization SET 
+        SeeAllSubjects = p_SeeAllSubjects
+    WHERE Username = p_Username;
+END //
+
+DELIMITER //
+
 CREATE PROCEDURE usp_AssignCoordinatorToSubject(
     IN p_SubjectId INT, 
     IN p_CoordinatorId INT
@@ -393,8 +420,6 @@ BEGIN
         Status = p_Status
     WHERE IdActivity = p_ActivityId;
 END //
-
-DELIMITER //
 
 CREATE PROCEDURE usp_AssignActivityToDay(
     IN p_Schedule JSON
@@ -449,6 +474,6 @@ INSERT INTO user_authorization (Username, Password) VALUES ('admin@alumnos.uc3m.
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Estudiante');
 INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
-INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-04-21','Organizar','Agresiva','2025-05-05',198237);
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-04-28','Normal','Lunes','Libre');
-INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-04-28',2,1);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-04-21','Asignado','Agresiva','2025-05-05',198237);
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-14','Normal','Lunes','Libre');
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-14',2,1);

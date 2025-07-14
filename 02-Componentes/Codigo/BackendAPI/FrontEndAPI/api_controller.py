@@ -80,6 +80,10 @@ class AssignUserToSubject(BaseModel):
     userId: int
     subjectId: int
 
+class ChangeSubjectVisionOfUser(BaseModel):
+    userId: int
+    seeAllSubjects: bool
+
 class AssignCoordinatorToSubject(BaseModel):
     adminId: int
     subjectId: int
@@ -98,6 +102,13 @@ class DeleteActivity(BaseModel):
 @app.get("/users/", description= "GetUsers", tags=["Users"])
 def read_users(username: Optional[constr(min_length=0,max_length=100)] = None):
     result = db.get_users(username)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/users/id", description= "GetUsersThroughId", tags=["Users"])
+def read_users(userId: int):
+    result = db.get_users_through_id(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
@@ -143,6 +154,21 @@ def delete_user(item: DeleteUser):
     match result:
         case 200:
             return {"result": result, "message": "User successfully deleted"}
+        case 503:
+            raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+        case 505:
+            raise HTTPException(status_code=505, detail="Unknown Error")
+        case _:
+            raise HTTPException(status_code=400, detail="Unknown Code")
+    
+@app.post("/users/subject/vision/", description= "ChangeSubjectVisionOfUser", tags=["Users"])
+def change_subject_vision_of_user(item: ChangeSubjectVisionOfUser):
+    result = db.assign_user_to_subject(item.userId,item.seeAllSubjects)
+    match result:
+        case 200:
+            return {"result": result, "message": "Changed Subject vision of the user succesfully"}
+        case 401:
+            raise HTTPException(status_code=401, detail="User doesn't exist")
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:
@@ -242,6 +268,13 @@ def assign_coordinator_to_subject(item: AssignCoordinatorToSubject):
 @app.get("/activities/", description= "GetActivities", tags=["Activities"])
 def read_activities(activityId: Optional[int] = None):
     result = db.get_activities(activityId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/activities/info", description= "GetActivities", tags=["Activities"])
+def read_activities_main_info():
+    result = db.get_activities_main_info()
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result

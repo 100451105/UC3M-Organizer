@@ -1,11 +1,14 @@
 import Header from "../components/common/Header";
-import CustomCalendar from "../components/data_related/Calendar"
+import { useState } from "react";
+import CustomCalendar from "../components/data_related/Calendar";
 
 export default function Organizador() {
-    return (
+  const [loading, setLoadingState] = useState(true);
+
+  return (
     <>
-      <Header showIndex={true} loadingInProgress={false}/>
-      <CustomCalendar />
+      <Header showIndex={true} loadingInProgress={loading}/>
+      <CustomCalendar setLoadingState={ setLoadingState }/>
     </>
   )
 }

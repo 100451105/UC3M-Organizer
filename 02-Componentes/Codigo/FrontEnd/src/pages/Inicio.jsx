@@ -5,6 +5,7 @@ import RegisterForm from "../components/forms/RegisterForm";
 import Header from "../components/common/Header";
 
 
+
 export default function Inicio() {
   const [loading, setLoadingState] = useState(false);
 

@@ -29,16 +29,34 @@ export default function LoginForm({ setLoadingState }) {
         // Envío de datos al backend
         try {
             console.log("Enviando datos de inicio de sesión:", { email, password });
-            const response = await axios.post("http://localhost:8002/user/login/", {
+            const loginResponse = await axios.post("http://localhost:8002/user/login/", {
                 email: email,
                 password: password
             });
-            console.log("Respuesta del servidor:", response.status);
-            setLoadingState(false);
-            if (response.status === 200) {
+            console.log("Respuesta del servidor:", loginResponse.status);
+            if (loginResponse.status === 200) {
+                const userId = loginResponse.data.user.Id;
+                console.log("Inicio de sesión exitoso:", userId);
+
+                // Crear caché de información de usuario
+                const userInfoResponse = await axios.get("http://localhost:8002/user/info/", {
+                    withCredentials: true,
+                    params: {
+                        userId: userId
+                    }
+                })
+                let userInfo = userInfoResponse.data.userInformation;
+                let subjectList = userInfoResponse.data.subjectsOfUser;
+                const fullUserCache = {
+                    ...userInfo,
+                    relatedSubjectsList: subjectList,
+                    updatedAt: new Date().toIsoString()
+                }
+                console.log(fullUserCache)
+                localStorage.removeItem("user_info");
+                localStorage.setItem("user_info", JSON.stringify(fullUserCache));
+                setLoadingState(false);
                 // Redirigir a la página principal
-                const userInfo = response.data;
-                console.log("Inicio de sesión exitoso:", userInfo);
                 alert("Inicio de sesión exitoso");
                 window.location.href = "/main"; 
             }
