@@ -148,7 +148,9 @@ export default function CustomCalendar({ setLoadingState }) {
                         return day_style;
                     }}
                     />
-                    <p className="mt-4 text-center">Seleccionado: {date.toLocaleDateString()}</p>
+                    {date && <p className="mt-1 text-center">Seleccionado: {date.toLocaleDateString()}</p>}
+                    {!date && <p className="mt-1 text-center">Seleccionado: Ninguno</p>}
+                    
                 </div>
             </section>
         </>
