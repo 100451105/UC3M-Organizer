@@ -93,8 +93,37 @@
         overflow: hidden;
     }
 
+    .main-diagram-section {
+        position: absolute;
+        top: 29%;
+        left: 1%;
+        width: 98vw;
+        height: 70vh;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+    }
+
+    .main-diagram-section-2 {
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        width: 48vw;
+        height: 79vh;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+    }
+
     .page-title {
         @apply text-[clamp(3.6vh,2vw,4.78vh)] underline font-bold font-montserrat text-main-dark-blue text-left ml-[1vw] pt-[1vh];
     }
-    
+
+    .normal-page-title {
+        @apply text-[clamp(3.6vh,2vw,4.78vh)] font-bold font-montserrat text-main-dark-blue text-left ml-[1vw] pt-[1vh];
+    }
+
+    .section-title {
+        @apply text-[clamp(4.6vh,4vw,5.78vh)] pt-[2.5vh] font-bold font-montserrat text-main-dark-blue text-left;
+    }
 }
