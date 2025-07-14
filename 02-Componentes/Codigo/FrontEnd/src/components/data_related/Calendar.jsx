@@ -95,9 +95,7 @@ export default function CustomCalendar({ setLoadingState }) {
                         <p className="text-center text-gray-500">No hay actividades para este día.</p>
                     )}
                 </div>
-
-                {/* Visualización del Calendario */}
-                <div className="bg-white p-6 rounded-xl shadow-lg w-1/3">
+                <div className="bg-white p-6 rounded-xl shadow-lg w-1/3 h-full">
                     <Calendar
                     view="month"
                     defaultView="month"
@@ -150,9 +148,7 @@ export default function CustomCalendar({ setLoadingState }) {
                         return day_style;
                     }}
                     />
-                    {date && <p className="mt-1 text-center">Seleccionado: {date.toLocaleDateString()}</p>}
-                    {!date && <p className="mt-1 text-center">Seleccionado: Ninguno</p>}
-                    
+                    <p className="mt-4 text-center">Seleccionado: {date.toLocaleDateString()}</p>
                 </div>
             </section>
         </>
