@@ -272,11 +272,12 @@ def read_activities(activityId: Optional[int] = None):
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/activities/info", description= "GetActivities", tags=["Activities"])
-def read_activities_main_info():
-    result = db.get_activities_main_info()
+@app.get("/activities/info/", description= "GetActivities", tags=["Activities"])
+def read_activities_main_info(actualDate: date):
+    result = db.get_activities_main_info(actualDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    print(result)
     return result
 
 @app.get("/activities/subject/", description= "GetActivitiesOfSubject", tags=["Activities"])

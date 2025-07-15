@@ -101,13 +101,13 @@ class Database:
         cursor.close()
         return result
     
-    def get_activities_main_info(self):
+    def get_activities_main_info(self, actualDate):
         """  Leer actividades (todas y solo la información principal) """
         connection = self.get_connection()
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT ActivityId, ActivityName, ActivityType, StartOfActivity, EndOfActivity, SubjectId, SubjectName FROM vSubjectActivityInfo WHERE Status = 'Asignado';")
+        cursor.execute("SELECT ActivityId, ActivityName, ActivityType, StartOfActivity, EndOfActivity, SubjectId, SubjectName FROM vSubjectActivityInfo WHERE Status = 'Asignado' AND StartOfActivity BETWEEN DATE_FORMAT(DATE_SUB(%s, INTERVAL 1 MONTH), '%Y-%m-01') AND LAST_DAY(DATE_ADD(%s, INTERVAL 2 MONTH));", (actualDate,actualDate,))
         result = cursor.fetchall()
         cursor.close()
         return result

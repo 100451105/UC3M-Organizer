@@ -47,6 +47,9 @@ export default function Inicio() {
         try {
           const response = await axios.get("http://localhost:8002/calendar/info/daily/");
           if (response.status === 200) {
+            if (response.data.calendar.length === 0) {
+              return
+            }
             let dailyCalendar = response.data.calendar[0];
             
             dailyCalendar.Activities = JSON.parse(dailyCalendar.Activities);

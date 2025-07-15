@@ -1,12 +1,7 @@
-import React from "react";
+import { ActivityCache } from "../common/Cache";
+import { useState, useEffect } from "react";
 import ReactECharts from "echarts-for-react";
 import { mainColors } from "../common/Colors"
-
-const COLORS = {
-    "Diseño": mainColors["main-dark-blue"],
-    "Desarrollo": mainColors["main-green"],
-    "QA": mainColors["main-red"]
-}
 
 const MONTHS = [
     "Enero",
@@ -23,125 +18,267 @@ const MONTHS = [
     "Diciembre"
 ]
 
-export default function GanttDiagram() {
+export default function GanttDiagram({ setLoadingState }) {
+    const [activity_list, setActivityList] = useState([]);
+
     {/* Definición de meses a utilizar */}
     const UTCDate = new Date();
     const actualYear = UTCDate.getUTCFullYear();
     const actualMonth = UTCDate.getUTCMonth();
-    const monthIndexes = [
-        (actualMonth + 11) % 12,
-        actualMonth,
-        (actualMonth + 1) % 12,
-        (actualMonth + 2) % 12
-    ]
-    const ganttMonths = monthIndexes.map(i => MONTHS[i]);
+    const monthIndexes = [-1,0,1,2];
+
+    const ganttMonths = monthIndexes.map(offset => {
+        const date = new Date(Date.UTC(actualYear, actualMonth + offset, 1));
+        return {
+            "month": date.getUTCMonth(),
+            "year": date.getUTCFullYear()
+        };
+    });
+
+    const minDate = new Date(Date.UTC(ganttMonths[0].year, ganttMonths[0].month, 1));
+    const maxDate = new Date(Date.UTC(ganttMonths[3].year, ganttMonths[3].month + 1, 0));
+
+    const labelMonths = ganttMonths.map(({ month, year }) => ({
+        timestamp: new Date(Date.UTC(year, month, 1)).getTime(),
+        label: MONTHS[month]
+    }));
 
 
     {/* Datos para realización del diagrama de Gantt */}
-    const data = [
-        {
-        name: "Diseño prototipo",
-        resource: "Diseño",
-        start: new Date("2025-07-01"),
-        end: new Date("2025-07-05"),
-        },
-        {
-        name: "Frontend",
-        resource: "Desarrollo",
-        start: new Date("2025-07-06"),
-        end: new Date("2025-07-20"),
-        },
-        {
-        name: "Backend",
-        resource: "Desarrollo",
-        start: new Date("2025-07-06"),
-        end: new Date("2025-07-22"),
-        },
-        {
-        name: "QA",
-        resource: "QA",
-        start: new Date("2025-07-23"),
-        end: new Date("2025-08-10"),
-        },
-    ];
-    const resources = [...new Set(data.map(d => d.resource))];
-    const chartData = data.map((item) => ([
-        resources.indexOf(item.resource),
-        item.resource,
-        item.start.getTime(),
-        item.end.getTime(),
-        item.name,
-        COLORS[item.resource],
-    ]));
+    useEffect(() => {
+        const getActivities = async () => {
+            let activities = await ActivityCache();
+            activities = activities.map(activity => {
+                return {
+                    name: activity.ActivityName,
+                    start: new Date(activity.StartOfActivity),
+                    end: new Date(activity.EndOfActivity),
+                    type: activity.ActivityType,
+                    resource: activity.SubjectName
+                }
+            })
+            setActivityList(activities);
+        }
+        getActivities();
+    }, []);
+    
+    const resources = [...new Set(activity_list.map(d => d.resource))];
+    const resourceKeys = Object.fromEntries(
+        resources.map(resource => [
+            resource,
+            resource.replace(/\s+/g, "_").normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quita tildes y espacios
+        ])
+    );
+
+    const COLORS = {};
+    const colorValues = Object.values(mainColors);
+    resources.forEach(resource => {
+        const randomIndex = Math.floor(Math.random() * colorValues.length);
+        COLORS[resource] = colorValues[randomIndex];
+    });
+
+    console.log(resourceKeys);
+
+    {/* Cálculo del tamaño del Gantt dinámicamente */}
+    const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+
+    useEffect(() => {
+        function onResize() {
+            setWindowHeight(window.innerHeight);
+        }
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, []);
+
+    const containerHeightvh = 70;
+    const visibleRows = 7;
+    const rowHeight = windowHeight * ((containerHeightvh / visibleRows) / 100);
+
+    const chartHeight = Math.max(resources.length * rowHeight, windowHeight  * (containerHeightvh / 100));
+    
+    {/* Agrupar para mostrar múltiples barras */}
+    const groupedData = {};
+    activity_list.forEach((activity) => {
+        if (!groupedData[activity.resource]) groupedData[activity.resource] = [];
+        groupedData[activity.resource].push(activity);
+    })
+
+    const chartData = [];
+    Object.entries(groupedData).forEach(([subject, tasks]) => {
+        tasks.forEach((activity, subIndex) => {
+            const startTime = activity.start.getTime();
+            const endTime = activity.end.getTime();
+            chartData.push([
+                resources.indexOf(subject),
+                subject,
+                startTime,
+                endTime,
+                activity.name,
+                COLORS[activity.resource],
+                subIndex,
+                tasks.length,
+                activity.type
+            ]);
+        });
+    });
+
+    const endOfMonthLines = ganttMonths.map(({ year, month }) => {
+        const lastDayTimestamp = Date.UTC(year, month + 1, 0);
+        return lastDayTimestamp;
+    });
 
     const option = {
         tooltip: {
+            trigger: "item",
             formatter: (params) => {
-                const data = params.data
+                const data = params.data;
                 const startStr = new Date(data[2]).toLocaleDateString();
                 const endStr = new Date(data[3]).toLocaleDateString();
-                return `<b>${data[4]}</b><br/>${startStr} → ${endStr}`;
+                const color = data[5] || "#333";
+
+                return `
+                    <div style="
+                        background-color: ${color};
+                        color: white;
+                        padding: 10px;
+                        border-radius: 6px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                        border: 1px solid ${mainColors['main-dark-blue']}
+                    ">
+                        <div style="font-weight: bold; margin-bottom: 4px;">${data[4]}</div>
+                        <div> ${startStr} → ${endStr}</div>
+                        <div><b>Tipo:</b> ${data[8]}</div>
+                    </div>
+                `;
             },
+            backgroundColor: 'transparent',
+            borderWidth: 0,
+            textStyle: {
+                color: "#fff",
+                fontSize: 13,
+            },
+            padding: 0,
+            extraCssText: 'box-shadow: none;',
         },
         xAxis: {
             type: "time",
-            min: new Date("2025-06-25").getTime(),
-            max: new Date("2025-08-20").getTime(),
+            min: minDate.getTime(),
+            max: maxDate.getTime(),
+            axisTick: {
+                alignWithLabel: true
+            },
+            data: labelMonths,
+            axisLabel: {
+                formatter: (value) => {
+                    const current = new Date(value);
+                    const match = labelMonths.find(({ timestamp }) => {
+                        const currentUTC = Date.UTC(current.getUTCFullYear(), current.getUTCMonth(), 1);
+                        return currentUTC === timestamp;
+                    });
+                    return match ? match.label : "";
+                },
+                hideOverlap: false,
+                showMinLabel: true,
+                showMaxLabel: true,
+            },
+            splitNumber: labelMonths.length,
         },
         yAxis: {
             type: "category",
             data: resources,
             inverse: true,
+            axisLabel: {
+                formatter: (value) => {
+                    const key = resourceKeys[value];
+                    return `{${key}|${value}}`;
+                },
+                rich: Object.fromEntries(
+                    resources.map(resource => {
+                        const key = resourceKeys[resource];
+                        return [key, {
+                            backgroundColor: COLORS[resource],
+                            color: "#fff",
+                            padding: [4,8],
+                            borderRadius: 6,
+                            fontWeight: "bold",
+                            fontSize: 12,
+                            align: "center",
+                        }];
+                    })
+                ), 
+            },
         },
         grid: {
             top: 20,
             bottom: 40,
             left: 100,
-            right: 20,
+            right: 40,
         },
         series: [
         {
             type: "custom",
+            markLine: {
+                silent: true,
+                symbol: "none",
+                lineStyle: {
+                    color: "#aaa",
+                    width: 1,
+                    type: "dashed"
+                },
+                label: {
+                    show: false,
+                },
+                data: endOfMonthLines.map(timestamp => ({
+                    xAxis: timestamp
+                }))
+            },
             renderItem: function (params, api) {
                 const color = api.value(5);
                 const categoryIndex = api.value(0);
+                const subIndex = api.value(6);
+                const totalInGroup = api.value(7);
+
                 const startCoord = api.coord([api.value(2), categoryIndex]);
                 const endCoord = api.coord([api.value(3), categoryIndex]);
-                const height = 20;
+                const fullHeight = api.size([0,1])[1];
+                const subBarHeight = fullHeight/totalInGroup;
+                const y = startCoord[1] - fullHeight/2 + subBarHeight * subIndex;
 
                 return {
                     type: "rect",
                     shape: {
                         x: startCoord[0],
-                        y: startCoord[1] - height / 2,
+                        y: y,
                         width: endCoord[0] - startCoord[0],
-                        height: height,
+                        height: subBarHeight - 2,
                     },
                     style: {
                         fill: color,
                     },
+                    
                 };
             },
             encode: {
                 x: [1, 2],
                 y: 0,
+                tooltip: [0,1,2,3,4,5,6,7,8]
             },
             data: chartData,
-            tooltip: {
-                valueFormatter: () => "",
-            },
+            clip: true,
+
         },
         ],
     };
 
+    setLoadingState(false);
     {/* HTML exportado como diagrama de Gantt */}
     return (
         <>
             <h1 className="nav-bar-text text-black">
                 Gantt Diagram
             </h1>
-            <section className="gantt-diagram-section">
-                <ReactECharts option={option} style={{ height: "100%", width: "100%" }} />
+            <section className="gantt-diagram-section" style={{height: `${containerHeightvh}vh`}}>
+                <ReactECharts option={option} style={{ height: `${chartHeight}px`, width: "100%" }} />
             </section>
         </>
     );

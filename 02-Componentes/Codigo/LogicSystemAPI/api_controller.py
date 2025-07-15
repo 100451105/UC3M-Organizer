@@ -96,9 +96,11 @@ def user_information(userId: int):
     )
 
 @app.get("/activities/info/", description= "Activities Information", tags=["Activity"])
-def activities_information():
+def activities_information(actualDate: date):
     # Checks if the user already exists and, if not, creates it
-    activity_info = requests.get("http://backend_api:8000/activities/info")
+    activity_info = requests.get("http://backend_api:8000/activities/info",params={
+        "actualDate": actualDate
+    })
     if activity_info.status_code != 200:
         raise HTTPException(status_code=activity_info.status_code, detail=activity_info.text)
     activity = activity_info.json()

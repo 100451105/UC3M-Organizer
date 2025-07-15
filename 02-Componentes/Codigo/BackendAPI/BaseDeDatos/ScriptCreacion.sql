@@ -474,6 +474,6 @@ INSERT INTO user_authorization (Username, Password) VALUES ('admin@alumnos.uc3m.
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Estudiante');
 INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
-INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-04-21','Asignado','Agresiva','2025-05-05',198237);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-07-21','Asignado','Agresiva','2025-08-05',198237);
 INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-14','Normal','Lunes','Libre');
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-14',2,1);
