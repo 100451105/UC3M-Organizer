@@ -78,10 +78,10 @@ class Database:
             return 503
         cursor = connection.cursor(dictionary=True)
         if subjectId:
-            cursor.execute("SELECT * FROM subject WHERE IdSubject = %s;",(subjectId))
+            cursor.execute("SELECT * FROM subject WHERE IdSubject = %s;",(subjectId,))
             result = cursor.fetchone()
         else:
-            cursor.execute("SELECT * FROM subject;")
+            cursor.execute("SELECT IdSubject, Name FROM subject;")
             result = cursor.fetchall()
         cursor.close()
         return result
@@ -93,7 +93,7 @@ class Database:
             return 503
         cursor = connection.cursor(dictionary=True)
         if activityId:
-            cursor.execute("SELECT * FROM activity WHERE IdActivity = %s;",(activityId))
+            cursor.execute("SELECT * FROM activity WHERE IdActivity = %s;",(activityId,))
             result = cursor.fetchone()
         else:
             cursor.execute("SELECT * FROM activity;")
@@ -215,7 +215,7 @@ class Database:
         cursor = connection.cursor(dictionary=True)
         try:
             cursor.execute("SET @p_newId = NULL;")
-            cursor.execute("CALL usp_CreateOrUpdateUser(%s,%s,%s,NULL,@p_newId);",(username,userType,password))
+            cursor.execute("CALL usp_CreateOrUpdateUser(%s,%s,%s,0,NULL,@p_newId);",(username,userType,password))
             cursor.execute("SELECT @p_newId as userId;")
             result = cursor.fetchone()
             userId = result["userId"] if result else None
@@ -231,7 +231,7 @@ class Database:
         cursor.close()
         return 200, userId
     
-    def update_user(self,username,password,userType,usernameId):
+    def update_user(self,username,password,userType,seeAllSubjects,usernameId):
         """ Actualizar usuario """
         connection = self.get_connection()
         if not connection:
@@ -239,7 +239,7 @@ class Database:
         cursor = connection.cursor(dictionary=True)
         try:
             cursor.execute("SET @p_newId = NULL;")
-            cursor.execute("CALL usp_CreateOrUpdateUser(%s,%s,%s,%s,@p_newId);",(username,userType,password,usernameId))
+            cursor.execute("CALL usp_CreateOrUpdateUser(%s,%s,%s,%s,%s,@p_newId);",(username,userType,password,seeAllSubjects,usernameId))
             cursor.execute("SELECT @p_newId as userId;")
             result = cursor.fetchone()
             userId = result["userId"] if result else None
@@ -250,6 +250,7 @@ class Database:
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
+                print(err.sqlstate, err.errno)
                 return 505, None
         cursor.close()
         return 200, userId

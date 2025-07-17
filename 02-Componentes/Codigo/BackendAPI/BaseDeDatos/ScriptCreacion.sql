@@ -164,6 +164,7 @@ CREATE PROCEDURE usp_CreateOrUpdateUser(
     IN p_Username NVARCHAR(100), 
     IN p_Type ENUM('Profesor','Estudiante','Administrador','Otros'),
     IN p_Password NVARCHAR(255),
+    IN p_SeeAllSubjects BOOLEAN,
     IN p_Id INT,
     OUT p_newId INT
 )
@@ -172,12 +173,11 @@ BEGIN
     IF p_Id IS NOT NULL AND EXISTS (SELECT 1 FROM user_authorization WHERE Id = p_Id) THEN
         UPDATE user_authorization SET 
             Password = p_Password,
-            Username = p_Username
+            SeeAllSubjects = p_SeeAllSubjects
         WHERE Id = p_Id;
 
-        UPDATE person SET 
-            Username = p_Username, 
-            Type = p_Type 
+        UPDATE person SET
+            Type = p_Type
         WHERE Id = p_Id;
         SET p_newId = p_Id;
     ELSE

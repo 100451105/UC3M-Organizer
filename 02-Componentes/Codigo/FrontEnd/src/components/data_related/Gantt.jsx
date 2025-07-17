@@ -274,8 +274,8 @@ export default function GanttDiagram({ setLoadingState }) {
     {/* HTML exportado como diagrama de Gantt */}
     return (
         <>
-            <h1 className="nav-bar-text text-black">
-                Gantt Diagram
+            <h1 className="section-title text-[clamp(4.0vh,3vw,4.5vh)] h-1/6 items-center pt-[1.5vh] ml-[2vw] underline">
+                Calendario
             </h1>
             <section className="gantt-diagram-section" style={{height: `${containerHeightvh}vh`}}>
                 <ReactECharts option={option} style={{ height: `${chartHeight}px`, width: "100%" }} />

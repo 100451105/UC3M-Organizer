@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, conint, model_validator
+from pydantic import BaseModel, conint, constr, model_validator
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal, List
 from datetime import date
@@ -26,7 +26,14 @@ class UserLoginRegister(BaseModel):
     email: str
     password: str
 
-""" Main Logic Endpoints """
+class UserUpdate(BaseModel):
+    username: constr(min_length=0,max_length=100)
+    password: constr(min_length=0,max_length=100)
+    userType: Literal["Profesor","Estudiante","Administrador","Otros"]
+    seeAllSubjects: bool
+    userId: int
+
+""" User Action Endpoints """
 @app.post("/user/login/", description= "Login of the User", tags=["User"])
 def user_login(information: UserLoginRegister):
     # Check if the user exists and the password is correct
@@ -70,6 +77,31 @@ def user_register(information: UserLoginRegister):
         })
     )
 
+@app.post("/user/update/", description= "User Update", tags=["User"])
+def user_update(info: UserUpdate):
+    # Checks if the user already exists and, if not, creates it
+    user_info = requests.put("http://backend_api:8000/users/", json={
+        "username": info.username,
+        "password": info.password,
+        "userType": info.userType,
+        "seeAllSubjects": info.seeAllSubjects,
+        "userId": info.userId
+    })
+
+    if user_info.status_code != 200:
+        raise HTTPException(status_code=user_info.status_code, detail=user_info.text)
+    users = user_info.json()
+    print(users);
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "userInformation": users["affected"]
+        })
+    )
+
+""" Endpoints de información """
+
 @app.get("/user/info/", description= "User Information", tags=["User"])
 def user_information(userId: int):
     # Checks if the user already exists and, if not, creates it
@@ -78,8 +110,8 @@ def user_information(userId: int):
     })
     if user_info.status_code != 200:
         raise HTTPException(status_code=user_info.status_code, detail=user_info.text)
-    print(user_info)
     users = user_info.json()
+    print(users);
     if users is None:
         raise HTTPException(status_code=401, detail="No username found in the database with the userId given")
     subject_info_of_user = requests.get("http://backend_api:8000/subjects/user", params={
@@ -144,5 +176,21 @@ def calendar_information(calendarDate: date):
         content=jsonable_encoder({
             "result": 200,
             "calendar": calendar
+        })
+    )
+
+@app.get("/subject/info/", description= "Subject Information", tags=["Subject"])
+def subject_information():
+    # Checks if the user already exists and, if not, creates it
+    subject_info = requests.get("http://backend_api:8000/subjects/")
+    if subject_info.status_code != 200:
+        raise HTTPException(status_code=subject_info.status_code, detail=subject_info.text)
+    subjectList = subject_info.json()
+    print(subjectList)
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "subjectList": subjectList
         })
     )

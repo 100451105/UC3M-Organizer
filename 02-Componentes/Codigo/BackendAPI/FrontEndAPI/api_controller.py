@@ -20,6 +20,7 @@ class UpdateUser(BaseModel):
     username: constr(min_length=0,max_length=100)
     password: constr(min_length=0,max_length=100)
     userType: Literal["Profesor","Estudiante","Administrador","Otros"]
+    seeAllSubjects: bool
     userId: int
 
 class CreateSubject(BaseModel):
@@ -137,7 +138,7 @@ def create_user(item: CreateUser):
 
 @app.put("/users/", description= "UpdateUser", tags=["Users"])
 def update_user(item: UpdateUser):
-    result = db.update_user(item.username, item.password, item.userType, item.userId)
+    result = db.update_user(item.username, item.password, item.userType, item.seeAllSubjects, item.userId)
     match result[0]:
         case 200:
             return {"result": result[0], "affected": result[1]}
@@ -277,7 +278,6 @@ def read_activities_main_info(actualDate: date):
     result = db.get_activities_main_info(actualDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
-    print(result)
     return result
 
 @app.get("/activities/subject/", description= "GetActivitiesOfSubject", tags=["Activities"])

@@ -1,5 +1,6 @@
 import {useState} from "react";
 import axios from "axios";
+import { UserCache } from "../common/Cache";
 
 export default function RegisterForm({ setLoadingState }) {
     const errorMessages = {
@@ -35,23 +36,7 @@ export default function RegisterForm({ setLoadingState }) {
             if (regitryResponse.status === 200) {
                 const userId = regitryResponse.data.userId;
                 console.log("Inicio de sesión exitoso:", userId);
-
-                // Crear caché de información de usuario
-                const userInfoResponse = await axios.get("http://localhost:8002/user/info/", {
-                    withCredentials: true,
-                    params: {
-                        userId: userId
-                    }
-                })
-                let userInfo = userInfoResponse.data.userInformation;
-                let subjectList = userInfoResponse.data.subjectsOfUser;
-                const fullUserCache = {
-                    ...userInfo,
-                    relatedSubjectsList: subjectList,
-                    updatedAt: new Date().toIsoString()
-                }
-                localStorage.removeItem("user_info");
-                localStorage.setItem("user_info", JSON.stringify(fullUserCache));
+                await UserCache(userId);
                 setLoadingState(false);
                 // Redirigir a la página principal
                 alert("Inicio de sesión exitoso");

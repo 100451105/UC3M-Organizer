@@ -1,6 +1,6 @@
 import axios from "axios";
-import {useState} from "react";
-import Loading from "../common/Loading";
+import {useEffect, useState} from "react";
+import { UserCache } from "../common/Cache"
 
 export default function LoginForm({ setLoadingState }) {
     const errorMessages = {
@@ -37,24 +37,7 @@ export default function LoginForm({ setLoadingState }) {
             if (loginResponse.status === 200) {
                 const userId = loginResponse.data.user.Id;
                 console.log("Inicio de sesión exitoso:", userId);
-
-                // Crear caché de información de usuario
-                const userInfoResponse = await axios.get("http://localhost:8002/user/info/", {
-                    withCredentials: true,
-                    params: {
-                        userId: userId
-                    }
-                })
-                let userInfo = userInfoResponse.data.userInformation;
-                let subjectList = userInfoResponse.data.subjectsOfUser;
-                const fullUserCache = {
-                    ...userInfo,
-                    relatedSubjectsList: subjectList,
-                    updatedAt: new Date().toIsoString()
-                }
-                console.log(fullUserCache)
-                localStorage.removeItem("user_info");
-                localStorage.setItem("user_info", JSON.stringify(fullUserCache));
+                await UserCache(userId);
                 setLoadingState(false);
                 // Redirigir a la página principal
                 alert("Inicio de sesión exitoso");
