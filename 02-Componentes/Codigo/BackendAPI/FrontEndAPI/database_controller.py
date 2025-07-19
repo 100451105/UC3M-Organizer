@@ -14,18 +14,20 @@ def date_converter(obj):
 """ Clase de Base de Datos que alberga todos los procesos necesarios para operar con ella"""
 class Database:
     def __init__(self):
-        self.connection = None
-        self.isConnected = False
+        self.pool = None
 
     def connect(self):
         attempts = 0
         while attempts < 5:
             try:
-                self.connection = mysql.connector.connect(
+                self.pool = mysql.connector.pooling.MySQLConnectionPool(
+                    pool_name="databasepool",
+                    pool_size=5,
+                    pool_reset_session=True,
                     host= os.getenv("DATABASE_HOST"),
                     user= os.getenv("DATABASE_USER"),
                     password= os.getenv("DATABASE_PASSWORD"),
-                    database= os.getenv("DATABASE_NAME")
+                    database= os.getenv("DATABASE_NAME"),
                 )
                 self.isConnected = True
                 return
@@ -35,12 +37,14 @@ class Database:
                 time.sleep(2)
         
         print("Could not connect correctly to the database after 5 attempts")
-        self.isConnected = False
+        self.pool = None
     
     def get_connection(self):
-        if not self.isConnected:
+        if not self.pool:
             self.connect()
-        return self.connection if self.isConnected else None
+        if self.pool:
+            return self.pool.get_connection()
+        return None
     
     """ Operaciones permitidas en base de datos de lectura (casos de uso basicos) """
     
@@ -49,14 +53,26 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        if username:
-            cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
-            result = cursor.fetchone()
-        else:
-            cursor.execute("SELECT * FROM person;")
-            result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            if username:
+                cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
+                result = cursor.fetchone()
+            else:
+                cursor.execute("SELECT * FROM person;")
+                result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        
         cursor.close()
+        connection.close()
         return result
     
     def get_users_through_id(self, userId):
@@ -64,11 +80,22 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        if userId:
-            cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Id = %s;",(userId,))
-            result = cursor.fetchone()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            if userId:
+                cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Id = %s;",(userId,))
+                result = cursor.fetchone()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_subjects(self, subjectId=None):
@@ -76,14 +103,25 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        if subjectId:
-            cursor.execute("SELECT * FROM subject WHERE IdSubject = %s;",(subjectId,))
-            result = cursor.fetchone()
-        else:
-            cursor.execute("SELECT IdSubject, Name FROM subject;")
-            result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            if subjectId:
+                cursor.execute("SELECT * FROM subject WHERE IdSubject = %s;",(subjectId,))
+                result = cursor.fetchone()
+            else:
+                cursor.execute("SELECT IdSubject, Name FROM subject;")
+                result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_activities(self, activityId=None):
@@ -91,14 +129,25 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        if activityId:
-            cursor.execute("SELECT * FROM activity WHERE IdActivity = %s;",(activityId,))
-            result = cursor.fetchone()
-        else:
-            cursor.execute("SELECT * FROM activity;")
-            result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            if activityId:
+                cursor.execute("SELECT * FROM activity WHERE IdActivity = %s;",(activityId,))
+                result = cursor.fetchone()
+            else:
+                cursor.execute("SELECT * FROM activity;")
+                result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_activities_main_info(self, actualDate):
@@ -106,10 +155,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT ActivityId, ActivityName, ActivityType, StartOfActivity, EndOfActivity, SubjectId, SubjectName FROM vSubjectActivityInfo WHERE Status = 'Asignado' AND StartOfActivity BETWEEN DATE_FORMAT(DATE_SUB(%s, INTERVAL 1 MONTH), '%Y-%m-01') AND LAST_DAY(DATE_ADD(%s, INTERVAL 2 MONTH));", (actualDate,actualDate,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT ActivityId, ActivityName, ActivityType, StartOfActivity, EndOfActivity, SubjectId, SubjectName FROM vSubjectActivityInfo WHERE Status = 'Asignado' AND StartOfActivity BETWEEN DATE_FORMAT(DATE_SUB(%s, INTERVAL 1 MONTH), '%Y-%m-01') AND LAST_DAY(DATE_ADD(%s, INTERVAL 2 MONTH));", (actualDate,actualDate,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_calendar(self, calendarDate=None):
@@ -117,14 +177,25 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        if calendarDate:
-            cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate BETWEEN STR_TO_DATE(CONCAT(IF(MONTH(%s) >= 9, YEAR(%s), YEAR(%s) - 1),'-09-01'), '%Y-%m-%d') AND STR_TO_DATE(CONCAT(IF(MONTH(%s) >= 9, YEAR(%s) + 1, YEAR(%s)),'-10-31'), '%Y-%m-%d') ORDER BY CalendarDate;",(calendarDate,calendarDate,calendarDate,calendarDate,calendarDate,calendarDate))
-            result = cursor.fetchall()
-        else:
-            cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate = CURDATE();")
-            result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            if calendarDate:
+                cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate BETWEEN STR_TO_DATE(CONCAT(IF(MONTH(%s) >= 9, YEAR(%s), YEAR(%s) - 1),'-09-01'), '%Y-%m-%d') AND STR_TO_DATE(CONCAT(IF(MONTH(%s) >= 9, YEAR(%s) + 1, YEAR(%s)),'-10-31'), '%Y-%m-%d') ORDER BY CalendarDate;",(calendarDate,calendarDate,calendarDate,calendarDate,calendarDate,calendarDate))
+                result = cursor.fetchall()
+            else:
+                cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate = CURDATE();")
+                result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_calendar_scheduled_based_on_date(self, calendarDate):
@@ -132,10 +203,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate = %s;",(calendarDate,))
-        result = cursor.fetchone()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate = %s;",(calendarDate,))
+            result = cursor.fetchone()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_calendar_scheduled_based_on_activity(self, activityId):
@@ -143,10 +225,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate WHERE s.IdActivity = %s;",(activityId,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate WHERE s.IdActivity = %s;",(activityId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_calendar_scheduled_based_on_subject(self, subjectId):
@@ -154,10 +247,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours, a.IdSubject as Subject FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate LEFT JOIN activity a ON s.IdActivity = a.IdActivity WHERE a.IdSubject = %s;",(subjectId,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours, a.IdSubject as Subject FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate LEFT JOIN activity a ON s.IdActivity = a.IdActivity WHERE a.IdSubject = %s;",(subjectId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_subjects_of_user(self, userId):
@@ -165,10 +269,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT SubjectID, SubjectName, SubjectCredits, Semester, Year FROM vPersonSubjectInfo WHERE UserID = %s;",(userId,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT SubjectID, SubjectName, SubjectCredits, Semester, Year FROM vPersonSubjectInfo WHERE UserID = %s;",(userId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_users_of_subject(self, subjectId):
@@ -176,10 +291,43 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT UserID, Username, UserType FROM vPersonSubjectInfo WHERE SubjectID = %s GROUP BY UserID, Username, UserType;",(subjectId,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT UserID, Username, UserType FROM vPersonSubjectInfo WHERE SubjectID = %s GROUP BY UserID, Username, UserType;",(subjectId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
+        return result
+    
+    def get_proffesors_of_subject(self, subjectId):
+        """ Leer para una asignatura los profesores que tiene """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT UserID, Username FROM vPersonSubjectInfo WHERE SubjectID = %s AND UserType = 'Profesor' GROUP BY UserID, Username;",(subjectId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        connection.close()
         return result
     
     def get_activities_of_subject(self,subjectId):
@@ -187,10 +335,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, EndOfActivity FROM vSubjectActivityInfo WHERE SubjectID = %s;",(subjectId,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, EndOfActivity FROM vSubjectActivityInfo WHERE SubjectID = %s;",(subjectId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     def get_activities_of_user(self,userId):
@@ -198,10 +357,21 @@ class Database:
         connection = self.get_connection()
         if not connection:
             return 503
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, StartOfActivity, EndOfActivity, FromSubjectId, FromSubjectName FROM vUserInterestedActivities WHERE UserID = %s",(userId,))
-        result = cursor.fetchall()
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, StartOfActivity, EndOfActivity, FromSubjectId, FromSubjectName FROM vUserInterestedActivities WHERE UserID = %s",(userId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
         cursor.close()
+        connection.close()
         return result
     
     """ Operaciones de creación/modificación """
@@ -224,11 +394,13 @@ class Database:
             print(err.errno, int(err.msg.strip()), err.sqlstate)
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200, userId
     
     def update_user(self,username,password,userType,seeAllSubjects,usernameId):
@@ -247,12 +419,14 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 print(err.sqlstate, err.errno)
                 return 505, None
         cursor.close()
+        connection.close()
         return 200, userId
     
     def update_subject(self,credits,semester,year,name,subjectId):
@@ -272,11 +446,13 @@ class Database:
             print(err)
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200, subjectId
     
     def create_activity(self,name,description,type,hours,subjectId,strategy,startOfAct=None,endOfAct=None):
@@ -304,11 +480,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200, activityId
     
     def update_activity(self,name,description,type,hours,subjectId,activityId,strategy,startOfAct=None,endOfAct=None):
@@ -336,11 +514,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200, activityId
     
     def create_calendar_days(self,days):
@@ -357,11 +537,13 @@ class Database:
             print(err)
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def assign_user_to_subject(self,userId,subjectId):
@@ -376,11 +558,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def change_subject_vision_of_user(self,userId,seeAllSubjects):
@@ -395,11 +579,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def assign_coordinator_to_subject(self,adminId,subjectId):
@@ -414,11 +600,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def assign_activity_to_day(self,scheduledActivities):
@@ -435,11 +623,13 @@ class Database:
             print(err)
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     """ Delete operations:
@@ -461,11 +651,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def delete_subject(self,subjectId):
@@ -480,11 +672,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def delete_activity(self,activityId):
@@ -499,11 +693,13 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     def delete_scheduled_activities(self,activities):
@@ -530,12 +726,14 @@ class Database:
         except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
+            connection.close()
             print(err)
             if err.sqlstate == '45000' and err.errno == 1644:
                 return int(err.msg.strip()), None
             else:
                 return 505, None
         cursor.close()
+        connection.close()
         return 200
     
     

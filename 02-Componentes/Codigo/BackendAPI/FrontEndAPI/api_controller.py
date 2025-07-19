@@ -107,7 +107,7 @@ def read_users(username: Optional[constr(min_length=0,max_length=100)] = None):
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/users/id", description= "GetUsersThroughId", tags=["Users"])
+@app.get("/users/id/", description= "GetUsersThroughId", tags=["Users"])
 def read_users(userId: int):
     result = db.get_users_through_id(userId)
     if result == 503:
@@ -117,6 +117,13 @@ def read_users(userId: int):
 @app.get("/users/subject/", description= "GetUsersOfSubject", tags=["Users"])
 def read_users_of_subject(subjectId: int = None):
     result = db.get_users_of_subject(subjectId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/users/subject/proffesors/", description= "GetUsersOfSubject", tags=["Users"])
+def read_proffesors_of_subject(subjectId: int = None):
+    result = db.get_proffesors_of_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
@@ -186,7 +193,7 @@ def read_subjects(subjectId: Optional[int] = None):
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/subjects/user", description= "GetSubjectsPerUser", tags=["Subjects"])
+@app.get("/subjects/user/", description= "GetSubjectsPerUser", tags=["Subjects"])
 def read_subjects_of_user(userId: int = None):
     result = db.get_subjects_of_user(userId)
     if result == 503:

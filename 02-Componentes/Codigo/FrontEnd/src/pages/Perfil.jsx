@@ -10,10 +10,36 @@ const getRandomColor = (subjectName) => {
     if (subjectColorMap[subjectName]) {
         return subjectColorMap[subjectName]
     }
-    const keys = Object.keys(mainColors);
-    const randomColor = keys[Math.floor(Math.random() * keys.length)];
-    subjectColorMap[subjectName] = mainColors[randomColor];
-    return mainColors[randomColor];
+
+    // 1. Contar cuántas veces se ha asignado cada color
+    const colorUsage = {};
+    Object.keys(mainColors).forEach(colorKey => {
+      colorUsage[colorKey] = 0;
+    });
+    
+    Object.values(subjectColorMap).forEach(colorValue => {
+      const colorKey = Object.keys(mainColors).find(key => mainColors[key] === colorValue);
+      if (colorKey) {
+        colorUsage[colorKey]++;
+      }
+    });
+
+    // 2. Encontrar el menor uso de colores
+    const minUsage = Math.min(...Object.values(colorUsage));
+
+    // 3. Obtener todos los colores con el menor uso
+    const leastUsedColors = Object.keys(colorUsage).filter(
+      key => colorUsage[key] === minUsage
+    );
+
+    // 4. Seleccionar uno aleatorio entre los menos usados
+    const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
+    const chosenColorValue = mainColors[chosenColorKey];
+
+    // 5. Asignar y devolver
+    console.log(subjectColorMap);
+    subjectColorMap[subjectName] = chosenColorValue;
+    return chosenColorValue;
 }
 
 export default function Perfil() {

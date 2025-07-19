@@ -10,10 +10,35 @@ const getRandomColor = (subjectName) => {
     if (subjectColorMap[subjectName]) {
         return subjectColorMap[subjectName]
     }
-    const keys = Object.keys(mainColors);
-    const randomColor = keys[Math.floor(Math.random() * keys.length)];
-    subjectColorMap[subjectName] = mainColors[randomColor];
-    return mainColors[randomColor];
+
+    // 1. Contar cuántas veces se ha asignado cada color
+    const colorUsage = {};
+    Object.keys(mainColors).forEach(colorKey => {
+      colorUsage[colorKey] = 0;
+    });
+    
+    Object.values(subjectColorMap).forEach(colorValue => {
+      const colorKey = Object.keys(mainColors).find(key => mainColors[key] === colorValue);
+      if (colorKey) {
+        colorUsage[colorKey]++;
+      }
+    });
+
+    // 2. Encontrar el menor uso de colores
+    const minUsage = Math.min(...Object.values(colorUsage));
+
+    // 3. Obtener todos los colores con el menor uso
+    const leastUsedColors = Object.keys(colorUsage).filter(
+      key => colorUsage[key] === minUsage
+    );
+
+    // 4. Seleccionar uno aleatorio entre los menos usados
+    const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
+    const chosenColorValue = mainColors[chosenColorKey];
+
+    // 5. Asignar y devolver
+    subjectColorMap[subjectName] = chosenColorValue;
+    return chosenColorValue;
 }
 
 export default function Asignaturas() {
@@ -31,12 +56,13 @@ export default function Asignaturas() {
 
   useEffect(() => {
     const fetchSubjectData = async () => {
-      await UserCache(false);
       const user_info = JSON.parse(localStorage.getItem("user_info"));
-      if (!user_info || user_info.Type === "Administrador") {
+      if (!user_info || user_info.Type !== "Administrador") {
         alert("Acceso denegado a la sección de asignaturas");
         window.location.href = "/main";
       }
+      const Id = user_info.Id;
+      await UserCache(Id);
       // Asignaturas a mostrar
       try {
         const subjectInfo = await axios.get("http://localhost:8002/subject/info/");
@@ -62,11 +88,55 @@ export default function Asignaturas() {
       }
     }
     fetchSubjectData();
+    setLoadingState(false);
   }, []);
+
+  const handleConfirm = async () => {
+    setLoadingState(true);
+          
+    {/* Petición para actualizar/crear la asignatura en el backend */}
+    try {
+        if (!tempData.subjectId || !tempData.subjectName || !tempData.subjectCredits || !tempData.subjectSemester || !tempData.subjectYear){
+          alert("Alguno de los campos de texto introducidos está vacío. Por favor, rellene dichos campos antes de confirmar de nuevo")
+          setLoadingState(false);
+          return;
+        }
+        const updateResponse = await axios.post("http://localhost:8002/subject/update/", {
+            credits: tempData.subjectCredits,
+            semester: tempData.subjectSemester,
+            year: tempData.subjectYear,
+            name: tempData.subjectName,
+            subjectId: tempData.subjectId,
+            coordinator: tempData.subjectCoordinator
+        });
+        console.log("Respuesta del servidor:", updateResponse);
+        if (updateResponse.status == 200) {
+          alert("Datos actualizados correctamente"); 
+          // window.location.href = '/asignaturas';
+        }
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response) {
+                const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
+                console.error(message);
+                alert(message);
+            } else if (error.request) {
+                console.error("No se recibió respuesta del servidor:", error.request);
+                alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
+            } else {
+                console.error("Error al configurar la solicitud:", error.message);
+                alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
+            }
+        }
+    } finally {
+      setCreateMode(false);
+      setLoadingState(false);
+    }
+  };
 
   return (
     <>
-      <Header showIndex={true} loadingInProgress={false}/>
+      <Header showIndex={true} loadingInProgress={loading}/>
       <h2 className="page-title">Panel de Asignaturas</h2>
       <section className="bg-white rounded-xl p-6 w-[50vw] text-left">
         {/* Botón para crear asignatura */}
@@ -159,10 +229,7 @@ export default function Asignaturas() {
             </div>
 
             <button
-              onClick={() => {
-                // Aquí puedes hacer un POST al backend
-                console.log("Confirmar asignatura:", tempData);
-              }}
+              onClick={handleConfirm}
               className="custom-button mt-4 font-montserrat text-[3vh] px-4 py-2 rounded"
             >
               Confirmar
@@ -176,7 +243,7 @@ export default function Asignaturas() {
         </h2>
         <div className="h-[60vh] border-main-dark-blue border-[0.5vh] overflow-y-auto">
           {subjectList.map((subject, index) => {
-            const color = getRandomColor(subject.SubjectName);
+            const color = getRandomColor(subject.Name);
             return (
             <button
               key={subject.IdSubject}

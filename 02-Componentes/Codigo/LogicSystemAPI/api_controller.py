@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, conint, constr, model_validator
+from pydantic import BaseModel, conint, constr, model_validator, confloat
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Literal, List
 from datetime import date
@@ -32,6 +32,14 @@ class UserUpdate(BaseModel):
     userType: Literal["Profesor","Estudiante","Administrador","Otros"]
     seeAllSubjects: bool
     userId: int
+
+class UpdateSubject(BaseModel):
+    credits: confloat(ge=0,le=12,multiple_of=0.1)
+    semester: conint(ge=1,le=2)
+    year: conint(ge=1,le=4)
+    name: constr(min_length=0,max_length=1024)
+    subjectId: int
+    coordinator: constr(min_length=0,max_length=100)
 
 """ User Action Endpoints """
 @app.post("/user/login/", description= "Login of the User", tags=["User"])
@@ -192,5 +200,42 @@ def subject_information():
         content=jsonable_encoder({
             "result": 200,
             "subjectList": subjectList
+        })
+    )
+
+@app.post("/subject/update/", description= "Subject Information", tags=["Subject"])
+def subject_information(information: UpdateSubject):
+    print(information)
+    return_message_OK = "Subject has been created/updated correctly."
+    # Checks if the user already exists and, if not, creates it
+    subject_info = requests.post("http://backend_api:8000/subjects/", json={
+        "credits": information.credits,
+        "semester": information.semester,
+        "year": information.year,
+        "name": information.name,
+        "subjectId": information.subjectId
+    })
+    if subject_info.status_code != 200:
+        raise HTTPException(status_code=subject_info.status_code, detail=subject_info.text)
+    if information.coordinator:
+        coordinator_info = requests.get("http://backend_api:8000/users/", params={"username": information.coordinator})
+        if coordinator_info.status_code != 200:
+            raise HTTPException(status_code=coordinator_info.status_code, detail="Couldn't assign the coordinator properly to the subject (subject is created but coordinator not assigned). Due to: " + coordinator_info.text)
+        coordinator = coordinator_info.json()
+        if coordinator is None:
+            raise HTTPException(status_code=401, detail="Coordinator '" + information.coordinator + "' does not exist in the database. Subject is created but no coordinator is assigned.")
+        print(coordinator)
+        assign_coordinator_to_subject = requests.post("http://backend_api:8000//subjects/assign/coordinator/", json={
+            "adminId": coordinator["Id"],
+            "subjectId": information.subjectId
+        })
+        if assign_coordinator_to_subject.status_code != 200:
+            raise HTTPException(status_code=assign_coordinator_to_subject.status_code, detail=assign_coordinator_to_subject.text)
+        return_message_OK += " Coordinator has been assigned correctly to the subject."
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "message": return_message_OK
         })
     )

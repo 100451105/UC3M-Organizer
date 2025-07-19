@@ -363,9 +363,9 @@ BEGIN
     -- Verify if it is already assigned
     IF NOT EXISTS (
         SELECT 1 FROM personPerSubject 
-        WHERE PersonId = p_PersonId AND SubjectId = p_SubjectId
+        WHERE IdPerson = p_PersonId AND IdSubject = p_SubjectId
     ) THEN
-        INSERT INTO personPerSubject (PersonId, SubjectId) 
+        INSERT INTO personPerSubject (IdPerson, IdSubject) 
         VALUES (p_PersonId, p_SubjectId);
     END IF;
 END //
@@ -402,6 +402,10 @@ BEGIN
     UPDATE subject SET 
         IdAdministrator = p_CoordinatorId 
     WHERE IdSubject = p_SubjectId;
+    IF NOT EXISTS (SELECT 1 FROM personPerSubject WHERE IdSubject = p_SubjectId AND IdPerson = p_CoordinatorId) THEN
+        INSERT INTO personPerSubject (IdPerson, IdSubject) 
+        VALUES (p_CoordinatorId, p_SubjectId);
+    END IF;
 END //
 
 DELIMITER //
@@ -471,9 +475,12 @@ DELIMITER ;
 
 -- Examples to test
 INSERT INTO user_authorization (Username, Password) VALUES ('admin@alumnos.uc3m.es','password');
-INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Estudiante');
+INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Administrador');
+INSERT INTO user_authorization (Username, Password) VALUES ('test@profesor.uc3m.es','password');
+INSERT INTO person (Id, Username, Type) VALUES (2,'test@profesor.uc3m.es','Profesor');
 INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
+INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,2);
 INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-07-21','Asignado','Agresiva','2025-08-05',198237);
 INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-14','Normal','Lunes','Libre');
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-14',2,1);

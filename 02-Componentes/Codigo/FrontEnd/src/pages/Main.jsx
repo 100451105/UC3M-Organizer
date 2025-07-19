@@ -67,7 +67,9 @@ export default function Inicio() {
           }
         } catch (error) {
             console.error("Error al obtener el calendario de hoy:", error);
-            setDailyCalendar({});
+            setDailyCalendar({
+              "Activities": []
+            });
         }
       }
       fetchCalendarDaily();
@@ -83,6 +85,8 @@ export default function Inicio() {
     useEffect(() => {
       setLoadingState(false);
     }, []);
+
+    console.log(daily_calendar.Activities);
 
     return (
     <>

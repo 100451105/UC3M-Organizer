@@ -55,10 +55,20 @@ export async function UserCache(Id) {
         refreshCache = true;
     } else {
         const minutesSinceCache = (now - new Date(user_info.updatedAt)) / 1000 / 60;
-        if (minutesSinceCache > 30 || !user_info.Id || !user_info.relatedSubjectsList || user_info.Id !== Id) {
+        if (minutesSinceCache > 30) {
             refreshCache = true;
         }
     }
+    if (!user_info.Id || (user_info.Id !== Id && Id !== false)){
+        refreshCache = true
+    }
+    if (Id === false) {
+        refreshCache = true
+    }
+    if (!user_info.relatedSubjectsList) {
+        refreshCache = true
+    }
+    {/* Si necesita refrescar la caché, obtiene la información de nuevo del usuario */}
     if (refreshCache) {
         try {
             let userId = 0;
