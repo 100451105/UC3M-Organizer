@@ -81,7 +81,6 @@ export default function CustomCalendar({ setLoadingState }) {
     };
 
     const handleConfirm = async () => {
-        console.log("Confirmado");
         try {
             const confirmActivity = await axios.post("http://localhost:8002/activities/confirm/", {
                 activityId: selectedActivity.id
@@ -292,7 +291,11 @@ export default function CustomCalendar({ setLoadingState }) {
                     
                 </div>
                 {/* Selector de actividades */}
-                <div className="w-1/3 ml-[5vw] mt-[15vh] border-main-dark-blue bg-grey-300 border-[1vh] flex flex-col overflow-y-auto h-[55vh]">
+                
+                <div className="w-1/3 ml-[5vw] border-main-dark-blue bg-grey-300 border-[1vh] flex flex-col overflow-y-auto h-[70vh]">
+                    <h2 className="text-center text-main-dark-blue font-montserrat font-bold text-xl py-4 border-b border-main-dark-blue">
+                        Actividades pendientes
+                    </h2>
                     {pending_activities.length > 0 ? (
                         pending_activities.map((activity) => {
                             const color = getRandomColor(activity.name);
