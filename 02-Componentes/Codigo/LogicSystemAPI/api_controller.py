@@ -41,6 +41,9 @@ class UpdateSubject(BaseModel):
     subjectId: int
     coordinator: constr(min_length=0,max_length=100)
 
+class ConfirmActivity(BaseModel):
+    activityId: int
+
 """ User Action Endpoints """
 @app.post("/user/login/", description= "Login of the User", tags=["User"])
 def user_login(information: UserLoginRegister):
@@ -203,7 +206,7 @@ def subject_information():
         })
     )
 
-@app.post("/subject/update/", description= "Subject Information", tags=["Subject"])
+@app.post("/subject/update/", description= "Subject Update/Creation", tags=["Subject"])
 def subject_information(information: UpdateSubject):
     print(information)
     return_message_OK = "Subject has been created/updated correctly."
@@ -237,5 +240,41 @@ def subject_information(information: UpdateSubject):
         content=jsonable_encoder({
             "result": 200,
             "message": return_message_OK
+        })
+    )
+
+@app.get("/activities/pending/info/", description= "Pending Activities Information", tags=["Activities"])
+def pending_activities_information(userId: int):
+    # Checks if the user already exists and, if not, creates it
+    pending_activities_information = requests.get("http://backend_api:8000/scheduler/activities/pending/", params={
+        "userId": userId
+    })
+    if pending_activities_information.status_code != 200:
+        raise HTTPException(status_code=pending_activities_information.status_code, detail=pending_activities_information.text)
+    pending_list = pending_activities_information.json()
+    print(pending_list)
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "pendingList": pending_list
+        })
+    )
+
+@app.post("/activities/confirm/", description= "Confirm Activity", tags=["Activities"])
+def confirm_activity(information: ConfirmActivity):
+    # Checks if the user already exists and, if not, creates it
+    confirmed_activity = requests.post("http://backend_api:8000/activities/change/status/", json={
+        "activityId": information.activityId,
+        "newStatus": "Asignado"
+    })
+    if confirmed_activity.status_code != 200:
+        raise HTTPException(status_code=confirmed_activity.status_code, detail=confirmed_activity.text)
+    confirmation_message = confirmed_activity.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "message": confirmation_message
         })
     )

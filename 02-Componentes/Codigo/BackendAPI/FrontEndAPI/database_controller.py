@@ -264,6 +264,28 @@ class Database:
         connection.close()
         return result
     
+    def read_pending_activities(self, userId):
+        """  Leer días del organizador en base a la fecha """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM vPendingActivitiesInformation WHERE CoordinatorId = %s;",(userId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        connection.close()
+        return result
+    
     def get_subjects_of_user(self, userId):
         """  Leer para un usuario las asignaturas que tiene """
         connection = self.get_connection()
@@ -621,6 +643,27 @@ class Database:
             connection.commit()
         except mysql.connector.Error as err:
             print(err)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        connection.close()
+        return 200
+    
+    def change_status_of_activity(self,activityId,newStatus):
+        """ Asignar asignatura a un usuario """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        cursor = connection.cursor(dictionary=True)
+        try:
+            cursor.execute("CALL usp_ChangeStatusOfActivity(%s,%s);",(activityId,newStatus))
+            connection.commit()
+        except mysql.connector.Error as err:
             connection.rollback()
             cursor.close()
             connection.close()

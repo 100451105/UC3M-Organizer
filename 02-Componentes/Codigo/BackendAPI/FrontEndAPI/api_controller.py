@@ -89,6 +89,10 @@ class AssignCoordinatorToSubject(BaseModel):
     adminId: int
     subjectId: int
 
+class ChangeStatusOfActivity(BaseModel):
+    activityId: int
+    newStatus: Literal["Organizar","Confirmar","Sin Asignar","Asignado"]
+
 class DeleteUser(BaseModel):
     userId: int
 
@@ -340,6 +344,23 @@ def delete_activity(item: DeleteActivity):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
         
+@app.post("/activities/change/status/", description= "ChangeStatusOfActivity", tags=["Activities"])
+def change_status_of_activity(item: ChangeStatusOfActivity):
+    result = db.change_status_of_activity(item.activityId,item.newStatus)
+    match result:
+        case 200:
+            return {"result": result, "message": "Changed the status of the activity succesfully"}
+        case 401:
+            raise HTTPException(status_code=401, detail="Activity doesn't exist")
+        case 402:
+            raise HTTPException(status_code=402, detail="Cannot confirm an activity without it being in pending status")
+        case 503:
+            raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+        case 505:
+            raise HTTPException(status_code=505, detail="Unknown Error")
+        case _:
+            raise HTTPException(status_code=400, detail="Unknown Code")
+        
 
 """ Scheduler Endpoints """  
 @app.get("/scheduler/calendar/", description= "GetCalendar", tags=["Scheduler"])
@@ -366,6 +387,13 @@ def read_calendar_scheduled_on_activity(activityId: int):
 @app.get("/scheduler/subject/", description= "GetSchedulerCalendarBasedOnSubject", tags=["Scheduler"])
 def read_calendar_scheduled_on_subject(subjectId: int):
     result = db.get_calendar_scheduled_based_on_subject(subjectId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/scheduler/activities/pending/", description= "GetPendingActivities", tags=["Scheduler"])
+def read_pending_activities(userId: int):
+    result = db.read_pending_activities(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result

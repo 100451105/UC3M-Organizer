@@ -62,6 +62,7 @@ CREATE TABLE activity (
     Strategy ENUM('Agresiva','Calmada','Completa'),
     EstimatedHours INT NOT NULL CHECK(EstimatedHours >= 0),
     EndOfActivity DATE,
+    NewEndOfActivity DATE,
     IdSubject INT NOT NULL
 );
 ALTER TABLE activity ADD CONSTRAINT fk_activity_subjectId FOREIGN KEY (IdSubject) REFERENCES subject(IdSubject) ON DELETE CASCADE;
@@ -110,6 +111,7 @@ SELECT
     a.Status,
     a.Strategy,
     a.EndOfActivity,
+    a.NewEndOfActivity,
     a.IdSubject AS SubjectID,
     s.Name AS SubjectName, 
     s.Credits AS SubjectCredits, 
@@ -157,6 +159,36 @@ LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate
 LEFT JOIN vSubjectActivityInfo a ON s.IdActivity = a.ActivityID AND a.Status = 'Asignado'
 GROUP BY
     c.CalendarDate, c.DayType, c.WeekDay, c.Status;
+
+CREATE VIEW vPendingActivitiesInformation AS
+SELECT
+    a.IdActivity AS ActivityID,
+    a.Name AS ActivityName,
+    a.StartOfActivity,
+    a.EndOfActivity,
+    a.NewEndOfActivity,
+    s.IdSubject AS SubjectID,
+    s.Name AS SubjectName,
+    s.IdAdministrator AS CoordinatorId,
+    (
+        SELECT 
+            CONCAT('[', GROUP_CONCAT(
+                JSON_OBJECT(
+                    'day', sc.CalendarDate,
+                    'hours', sc.Hours,
+                    'dayType', c.DayType
+                )
+                ORDER BY sc.CalendarDate
+            ), ']')
+        FROM schedule sc
+        JOIN calendar c ON sc.CalendarDate = c.CalendarDate
+        WHERE sc.IdActivity = a.IdActivity
+    ) AS ScheduleJSON
+FROM subject s
+JOIN activity a ON s.IdSubject = a.IdSubject
+WHERE a.Status = 'Confirmar';
+
+
 
 -- Store Procedures for create/update operations
 DELIMITER //
@@ -281,6 +313,7 @@ BEGIN
             Status,
             Strategy,
             EndOfActivity,
+            NewEndOfActivity,
             IdSubject
         ) VALUES (
             p_Name, 
@@ -291,6 +324,7 @@ BEGIN
             'Organizar',
             p_Strategy,
             p_End,
+            NULL,
             p_SubjectId
         );
         SET p_newId = LAST_INSERT_ID();
@@ -415,14 +449,32 @@ CREATE PROCEDURE usp_ChangeStatusOfActivity(
     IN p_Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado')
 )
 BEGIN
+    DECLARE current_status VARCHAR(20);
     -- Verify activity
     IF NOT EXISTS (SELECT 1 FROM activity WHERE IdActivity = p_ActivityId) THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = '401';
     END IF;
-    UPDATE activity SET 
-        Status = p_Status
-    WHERE IdActivity = p_ActivityId;
+    IF p_Status = 'Asignado' THEN
+        
+        SELECT Status INTO current_status 
+        FROM activity 
+        WHERE IdActivity = p_ActivityId;
+
+        IF current_status != 'Confirmar' THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = '402';
+        END IF;
+        UPDATE activity SET 
+            Status = p_Status,
+            EndOfActivity = NewEndOfActivity,
+            NewEndOfActivity = NULL
+        WHERE IdActivity = p_ActivityId;
+    ELSE
+        UPDATE activity SET 
+            Status = p_Status
+        WHERE IdActivity = p_ActivityId;
+    END IF;
 END //
 
 CREATE PROCEDURE usp_AssignActivityToDay(
@@ -478,9 +530,50 @@ INSERT INTO user_authorization (Username, Password) VALUES ('admin@alumnos.uc3m.
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Administrador');
 INSERT INTO user_authorization (Username, Password) VALUES ('test@profesor.uc3m.es','password');
 INSERT INTO person (Id, Username, Type) VALUES (2,'test@profesor.uc3m.es','Profesor');
-INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,NULL);
+INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,1);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,2);
-INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-07-21','Asignado','Agresiva','2025-08-05',198237);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, NewEndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-07-01','Asignado','Agresiva','2025-07-15',NULL,198237);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, NewEndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',34,'2025-07-21','Confirmar','Agresiva','2025-08-05','2025-08-06',198237);
 INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-14','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-15','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-16','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-17','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-18','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-19','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-20','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-21','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-22','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-23','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-24','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-25','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-26','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-27','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-28','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-29','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-30','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-31','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-01','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-02','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-03','Festivo','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-04','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-05','Normal','Lunes','Libre');
+INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-06','Normal','Lunes','Libre');
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-14',2,1);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-21',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-22',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-23',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-24',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-25',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-26',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-27',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-28',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-29',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-30',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-31',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-08-01',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-08-02',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-08-03',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-08-04',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-08-05',2,2);
+INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-08-06',2,2);
