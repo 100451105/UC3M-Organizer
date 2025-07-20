@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, confloat, conint, constr
+from pydantic import BaseModel, confloat, conint, constr, model_validator
 from typing import Literal, Optional, List
 from datetime import date
 import database_controller as Database
@@ -77,9 +77,19 @@ class DeleteCalendarScheduledActivities(BaseModel):
     calendarDate: date
     activityId: int
 
-class AssignUserToSubject(BaseModel):
+class UserAssignment(BaseModel):
     userId: int
+    assigned: bool
+
+class AssignUserToSubject(BaseModel):
+    users: List[UserAssignment]
     subjectId: int
+
+    @model_validator(mode="after")
+    def validate_assignments(self):
+        if not self.users:
+            raise ValueError("Debe asignar al menos un usuario.")
+        return self
 
 class ChangeSubjectVisionOfUser(BaseModel):
     userId: int
@@ -114,6 +124,13 @@ def read_users(username: Optional[constr(min_length=0,max_length=100)] = None):
 @app.get("/users/id/", description= "GetUsersThroughId", tags=["Users"])
 def read_users(userId: int):
     result = db.get_users_through_id(userId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/users/assigned/subject/", description= "GetUsersStateOnSubject", tags=["Users"])
+def get_users_state_on_subject(subjectId: int):
+    result = db.get_users_state_on_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
@@ -204,6 +221,13 @@ def read_subjects_of_user(userId: int = None):
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
+@app.get("/subjects/coordinator/", description= "GetSubjectsPerUser", tags=["Subjects"])
+def get_subjects_of_coordinator(userId: int):
+    result = db.get_subjects_of_coordinator(userId)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
 @app.post("/subjects/", description= "CreateSubject", tags=["Subjects"])
 def create_subject(item: UpdateSubject):
     result = db.update_subject(item.credits, item.semester, item.year, item.name, item.subjectId)
@@ -245,14 +269,14 @@ def delete_subject(item: DeleteSubject):
         
 @app.post("/subjects/assign/user/", description= "AssignUserToSubject", tags=["Subjects"])
 def assign_user_to_subject(item: AssignUserToSubject):
-    result = db.assign_user_to_subject(item.userId,item.subjectId)
+    result = db.assign_user_to_subject(item.users,item.subjectId)
     match result:
         case 200:
-            return {"result": result, "message": "Assigned user to subject successfully"}
+            return {"result": result, "message": "Changed assignments of users to subject successfully"}
         case 401:
-            raise HTTPException(status_code=401, detail="User doesn't exist")
+            raise HTTPException(status_code=401, detail="Subject doesn't exist")
         case 402:
-            raise HTTPException(status_code=402, detail="Subject doesn't exist")
+            raise HTTPException(status_code=402, detail="One of the users given in the JSON does not exist")
         case 503:
             raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
         case 505:

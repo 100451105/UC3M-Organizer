@@ -308,6 +308,28 @@ class Database:
         connection.close()
         return result
     
+    def get_subjects_of_coordinator(self, userId):
+        """  Leer para un usuario las asignaturas que tiene """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT SubjectID, SubjectName FROM vPersonSubjectInfo WHERE AdministratorID = %s;",(userId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        connection.close()
+        return result
+    
     def get_users_of_subject(self, subjectId):
         """ Leer para una asignatura los usuarios que tiene """
         connection = self.get_connection()
@@ -316,6 +338,28 @@ class Database:
         try:
             cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT UserID, Username, UserType FROM vPersonSubjectInfo WHERE SubjectID = %s GROUP BY UserID, Username, UserType;",(subjectId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        connection.close()
+        return result
+    
+    def get_users_state_on_subject(self, subjectId):
+        """ Leer para una asignatura los usuarios que tiene """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT p.Username, p.Id, p.Type, CASE WHEN pps.IdSubject IS NOT NULL THEN TRUE ELSE FALSE END AS IsAssigned FROM person p LEFT JOIN personPerSubject pps ON p.Id = pps.IdPerson AND pps.IdSubject = %s;",(subjectId,))
             result = cursor.fetchall()
         except mysql.connector.Error as err:
             print(err.errno, int(err.msg.strip()), err.sqlstate)
@@ -568,14 +612,15 @@ class Database:
         connection.close()
         return 200
     
-    def assign_user_to_subject(self,userId,subjectId):
+    def assign_user_to_subject(self,userList,subjectId):
         """ Asignar asignatura a un usuario """
         connection = self.get_connection()
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
         try:
-            cursor.execute("CALL usp_AssignSubjectToUser(%s,%s);",(userId,subjectId))
+            user_json = json.dumps([user.dict() for user in userList],default=date_converter)
+            cursor.execute("CALL usp_AssignOrUnassignUsersToSubject(%s,%s);",(subjectId, user_json))
             connection.commit()
         except mysql.connector.Error as err:
             connection.rollback()

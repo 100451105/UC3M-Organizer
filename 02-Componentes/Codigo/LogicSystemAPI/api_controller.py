@@ -44,12 +44,25 @@ class UpdateSubject(BaseModel):
 class ConfirmActivity(BaseModel):
     activityId: int
 
+class UserAssignment(BaseModel):
+    userId: int
+    assigned: bool
+
+class AssignUserToSubject(BaseModel):
+    users: List[UserAssignment]
+    subjectId: int
+
+    @model_validator(mode="after")
+    def validate_assignments(self):
+        if not self.users:
+            raise ValueError("Debe asignar al menos un usuario.")
+        return self
+
 """ User Action Endpoints """
 @app.post("/user/login/", description= "Login of the User", tags=["User"])
 def user_login(information: UserLoginRegister):
     # Check if the user exists and the password is correct
     user_info = requests.get("http://backend_api:8000/users/", params={"username": information.email})
-    print("User info response:", user_info.status_code, user_info.text)
     if user_info.status_code != 200:
         raise HTTPException(status_code=user_info.status_code, detail=user_info.text)
     users = user_info.json()
@@ -74,7 +87,6 @@ def user_register(information: UserLoginRegister):
         "password": information.password,
         "userType": "Estudiante"
     })
-    print("User register response:", result.status_code, result.text)
     if result.status_code == 401:
         raise HTTPException(status_code=401, detail="Username already exists.")
     elif result.status_code != 200:
@@ -102,7 +114,6 @@ def user_update(info: UserUpdate):
     if user_info.status_code != 200:
         raise HTTPException(status_code=user_info.status_code, detail=user_info.text)
     users = user_info.json()
-    print(users);
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({
@@ -122,13 +133,11 @@ def user_information(userId: int):
     if user_info.status_code != 200:
         raise HTTPException(status_code=user_info.status_code, detail=user_info.text)
     users = user_info.json()
-    print(users);
     if users is None:
         raise HTTPException(status_code=401, detail="No username found in the database with the userId given")
     subject_info_of_user = requests.get("http://backend_api:8000/subjects/user", params={
         "userId": userId
     })
-    print(subject_info_of_user)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({
@@ -147,7 +156,6 @@ def activities_information(actualDate: date):
     if activity_info.status_code != 200:
         raise HTTPException(status_code=activity_info.status_code, detail=activity_info.text)
     activity = activity_info.json()
-    print(activity)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({
@@ -163,7 +171,6 @@ def calendar_daily_information():
     if calendar_info.status_code != 200:
         raise HTTPException(status_code=calendar_info.status_code, detail=calendar_info.text)
     calendar = calendar_info.json()
-    print(calendar)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({
@@ -181,7 +188,6 @@ def calendar_information(calendarDate: date):
     if calendar_info.status_code != 200:
         raise HTTPException(status_code=calendar_info.status_code, detail=calendar_info.text)
     calendar = calendar_info.json()
-    print(calendar)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({
@@ -197,6 +203,27 @@ def subject_information():
     if subject_info.status_code != 200:
         raise HTTPException(status_code=subject_info.status_code, detail=subject_info.text)
     subjectList = subject_info.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "subjectList": subjectList
+        })
+    )
+
+@app.get("/subject/coordinator/info/", description= "Subjects of a Coordinator", tags=["Subject"])
+def subject_coordinator_information(userId: int = None):
+    # Checks if the user already exists and, if not, creates it
+    subject_coordinator_info = 0
+    if userId is not None:
+        subject_coordinator_info = requests.get("http://backend_api:8000/subjects/coordinator/", params={
+            "userId": userId
+        })
+    else:
+        subject_coordinator_info = requests.get("http://backend_api:8000/subjects/")
+    if subject_coordinator_info.status_code != 200:
+        raise HTTPException(status_code=subject_coordinator_info.status_code, detail=subject_coordinator_info.text)
+    subjectList = subject_coordinator_info.json()
     print(subjectList)
     return JSONResponse(
         status_code=200,
@@ -206,9 +233,25 @@ def subject_information():
         })
     )
 
+@app.get("/subject/assigned/info/", description= "Users Assigned To Subject", tags=["Subject"])
+def subject_information(subjectId: int):
+    # Checks if the user already exists and, if not, creates it
+    subject_info = requests.get("http://backend_api:8000/users/assigned/subject/", params={
+        "subjectId": subjectId
+    })
+    if subject_info.status_code != 200:
+        raise HTTPException(status_code=subject_info.status_code, detail=subject_info.text)
+    userList = subject_info.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "userList": userList
+        })
+    )
+
 @app.post("/subject/update/", description= "Subject Update/Creation", tags=["Subject"])
-def subject_information(information: UpdateSubject):
-    print(information)
+def subject_update(information: UpdateSubject):
     return_message_OK = "Subject has been created/updated correctly."
     # Checks if the user already exists and, if not, creates it
     subject_info = requests.post("http://backend_api:8000/subjects/", json={
@@ -227,7 +270,6 @@ def subject_information(information: UpdateSubject):
         coordinator = coordinator_info.json()
         if coordinator is None:
             raise HTTPException(status_code=401, detail="Coordinator '" + information.coordinator + "' does not exist in the database. Subject is created but no coordinator is assigned.")
-        print(coordinator)
         assign_coordinator_to_subject = requests.post("http://backend_api:8000//subjects/assign/coordinator/", json={
             "adminId": coordinator["Id"],
             "subjectId": information.subjectId
@@ -252,7 +294,6 @@ def pending_activities_information(userId: int):
     if pending_activities_information.status_code != 200:
         raise HTTPException(status_code=pending_activities_information.status_code, detail=pending_activities_information.text)
     pending_list = pending_activities_information.json()
-    print(pending_list)
     return JSONResponse(
         status_code=200,
         content=jsonable_encoder({
@@ -278,3 +319,20 @@ def confirm_activity(information: ConfirmActivity):
             "message": confirmation_message
         })
     )
+
+@app.post("/subject/assignments/", description= "Change Assignments of User", tags=["Subject"])
+def change_user_assigments_to_subject(information: AssignUserToSubject):
+    # Checks if the user already exists and, if not, creates it
+    print("Petition arrived: ", information.dict())
+    confirmed_assignments = requests.post("http://backend_api:8000/subjects/assign/user/", json=information.dict())
+    if confirmed_assignments.status_code != 200:
+        raise HTTPException(status_code=confirmed_assignments.status_code, detail=confirmed_assignments.text)
+    confirmation_message = confirmed_assignments.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "message": confirmation_message
+        })
+    )
+

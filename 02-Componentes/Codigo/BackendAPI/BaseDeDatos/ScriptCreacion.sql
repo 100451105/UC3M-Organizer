@@ -95,7 +95,8 @@ SELECT
     s.Name AS SubjectName, 
     s.Credits AS SubjectCredits, 
     s.Semester,
-    s.Year
+    s.Year,
+    s.IdAdministrator as AdministratorID
 FROM personPerSubject pps
 JOIN person p ON pps.IdPerson = p.Id
 JOIN subject s ON pps.IdSubject = s.IdSubject;
@@ -377,31 +378,68 @@ END //
 
 DELIMITER //
 
-CREATE PROCEDURE usp_AssignSubjectToUser(
-    IN p_PersonId INT, 
-    IN p_SubjectId INT
+CREATE PROCEDURE usp_AssignOrUnassignUsersToSubject(
+    IN p_SubjectId INT,
+    IN p_Users JSON
 )
 BEGIN
-    -- Verify user
-    IF NOT EXISTS (SELECT 1 FROM person WHERE Id = p_PersonId) THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = '401';
-    END IF;
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_UserId INT;
+    DECLARE v_Assigned BOOLEAN;
+    DECLARE v_AssignedStr NVARCHAR(10);
 
-    -- Verify subject
+    DECLARE cur CURSOR FOR 
+        SELECT 
+            CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.userId')) AS UNSIGNED) AS UserId,
+            JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.assigned')) AS AssignedStr
+        FROM JSON_TABLE(p_Users, "$[*]"
+            COLUMNS (
+                value JSON PATH "$"
+            )
+        ) u;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
     IF NOT EXISTS (SELECT 1 FROM subject WHERE IdSubject = p_SubjectId) THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = '402';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '401'; -- Subject not found
     END IF;
 
-    -- Verify if it is already assigned
-    IF NOT EXISTS (
-        SELECT 1 FROM personPerSubject 
-        WHERE IdPerson = p_PersonId AND IdSubject = p_SubjectId
-    ) THEN
-        INSERT INTO personPerSubject (IdPerson, IdSubject) 
-        VALUES (p_PersonId, p_SubjectId);
+    -- Verificar existencia de todos los usuarios
+    IF (
+        SELECT COUNT(*) FROM (
+            SELECT JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.userId')) AS UserId
+            FROM JSON_TABLE(p_Users, "$.users[*]"
+                COLUMNS (
+                    value JSON PATH "$"
+                )
+            ) u
+            LEFT JOIN person p ON p.Id = JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.userId'))
+            WHERE p.Id IS NULL
+        ) AS MissingUsers
+    ) > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '402'; -- Some users not found
     END IF;
+
+    OPEN cur;
+    read_loop: LOOP
+        FETCH cur INTO v_UserId, v_AssignedStr;
+        SET v_Assigned = (v_AssignedStr = 'true');
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        IF v_Assigned THEN
+            -- Insert only if not exists
+            INSERT IGNORE INTO personPerSubject (IdSubject, IdPerson)
+            VALUES (p_SubjectId, v_UserId);
+        ELSE
+            -- Remove the assignment if exists
+            DELETE FROM personPerSubject
+            WHERE IdSubject = p_SubjectId AND IdPerson = v_UserId;
+        END IF;
+
+    END LOOP;
+    CLOSE cur;
 END //
 
 DELIMITER //

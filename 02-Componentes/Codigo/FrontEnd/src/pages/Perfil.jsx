@@ -37,7 +37,6 @@ const getRandomColor = (subjectName) => {
     const chosenColorValue = mainColors[chosenColorKey];
 
     // 5. Asignar y devolver
-    console.log(subjectColorMap);
     subjectColorMap[subjectName] = chosenColorValue;
     return chosenColorValue;
 }
