@@ -188,6 +188,9 @@ export default function GanttDiagram({ setLoadingState }) {
             data: resources,
             inverse: true,
             axisLabel: {
+                width: 200,
+                overflow: "break",
+                lineHeight: 16,
                 formatter: (value) => {
                     const key = resourceKeys[value];
                     return `{${key}|${value}}`;
@@ -211,7 +214,7 @@ export default function GanttDiagram({ setLoadingState }) {
         grid: {
             top: 20,
             bottom: 40,
-            left: 100,
+            left: 220,
             right: 40,
         },
         series: [
@@ -228,9 +231,26 @@ export default function GanttDiagram({ setLoadingState }) {
                 label: {
                     show: false,
                 },
-                data: endOfMonthLines.map(timestamp => ({
+                data: [
+                    endOfMonthLines.map(timestamp => ({
                     xAxis: timestamp
-                }))
+                })),
+                {
+                    xAxis: new Date(), // <-- añade la línea de hoy
+                    lineStyle: {
+                        color: "#2563eb", // azul (o tu color Tailwind si lo pasas como hex)
+                        type: "dashed",
+                        width: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: "Hoy",
+                        position: "insideEndTop",
+                        color: mainColors["main-dark-blue"],
+                        fontWeight: "bold"
+                    }
+                    }
+                ]
             },
             renderItem: function (params, api) {
                 const color = api.value(5);

@@ -1,0 +1,59 @@
+IdSubject,Year,Semester,Name,Credits,IdAdministrator
+13869,1,2,"Tecnología de Computadores",6,1
+15969,1,2,"Principios físicos de la ingeniería informática",6,1
+15970,1,2,"Lógica",6,1
+15971,1,2,"Matemática Discreta",6,1
+13866,1,1,"Cálculo",6,1
+13867,1,1,"Física",6,1
+13868,1,1,"Programación",6,1
+13870,1,1,"Álgebra Lineal",6,1
+13873,1,2,"Estructura de datos y algoritmos",6,1
+14360,1,1,"Técnicas de expresión oral y escrita",3,1
+15975,2,2,"Cálculo diferencial aplicado",6,1
+13875,2,1,"Fundamentos de gestión empresarial",6,1
+13876,2,1,"Estadística",6,1
+13878,2,2,"Sistemas Operativos",6,1
+13881,2,2,"Ficheros y bases de datos",6,1
+13883,2,2,"Inteligencia Artificial",6,1
+18179,2,2,"Desarrollo de Software",6,1
+13874,2,1,"Estructura de Computadores",6,1
+13877,2,1,"Teoría de autómatas y lenguajes formales",6,1
+15974,2,1,"Ingeniería del Software",6,1
+13890,3,2,"Procesadores del Lenguaje",6,1
+15754,3,2,"Sistemas Distribuidos",6,1
+15757,3,2,"Aprendizaje Automático",6,1
+17881,3,2,"Hojas de cálculo. Nivel avanzado",2,1
+19081,3,2,"Competencias digitales para el uso de la información",2,1
+19472,3,2,"Sistemas Interactivos y Ubicuos",6,1
+13882,3,1,"Interfaces de Usuario",6,1
+13884,3,1,"Redes de Ordenadores",6,1
+13888,3,1,"Arquitectura de Computadores",6,1
+15973,3,1,"Criptografía y seguridad informática",6,1
+15976,3,1,"Heurística y Optimización",6,1
+19475,4,2,"Desarrollo y operación de sistemas software",6,1
+19476,4,2,"Fundamentos de internet de las cosas",6,1
+13457,4,1,"Creatividad e Innovación",3,1
+13468,4,1,"Negociación",3,1
+13471,4,1,"Organización del trabajo personal y del tiempo",3,1
+13892,4,1,"Dirección de proyectos de desarrollo de software",6,1
+14500,4,1,"Comunicación en el entorno profesional",3,1
+14501,4,1,"Gestión de equipos de trabajo y dirección de reuniones",3,1
+14505,4,1,"Emprendimiento",3,1
+14506,4,1,"Análisis y toma de decisiones",3,1
+14508,4,1,"Leading your team. Liderazgo, motivación y toma de decisiones",3,1
+14510,4,1,"Visual Thinking",3,1
+14511,4,1,"Outside the Box. Pensamiento crítico y análisis de problemas",3,1
+15764,4,1,"Inteligencia artificial en las organizaciones",6,1
+18464,4,1,"Definición de la carrera profesional",3,1
+18999,4,1,"AGILE: cómo abordar la complejidad y transformar la cultura empresarial",3,1
+19473,4,1,"Arquitectura de Datos",6,1
+19474,4,1,"Ingeniería de la Ciberseguridad",6,1
+15763,4,2,"Teoría avanzada de la computación",6,1
+18204,4,2,"Técnicas de desarrollo de software",6,1
+19482,4,2,"Ingeniería para la transformación digital",3,1
+19487,4,2,"Seguridad en dispositivos móviles",6,1
+19492,4,2,"Visión Artificial",3,1
+13898,4,1,"Redes de neuronas artificiales",6,1
+15756,4,1,"Tecnologías informáticas para la web",6,1
+19483,4,1,"Integración y visualización de datos",6,1
+19485,4,1,"Programación Funcional",6,1
