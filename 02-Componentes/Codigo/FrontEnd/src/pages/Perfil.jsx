@@ -231,8 +231,9 @@ export default function Perfil() {
             <button
               key={subject.SubjectID}
               onClick={() =>{
+                sessionStorage.removeItem('selectedSubjectID');
                 sessionStorage.setItem('selectedSubjectID', subject.SubjectID);
-                window.location.href = '/perfil';
+                window.location.href = '/asignatura';
               }}
               className="border-main-dark-blue w-full border-b-[0.5vh] text-white font-montserrat text-[3vh] font-semibold py-2"
               style={{ backgroundColor: color }}

@@ -112,7 +112,7 @@ export default function Asignaturas() {
         console.log("Respuesta del servidor:", updateResponse);
         if (updateResponse.status == 200) {
           alert("Datos actualizados correctamente"); 
-          // window.location.href = '/asignaturas';
+          window.location.href = '/asignaturas';
         }
     } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -248,8 +248,9 @@ export default function Asignaturas() {
             <button
               key={subject.IdSubject}
               onClick={() =>{
+                sessionStorage.removeItem('selectedSubjectID');
                 sessionStorage.setItem('selectedSubjectID', subject.IdSubject);
-                window.location.href = '/asignaturas';
+                window.location.href = '/asignatura';
               }}
               className="border-main-dark-blue w-full border-b-[0.5vh] text-white font-montserrat text-[3vh] font-semibold py-2"
               style={{ backgroundColor: color }}

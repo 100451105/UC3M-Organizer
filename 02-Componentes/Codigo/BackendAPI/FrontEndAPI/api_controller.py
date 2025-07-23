@@ -45,7 +45,7 @@ class CreateActivity(BaseModel):
     estimatedHours: conint(ge=0)
     strategy: Literal["Agresiva","Calmada","Completa"]
     subjectId: int
-    startOfActivity: date = None
+    startOfActivity: Optional[date] = None
     endOfActivity: date = None
 
     class Config:
@@ -55,10 +55,10 @@ class UpdateActivity(BaseModel):
     name: constr(min_length=0,max_length=1024)
     description: constr(min_length=0,max_length=1024)
     type: Literal["Examen","Actividad","Laboratorio","Clase","Otros"]
-    estimatedHours: conint(ge=0)
+    estimatedHours: conint(ge=1)
     strategy: Literal["Agresiva","Calmada","Completa"]
     subjectId: int
-    startOfActivity: date = None
+    startOfActivity: Optional[date] = None
     endOfActivity: date = None
     activityId: int
 
@@ -102,6 +102,7 @@ class AssignCoordinatorToSubject(BaseModel):
 class ChangeStatusOfActivity(BaseModel):
     activityId: int
     newStatus: Literal["Organizar","Confirmar","Sin Asignar","Asignado"]
+    newEndDate: Optional[date] = None
 
 class DeleteUser(BaseModel):
     userId: int
@@ -370,7 +371,7 @@ def delete_activity(item: DeleteActivity):
         
 @app.post("/activities/change/status/", description= "ChangeStatusOfActivity", tags=["Activities"])
 def change_status_of_activity(item: ChangeStatusOfActivity):
-    result = db.change_status_of_activity(item.activityId,item.newStatus)
+    result = db.change_status_of_activity(item.activityId,item.newStatus,item.newEndDate)
     match result:
         case 200:
             return {"result": result, "message": "Changed the status of the activity succesfully"}
@@ -397,6 +398,13 @@ def read_calendar(calendarDate: Optional[date] = None):
 @app.get("/scheduler/date/", description= "GetSchedulerCalendarBasedOnDate", tags=["Scheduler"])
 def read_calendar_scheduled_on_date(calendarDate: date):
     result = db.get_calendar_scheduled_based_on_date(calendarDate)
+    if result == 503:
+        raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
+    return result
+
+@app.get("/scheduler/dates/", description= "GetSchedulerCalendarBasedOnActivityAndDates", tags=["Scheduler"])
+def read_calendar_scheduled_on_activity_between_dates(startDate: date, endDate: date):
+    result = db.get_calendar_scheduled_based_on_dates(startDate, endDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result

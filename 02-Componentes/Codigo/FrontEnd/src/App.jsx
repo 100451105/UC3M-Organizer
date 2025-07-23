@@ -7,6 +7,9 @@ import Asignador from './pages/Asignador'
 import Calendario from './pages/Calendario'
 import Pendientes from './pages/Pendientes'
 import Asignaturas from './pages/Asignaturas'
+import Asignatura from './pages/Asignatura'
+import Actividad from './pages/Actividad'
+
 
 export default function App() {
   return(  
@@ -20,6 +23,8 @@ export default function App() {
             <Route path="/asignador" element={<Asignador />} />
             <Route path="/pendientes" element={<Pendientes />} />
             <Route path="/asignaturas" element={<Asignaturas />} />
+            <Route path="/asignatura" element={<Asignatura />} />
+            <Route path="/actividad" element={<Actividad />} />
         </Routes>
     </BrowserRouter>
   )

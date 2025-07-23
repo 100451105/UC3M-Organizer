@@ -3,9 +3,10 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, conint, constr, model_validator, confloat
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Literal, List
-from datetime import date
+from typing import Literal, List, Optional
+from datetime import date, timedelta, datetime
 import requests
+import json
 
 app = FastAPI()
 
@@ -41,6 +42,17 @@ class UpdateSubject(BaseModel):
     subjectId: int
     coordinator: constr(min_length=0,max_length=100)
 
+class UpdateActivity(BaseModel):
+    activityName: constr(min_length=0,max_length=1024)
+    description: constr(min_length=0,max_length=1024)
+    type: Literal["Examen","Actividad","Laboratorio","Clase","Otros"]
+    estimatedHours: conint(ge=1)
+    strategy: Literal["Agresiva","Calmada","Completa"]
+    subjectId: int
+    endOfActivity: date
+    startOfActivity: Optional[date]
+    activityId: int = None
+
 class ConfirmActivity(BaseModel):
     activityId: int
 
@@ -57,6 +69,14 @@ class AssignUserToSubject(BaseModel):
         if not self.users:
             raise ValueError("Debe asignar al menos un usuario.")
         return self
+    
+def obtener_dia_semana(fecha_str):
+    # Convertir string a objeto datetime
+    fecha = datetime.strptime(fecha_str, '%Y-%m-%d')
+    
+    # Obtener el nombre del día en español
+    dias = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
+    return dias[fecha.weekday()]
 
 """ User Action Endpoints """
 @app.post("/user/login/", description= "Login of the User", tags=["User"])
@@ -164,6 +184,41 @@ def activities_information(actualDate: date):
         })
     )
 
+@app.get("/activities/info/subject/", description= "Activities Information Based On Subject", tags=["Activity"])
+def activities_information_based_on_subject(subjectId: int):
+    # Checks if the user already exists and, if not, creates it
+    activity_info = requests.get("http://backend_api:8000/activities/subject/",params={
+        "subjectId": subjectId
+    })
+    if activity_info.status_code != 200:
+        raise HTTPException(status_code=activity_info.status_code, detail=activity_info.text)
+    activity = activity_info.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "activities": activity
+        })
+    )
+
+@app.get("/activities/specific/info/", description= "Activities Specific Information", tags=["Activity"])
+def activity_information(activityId: int):
+    # Checks if the user already exists and, if not, creates it
+    activity_info = requests.get("http://backend_api:8000/activities/", params={
+        "activityId": activityId
+    })
+    print(activity_info)
+    if activity_info.status_code != 200:
+        raise HTTPException(status_code=activity_info.status_code, detail=activity_info.text)
+    activityInfo = activity_info.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "activityInfo": activityInfo
+        })
+    )
+
 @app.get("/calendar/info/daily/", description= "Calendar Daily Information", tags=["Calendar"])
 def calendar_daily_information():
     # Checks if the user already exists and, if not, creates it
@@ -208,6 +263,24 @@ def subject_information():
         content=jsonable_encoder({
             "result": 200,
             "subjectList": subjectList
+        })
+    )
+
+@app.get("/subject/specific/info/", description= "Subject Specific Information", tags=["Subject"])
+def subject_information(subjectId: int):
+    # Checks if the user already exists and, if not, creates it
+    subject_info = requests.get("http://backend_api:8000/subjects/", params={
+        "subjectId": subjectId
+    })
+    print(subject_info)
+    if subject_info.status_code != 200:
+        raise HTTPException(status_code=subject_info.status_code, detail=subject_info.text)
+    subjectInfo = subject_info.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "subjectInfo": subjectInfo
         })
     )
 
@@ -270,7 +343,7 @@ def subject_update(information: UpdateSubject):
         coordinator = coordinator_info.json()
         if coordinator is None:
             raise HTTPException(status_code=401, detail="Coordinator '" + information.coordinator + "' does not exist in the database. Subject is created but no coordinator is assigned.")
-        assign_coordinator_to_subject = requests.post("http://backend_api:8000//subjects/assign/coordinator/", json={
+        assign_coordinator_to_subject = requests.post("http://backend_api:8000/subjects/assign/coordinator/", json={
             "adminId": coordinator["Id"],
             "subjectId": information.subjectId
         })
@@ -282,6 +355,136 @@ def subject_update(information: UpdateSubject):
         content=jsonable_encoder({
             "result": 200,
             "message": return_message_OK
+        })
+    )
+
+@app.post("/activities/update/", description= "Update/Create Activity and Attemp Organize", tags=["Activity"])
+def activity_information(information: UpdateActivity):
+    # 1. Llamada para crear/actualizar actividad (activityId)
+    activity_confirmation = 0
+    if information.activityId:
+        activity_confirmation = requests.put("http://backend_api:8000/activities/", json={
+            "name": information.activityName,
+            "description": information.description,
+            "type": information.type,
+            "estimatedHours": information.estimatedHours,
+            "strategy": information.strategy,
+            "subjectId": information.subjectId,
+            "startOfActivity": information.startOfActivity if information.startOfActivity is None else information.startOfActivity.isoformat(),
+            "endOfActivity": information.endOfActivity.isoformat(),
+            "activityId": information.activityId
+        })
+    else:
+        activity_confirmation = requests.post("http://backend_api:8000/activities/", json={
+            "name": information.activityName,
+            "description": information.description,
+            "type": information.type,
+            "estimatedHours": information.estimatedHours,
+            "strategy": information.strategy,
+            "subjectId": information.subjectId,
+            "startOfActivity": information.startOfActivity if information.startOfActivity is None else information.startOfActivity.isoformat(),
+            "endOfActivity": information.endOfActivity.isoformat()
+        })
+    if activity_confirmation.status_code != 200:
+        raise HTTPException(status_code=activity_confirmation.status_code, detail=activity_confirmation.text)
+    # 2. Llamada para conseguir los días
+    start_date = (
+        information.startOfActivity
+        if information.startOfActivity is not None
+        else information.endOfActivity - timedelta(days=14)
+    )
+    calendar_information = requests.get("http://backend_api:8000/scheduler/dates/", params={
+        "startDate": start_date.isoformat(),
+        "endDate": information.endOfActivity.isoformat()
+    })
+    if calendar_information.status_code != 200:
+        raise HTTPException(status_code=calendar_information.status_code, detail=calendar_information.text)
+    calendar_information = calendar_information.json()
+
+    calendar_info_for_scheduler = []
+    for day in calendar_information:
+        activities = json.loads(day["Activities"])
+        totalHours = sum(activity["Hours"] or 0 for activity in activities)
+        calendar_info_for_scheduler.append({
+            "calendarDate": day["CalendarDate"],
+            "dayType": day["DayType"],
+            "totalHoursBusy": totalHours
+        })
+    
+    activity_for_scheduler = {
+        "estimatedHours": information.estimatedHours,
+        "strategy": information.strategy,
+        "startOfActivity": information.startOfActivity if information.startOfActivity is None else information.startOfActivity.isoformat(),
+        "endOfActivity": information.endOfActivity.isoformat()
+    }
+
+    # 3. Realizar llamada al scheduler para organizar la actividad
+
+    scheduler_info = {
+        "activity": activity_for_scheduler,
+        "calendar": calendar_info_for_scheduler
+    }
+    scheduler_new_info = requests.post("http://scheduler:8001/scheduler/logic/activity/", json=scheduler_info)
+    scheduler_response = scheduler_new_info.json()
+    
+
+    # 4. Organizar información llegada del scheduler, colocar el status de la actividad dependiendo del response code y actualizar actividad con nueva información
+    status = 0
+    chosen_solution = 0
+    newEndDate = 0
+    if (scheduler_new_info.status_code == 200 or scheduler_new_info.status_code == 201):
+        status = "Confirmar"
+        chosen_solution = scheduler_response["solutions"][0]
+        newEndDate = chosen_solution["newEndDate"]
+    else:
+        status = "Sin Asignar"
+        chosen_solution = None
+        newEndDate = None
+
+    activity_status_confirmation = requests.post("http://backend_api:8000/activities/change/status/", json={
+        "activityId": information.activityId,
+        "newStatus": status,
+        "newEndDate": newEndDate
+    })
+    if activity_status_confirmation.status_code != 200:
+        raise HTTPException(status_code=activity_status_confirmation.status_code, detail=activity_status_confirmation.text)
+
+    # 5. Actualizar el calendario y el organizador con la salida del scheduler
+    if chosen_solution is None:
+        raise HTTPException(status_code=scheduler_new_info.status_code, detail=scheduler_new_info.text)
+
+    newCalendarPayload = []
+    newSchedulePayload = []
+    for date in chosen_solution["schedule"]:
+        newSchedulePayload.append({
+            "calendarDate": date["calendarDate"],
+            "hours": date["assignedHours"],
+            "activityId": information.activityId
+        })
+        
+    for date in chosen_solution["modifiedCalendar"]:
+        newCalendarPayload.append({
+            "calendarDate": date["calendarDate"],
+            "dayType": date["dayType"],
+            "weekDay": obtener_dia_semana(date["calendarDate"]),
+            "status": date["status"]
+        })
+    
+    print(newCalendarPayload)
+    print(newSchedulePayload)
+    
+    calendar_creation_confirmation = requests.post("http://backend_api:8000/scheduler/days/", json=newCalendarPayload)
+    schedule_creation_confirmation = requests.post("http://backend_api:8000/scheduler/days/activities/", json=newSchedulePayload)
+
+    if calendar_creation_confirmation.status_code != 200:
+        raise HTTPException(status_code=calendar_creation_confirmation.status_code, detail=calendar_creation_confirmation.text)
+    if schedule_creation_confirmation.status_code != 200:
+        raise HTTPException(status_code=schedule_creation_confirmation.status_code, detail=schedule_creation_confirmation.text)
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "message": "Ok"
         })
     )
 

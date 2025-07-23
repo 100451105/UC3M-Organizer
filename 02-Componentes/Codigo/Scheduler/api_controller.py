@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, conint, model_validator
-from typing import Literal, List
+from typing import Literal, List, Optional
 from datetime import date
 import scheduler as SchedulerController
 
@@ -12,7 +12,7 @@ app = FastAPI()
 class Activity(BaseModel):
     estimatedHours: conint(ge=0)
     strategy: Literal["Agresiva","Calmada","Completa"]
-    startOfActivity: date = None
+    startOfActivity: Optional[date] = None
     endOfActivity: date
 
     class Config:
@@ -35,7 +35,7 @@ class ScheduleActivity(BaseModel):
 
         if activity.startOfActivity:
             expected = (activity.endOfActivity - activity.startOfActivity).days + 1 + 3
-            if len(calendar) != expected:
+            if len(calendar) < expected:
                 raise ValueError(f"Call expected {expected} days on the Calendar list. It was given {len(calendar)}.")
         else:
             if len(calendar) != 21:

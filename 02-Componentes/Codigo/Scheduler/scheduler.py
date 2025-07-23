@@ -123,7 +123,7 @@ class Scheduler():
     def __complete_strategy(self, activity, calendar, busy_days):
         model = cp_model.CpModel()
         solver = cp_model.CpSolver()
-        solver.parameters.log_search_progress = False
+        solver.parameters.log_search_progress = True
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 

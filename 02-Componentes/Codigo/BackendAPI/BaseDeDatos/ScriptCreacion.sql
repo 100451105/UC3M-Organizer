@@ -330,6 +330,8 @@ BEGIN
         );
         SET p_newId = LAST_INSERT_ID();
     END IF;
+
+    DELETE FROM schedule WHERE IdActivity = p_newId;
 END //
 
 DELIMITER //
@@ -484,7 +486,8 @@ DELIMITER //
 
 CREATE PROCEDURE usp_ChangeStatusOfActivity(
     IN p_ActivityId INT, 
-    IN p_Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado')
+    IN p_Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado'),
+    IN p_NewEndDate DATE
 )
 BEGIN
     DECLARE current_status VARCHAR(20);
@@ -507,6 +510,12 @@ BEGIN
             Status = p_Status,
             EndOfActivity = NewEndOfActivity,
             NewEndOfActivity = NULL
+        WHERE IdActivity = p_ActivityId;
+    END IF;
+    IF p_Status = 'Confirmar' THEN
+        UPDATE activity SET 
+            Status = p_Status,
+            NewEndOfActivity = p_NewEndDate
         WHERE IdActivity = p_ActivityId;
     ELSE
         UPDATE activity SET 
@@ -571,32 +580,53 @@ INSERT INTO person (Id, Username, Type) VALUES (2,'test@profesor.uc3m.es','Profe
 INSERT INTO subject (Credits, Semester, Year, Name, IdSubject, IdAdministrator) VALUES (6,1,3,"Test Subject",198237,1);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,1);
 INSERT INTO personPerSubject (IdSubject, IdPerson) VALUES (198237,2);
-INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, NewEndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',0,'2025-07-01','Asignado','Agresiva','2025-07-15',NULL,198237);
+INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, NewEndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',16,'2025-07-01','Asignado','Agresiva','2025-07-15',NULL,198237);
 INSERT INTO activity (Name, Description, Type, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, NewEndOfActivity, IdSubject) VALUES ('Example Name','Example Description','Examen',34,'2025-07-21','Confirmar','Agresiva','2025-08-05','2025-08-06',198237);
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-14','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-15','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-16','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-17','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-18','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-19','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-20','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-21','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-22','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-23','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-24','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-25','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-26','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-27','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-28','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-29','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-30','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-07-31','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-01','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-02','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-03','Festivo','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-04','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-05','Normal','Lunes','Libre');
-INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status) VALUES ('2025-08-06','Normal','Lunes','Libre');
+
+
+-- Procedimiento para inicializar el calendario
+DELIMITER //
+
+CREATE PROCEDURE usp_InitializeCalendar()
+BEGIN
+    DECLARE v_date DATE DEFAULT '2024-01-01';
+    DECLARE v_end DATE DEFAULT '2026-12-31';
+    DECLARE v_weekday VARCHAR(20);
+    DECLARE v_daytype ENUM('Festivo', 'Normal');
+
+    WHILE v_date <= v_end DO
+        -- Día de la semana
+        SET v_weekday = CASE DAYOFWEEK(v_date)
+            WHEN 1 THEN 'Domingo'
+            WHEN 2 THEN 'Lunes'
+            WHEN 3 THEN 'Martes'
+            WHEN 4 THEN 'Miercoles'
+            WHEN 5 THEN 'Jueves'
+            WHEN 6 THEN 'Viernes'
+            WHEN 7 THEN 'Sabado'
+        END;
+
+        -- Tipo de día (sábado y domingo = Festivo)
+        SET v_daytype = CASE DAYOFWEEK(v_date)
+            WHEN 1 THEN 'Festivo'  -- Domingo
+            WHEN 7 THEN 'Festivo'  -- Sábado
+            ELSE 'Normal'
+        END;
+
+        -- Inserción
+        INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status)
+        VALUES (v_date, v_daytype, v_weekday, 'Libre');
+
+        SET v_date = DATE_ADD(v_date, INTERVAL 1 DAY);
+    END WHILE;
+END //
+
+DELIMITER ;
+
+-- Ejecutar el procedimiento
+CALL usp_InitializeCalendar();
+DROP PROCEDURE usp_InitializeCalendar;
+
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-14',2,1);
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-21',2,2);
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-22',2,2);

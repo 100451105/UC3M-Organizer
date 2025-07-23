@@ -106,7 +106,7 @@ class Database:
         try:
             cursor = connection.cursor(dictionary=True)
             if subjectId:
-                cursor.execute("SELECT * FROM subject WHERE IdSubject = %s;",(subjectId,))
+                cursor.execute("SELECT s.*, p.Username as AdministratorName FROM subject s LEFT JOIN person p on s.IdAdministrator = p.Id WHERE s.IdSubject = %s;",(subjectId,))
                 result = cursor.fetchone()
             else:
                 cursor.execute("SELECT IdSubject, Name FROM subject;")
@@ -132,7 +132,7 @@ class Database:
         try:
             cursor = connection.cursor(dictionary=True)
             if activityId:
-                cursor.execute("SELECT * FROM activity WHERE IdActivity = %s;",(activityId,))
+                cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, StartOfActivity, Status, Strategy, EndOfActivity, NewEndOfActivity, SubjectName, SubjectID FROM vSubjectActivityInfo  WHERE ActivityID = %s;",(activityId,))
                 result = cursor.fetchone()
             else:
                 cursor.execute("SELECT * FROM activity;")
@@ -228,6 +228,28 @@ class Database:
         try:
             cursor = connection.cursor(dictionary=True)
             cursor.execute("SELECT c.*, s.IdActivity as Activity, s.Hours as Hours FROM calendar c LEFT JOIN schedule s ON c.CalendarDate = s.CalendarDate WHERE s.IdActivity = %s;",(activityId,))
+            result = cursor.fetchall()
+        except mysql.connector.Error as err:
+            print(err.errno, int(err.msg.strip()), err.sqlstate)
+            connection.rollback()
+            cursor.close()
+            connection.close()
+            if err.sqlstate == '45000' and err.errno == 1644:
+                return int(err.msg.strip()), None
+            else:
+                return 505, None
+        cursor.close()
+        connection.close()
+        return result
+    
+    def get_calendar_scheduled_based_on_dates(self, startDate, endDate):
+        """  Leer días del organizador en base al activityId """
+        connection = self.get_connection()
+        if not connection:
+            return 503
+        try:
+            cursor = connection.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM vActivitiesPerDay WHERE CalendarDate BETWEEN DATE_SUB(%s, INTERVAL 3 DAY) AND DATE_ADD(%s, INTERVAL 3 DAY);",(startDate,endDate))
             result = cursor.fetchall()
         except mysql.connector.Error as err:
             print(err.errno, int(err.msg.strip()), err.sqlstate)
@@ -403,7 +425,7 @@ class Database:
             return 503
         try:
             cursor = connection.cursor(dictionary=True)
-            cursor.execute("SELECT ActivityID, ActivityName, ActivityType, Description, EstimatedHours, EndOfActivity FROM vSubjectActivityInfo WHERE SubjectID = %s;",(subjectId,))
+            cursor.execute("SELECT ActivityID, ActivityName FROM vSubjectActivityInfo WHERE SubjectID = %s;",(subjectId,))
             result = cursor.fetchall()
         except mysql.connector.Error as err:
             print(err.errno, int(err.msg.strip()), err.sqlstate)
@@ -699,14 +721,14 @@ class Database:
         connection.close()
         return 200
     
-    def change_status_of_activity(self,activityId,newStatus):
+    def change_status_of_activity(self,activityId,newStatus,newEndDate):
         """ Asignar asignatura a un usuario """
         connection = self.get_connection()
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
         try:
-            cursor.execute("CALL usp_ChangeStatusOfActivity(%s,%s);",(activityId,newStatus))
+            cursor.execute("CALL usp_ChangeStatusOfActivity(%s,%s,%s);",(activityId,newStatus,newEndDate))
             connection.commit()
         except mysql.connector.Error as err:
             connection.rollback()
