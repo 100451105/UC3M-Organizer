@@ -487,7 +487,8 @@ DELIMITER //
 CREATE PROCEDURE usp_ChangeStatusOfActivity(
     IN p_ActivityId INT, 
     IN p_Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado'),
-    IN p_NewEndDate DATE
+    IN p_NewEndDate DATE,
+    IN p_NewStartDate DATE
 )
 BEGIN
     DECLARE current_status VARCHAR(20);
@@ -515,7 +516,8 @@ BEGIN
     IF p_Status = 'Confirmar' THEN
         UPDATE activity SET 
             Status = p_Status,
-            NewEndOfActivity = p_NewEndDate
+            NewEndOfActivity = p_NewEndDate,
+            StartOfActivity = p_NewStartDate
         WHERE IdActivity = p_ActivityId;
     ELSE
         UPDATE activity SET 

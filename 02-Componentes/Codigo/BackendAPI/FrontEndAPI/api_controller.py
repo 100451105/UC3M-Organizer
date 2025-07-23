@@ -103,6 +103,7 @@ class ChangeStatusOfActivity(BaseModel):
     activityId: int
     newStatus: Literal["Organizar","Confirmar","Sin Asignar","Asignado"]
     newEndDate: Optional[date] = None
+    newStartDate: Optional[date] = None
 
 class DeleteUser(BaseModel):
     userId: int
@@ -371,7 +372,7 @@ def delete_activity(item: DeleteActivity):
         
 @app.post("/activities/change/status/", description= "ChangeStatusOfActivity", tags=["Activities"])
 def change_status_of_activity(item: ChangeStatusOfActivity):
-    result = db.change_status_of_activity(item.activityId,item.newStatus,item.newEndDate)
+    result = db.change_status_of_activity(item.activityId,item.newStatus,item.newEndDate,item.newStartDate)
     match result:
         case 200:
             return {"result": result, "message": "Changed the status of the activity succesfully"}

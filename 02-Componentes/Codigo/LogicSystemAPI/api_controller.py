@@ -387,6 +387,9 @@ def activity_information(information: UpdateActivity):
         })
     if activity_confirmation.status_code != 200:
         raise HTTPException(status_code=activity_confirmation.status_code, detail=activity_confirmation.text)
+    activity_info = activity_confirmation.json()
+    activityId = activity_info["affected"]
+    print(activityId)
     # 2. Llamada para conseguir los días
     start_date = (
         information.startOfActivity
@@ -442,9 +445,10 @@ def activity_information(information: UpdateActivity):
         newEndDate = None
 
     activity_status_confirmation = requests.post("http://backend_api:8000/activities/change/status/", json={
-        "activityId": information.activityId,
+        "activityId": activityId,
         "newStatus": status,
-        "newEndDate": newEndDate
+        "newEndDate": newEndDate,
+        "newStartDate": start_date.isoformat()
     })
     if activity_status_confirmation.status_code != 200:
         raise HTTPException(status_code=activity_status_confirmation.status_code, detail=activity_status_confirmation.text)
@@ -459,7 +463,7 @@ def activity_information(information: UpdateActivity):
         newSchedulePayload.append({
             "calendarDate": date["calendarDate"],
             "hours": date["assignedHours"],
-            "activityId": information.activityId
+            "activityId": activityId
         })
         
     for date in chosen_solution["modifiedCalendar"]:
@@ -469,9 +473,6 @@ def activity_information(information: UpdateActivity):
             "weekDay": obtener_dia_semana(date["calendarDate"]),
             "status": date["status"]
         })
-    
-    print(newCalendarPayload)
-    print(newSchedulePayload)
     
     calendar_creation_confirmation = requests.post("http://backend_api:8000/scheduler/days/", json=newCalendarPayload)
     schedule_creation_confirmation = requests.post("http://backend_api:8000/scheduler/days/activities/", json=newSchedulePayload)

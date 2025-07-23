@@ -88,6 +88,8 @@ export default function CustomCalendar({ setLoadingState }) {
             console.log("Respuesta del servidor:", confirmActivity.status);
             if (confirmActivity.status === 200) {
                 alert("Confirmada actividad correctamente");
+                // Forzar refresh de las actividades
+                localStorage.removeItem("activity_info");
                 window.location.href = '/pendientes';
             }
         } catch (error) {

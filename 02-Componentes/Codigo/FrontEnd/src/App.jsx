@@ -9,6 +9,7 @@ import Pendientes from './pages/Pendientes'
 import Asignaturas from './pages/Asignaturas'
 import Asignatura from './pages/Asignatura'
 import Actividad from './pages/Actividad'
+import CrearActividad from './pages/CrearActividad'
 
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/asignaturas" element={<Asignaturas />} />
             <Route path="/asignatura" element={<Asignatura />} />
             <Route path="/actividad" element={<Actividad />} />
+            <Route path="/crear/actividad" element={<CrearActividad />}/>
         </Routes>
     </BrowserRouter>
   )

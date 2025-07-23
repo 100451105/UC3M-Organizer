@@ -721,14 +721,14 @@ class Database:
         connection.close()
         return 200
     
-    def change_status_of_activity(self,activityId,newStatus,newEndDate):
+    def change_status_of_activity(self,activityId,newStatus,newEndDate,newStartDate):
         """ Asignar asignatura a un usuario """
         connection = self.get_connection()
         if not connection:
             return 503
         cursor = connection.cursor(dictionary=True)
         try:
-            cursor.execute("CALL usp_ChangeStatusOfActivity(%s,%s,%s);",(activityId,newStatus,newEndDate))
+            cursor.execute("CALL usp_ChangeStatusOfActivity(%s,%s,%s,%s);",(activityId,newStatus,newEndDate,newStartDate))
             connection.commit()
         except mysql.connector.Error as err:
             connection.rollback()

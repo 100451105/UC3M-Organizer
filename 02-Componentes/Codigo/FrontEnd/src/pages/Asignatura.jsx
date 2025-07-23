@@ -264,7 +264,9 @@ export default function Asignatura() {
                     <button
                         className="custom-button absolute bottom-[3%] left-[30%] rounded font-montserrat text-[3vh] px-4 py-2"
                         onClick={() => {
-                            alert("CREAR ACTIVIDAD");
+                            sessionStorage.removeItem("fromSubjectName");
+                            sessionStorage.setItem('fromSubjectName', subjectData.Name);
+                            window.location.href='/crear/actividad'
                         }}
                     >
                         Crear Actividad
