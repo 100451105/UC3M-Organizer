@@ -43,7 +43,7 @@ export default function CustomCalendar({ setLoadingState }) {
             // Parsear Activities y adaptar calendarDate para el calendario
             calendar = calendar.map(day => ({
                 ...day,
-                Activities: JSON.parse(day.Activities),
+                Activities: JSON.parse(day.Activities).filter(activity => activity.ActivityName),
                 CalendarDate: new Date(day.CalendarDate)
             }));
             
@@ -68,8 +68,8 @@ export default function CustomCalendar({ setLoadingState }) {
             <section className="class-diagram-section">
                 {/* Visualización del día seleccionado */}
                 <div className="w-1/3 mr-[8vw] border-main-dark-blue bg-grey-300 border-[1vh] p-4 flex flex-col gap-4 overflow-y-auto h-[70vh]">
-                    {calendar_days
-                        .find(entry => entry.CalendarDate.toDateString() === date?.toDateString())
+                    {(calendar_days
+                        .find(entry => entry.CalendarDate.toDateString() === date?.toDateString() && entry.Activities.length > 0)
                         ?.Activities.map((activity, index) => {
                         const color = getRandomColor(activity.SubjectName);
                         return (
@@ -93,7 +93,7 @@ export default function CustomCalendar({ setLoadingState }) {
                         );
                     }) ?? (
                         <p className="text-center text-gray-500">No hay actividades para este día.</p>
-                    )}
+                    ))}
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-lg w-1/3 h-full">
                     <Calendar
