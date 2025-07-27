@@ -52,11 +52,12 @@ export default function Header({ showIndex, loadingInProgress }) {
                 {/* Cabecera de navegación para ordenador */}
                 {showIndex && (
                     <div className= "w-full h-[7.5vh] mt-[12.5vh] bg-white border-[0.37vh] border-main-dark-blue flex items-center justify-between px-[1.77vw]">
-                        <button 
-                            className="w-[6.48vh] h-[6.48vh] custom-button rounded-full flex items-center justify-center"
-                            onClick={previous}
-                        >
-                            <svg
+                        {index > 0 ? (
+                            <button 
+                                className="w-[6.48vh] h-[6.48vh] custom-button rounded-full flex items-center justify-center"
+                                onClick={previous}
+                            >
+                                <svg
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="white"
@@ -64,10 +65,13 @@ export default function Header({ showIndex, loadingInProgress }) {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 className="w-[4vh] h-[4vh]"
-                            >
+                                >
                                 <polyline points="13 22 2 12 13 2 2 12 22 12" vectorEffect="non-scaling-stroke"></polyline>
-                            </svg>
-                        </button>
+                                </svg>
+                            </button>
+                        ) : (
+                            <div className="w-[6.48vh]" />
+                        )}
 
                         <div className="flex gap-[3.5vw] justify-center items-center flex-1">
                             {TITULOS.slice(index, index + 4).map((titulo, i) => (
@@ -83,11 +87,12 @@ export default function Header({ showIndex, loadingInProgress }) {
                             ))}
                         </div>
 
-                        <button 
-                            className="w-[6.48vh] h-[6.48vh] custom-button rounded-full flex items-center justify-center"
-                            onClick={next}
-                        >
-                            <svg
+                        {index + 4 < TITULOS.length ? (
+                            <button 
+                                className="w-[6.48vh] h-[6.48vh] custom-button rounded-full flex items-center justify-center"
+                                onClick={next}
+                            >
+                                <svg
                                 viewBox="0 0 24 24"
                                 fill="none"
                                 stroke="white"
@@ -95,10 +100,13 @@ export default function Header({ showIndex, loadingInProgress }) {
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                                 className="w-[4vh] h-[4vh]"
-                            >
+                                >
                                 <polyline points="11 22 22 12 11 2 22 12 2 12" vectorEffect="non-scaling-stroke"></polyline>
-                            </svg>
-                        </button>
+                                </svg>
+                            </button>
+                            ) : (
+                            <div className="w-[6.48vh]" />
+                        )}
                     </div>
                 )}
             </header>

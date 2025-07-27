@@ -31,7 +31,6 @@ class UserUpdate(BaseModel):
     username: constr(min_length=0,max_length=100)
     password: constr(min_length=0,max_length=100)
     userType: Literal["Profesor","Estudiante","Administrador","Otros"]
-    seeAllSubjects: bool
     userId: int
 
 class UpdateSubject(BaseModel):
@@ -127,7 +126,7 @@ def user_update(info: UserUpdate):
         "username": info.username,
         "password": info.password,
         "userType": info.userType,
-        "seeAllSubjects": info.seeAllSubjects,
+        "seeAllSubjects": False,
         "userId": info.userId
     })
 

@@ -58,7 +58,6 @@ export default function Perfil() {
           username: user_info.Username,
           password: user_info.Password,
           type: user_info.Type,
-          seeAll: user_info.SeeAllSubjects,
           id: user_info.Id
         });
         // Asignaturas a mostrar
@@ -88,7 +87,6 @@ export default function Perfil() {
               username: tempData.username,
               password: tempData.password,
               userType: tempData.type,
-              seeAllSubjects: tempData.seeAll,
               userId: tempData.id
           });
           console.log("Respuesta del servidor:", updateResponse.status);
@@ -176,23 +174,6 @@ export default function Perfil() {
           ) : (
             <span className="text-black font-montserrat text-[3vh]">{userData.type}</span>
           )}
-        </div>
-
-        {/* Opción para ver todas las asignaturas */}
-        <div className="mb-[3vh] flex items-center">
-          <input
-            type="checkbox"
-            id="ver-todas"
-            checked={editMode ? tempData.seeAll : userData.seeAll}
-            onChange={(e) => {
-              if (editMode) setTempData({ ...tempData, seeAll: e.target.checked });
-            }}
-            disabled={!editMode}
-            className="w-5 h-5 text-main-dark-blue focus:ring-0 accent-main-dark-blue"
-          />
-          <label htmlFor="ver-todas" className="ml-2 text-black font-montserrat text-[3vh]">
-            Ver Todas las Asignaturas
-          </label>
         </div>
 
         {/* Actualizar, confirmar y cancelar */}

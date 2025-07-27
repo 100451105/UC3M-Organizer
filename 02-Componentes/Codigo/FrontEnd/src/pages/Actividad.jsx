@@ -124,7 +124,7 @@ export default function Actividad() {
             {editMode ? (
             <input
                 value={tempData.Description}
-                onChange={(e) => setTempData({ ...tempData, Description: e.target.value === "" ? "" : parseInt(e.target.value) })}
+                onChange={(e) => setTempData({ ...tempData, Description: e.target.value })}
                 className="ml-2 border-b-2 border-main-dark-blue outline-none text-[3vh] font-montserrat text-black"
             />
           ) : (

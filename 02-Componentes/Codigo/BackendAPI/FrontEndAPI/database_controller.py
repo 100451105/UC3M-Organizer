@@ -83,7 +83,7 @@ class Database:
         try:
             cursor = connection.cursor(dictionary=True)
             if userId:
-                cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Id = %s;",(userId,))
+                cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Id = %s;",(userId,))
                 result = cursor.fetchone()
         except mysql.connector.Error as err:
             print(err.errno, int(err.msg.strip()), err.sqlstate)
