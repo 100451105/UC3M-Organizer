@@ -8,7 +8,7 @@ import scheduler as SchedulerController
 
 app = FastAPI()
 
-""" Payload definition """
+""" Definición del formato de las peticiones """
 class Activity(BaseModel):
     estimatedHours: conint(ge=0)
     strategy: Literal["Agresiva","Calmada","Completa"]
@@ -29,7 +29,7 @@ class ScheduleActivity(BaseModel):
 
     @model_validator(mode="after")
     def check_calendar_days(self) -> 'ScheduleActivity':
-        """ Checks the amount of calendar days that needs to be on the payload"""
+        """ Comprueba la cantidad de días de calendario que necesita tener la petición """
         activity = self.activity
         calendar = self.calendar
 
@@ -43,7 +43,7 @@ class ScheduleActivity(BaseModel):
         
         return self
 
-""" Scheduler Logic Endpoints """
+""" Endpoints relacionados con la Lógica del Organizador """
 @app.post("/scheduler/logic/activity/", description= "CreateCalendarScheduledActivities", tags=["Scheduler"])
 def create_calendar_scheduled_activities(information: ScheduleActivity):
     scheduler = SchedulerController.Scheduler()

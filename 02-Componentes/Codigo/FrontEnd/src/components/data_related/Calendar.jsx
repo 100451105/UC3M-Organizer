@@ -2,7 +2,9 @@ import React from "react";
 import axios from "axios";
 import Calendar from "react-calendar";
 import { useState, useEffect } from "react";
-import { mainColors } from "../common/Colors"
+import { mainColors } from "../common/Colors";
+
+{/* Sección de colores asignados a las asignaturas */}
 
 let subjectColorMap = {};
 
@@ -10,17 +12,44 @@ const getRandomColor = (subjectName) => {
     if (subjectColorMap[subjectName]) {
         return subjectColorMap[subjectName]
     }
-    const keys = Object.keys(mainColors);
-    const randomColor = keys[Math.floor(Math.random() * keys.length)];
-    subjectColorMap[subjectName] = mainColors[randomColor];
-    return mainColors[randomColor];
+
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
+    const colorUsage = {};
+    Object.keys(mainColors).forEach(colorKey => {
+      colorUsage[colorKey] = 0;
+    });
+    
+    Object.values(subjectColorMap).forEach(colorValue => {
+      const colorKey = Object.keys(mainColors).find(key => mainColors[key] === colorValue);
+      if (colorKey) {
+        colorUsage[colorKey]++;
+      }
+    });
+
+    {/* 2. Encontrar el menor uso de colores */}
+    const minUsage = Math.min(...Object.values(colorUsage));
+
+    {/* 3. Obtener todos los colores con el menor uso */}
+    const leastUsedColors = Object.keys(colorUsage).filter(
+      key => colorUsage[key] === minUsage
+    );
+
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
+    const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
+    const chosenColorValue = mainColors[chosenColorKey];
+
+    {/* 5. Asignar y devolver */}
+    subjectColorMap[subjectName] = chosenColorValue;
+    return chosenColorValue;
 }
 
 export default function CustomCalendar({ setLoadingState }) {
+    {/* Creación de un calendario personalizado para la página del Organizador */}
     const [date, setDate] = useState(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [calendar_days, setCalendarDays] = useState([]);
 
+    {/* Función para comprobar si dos fechas son la misma */}
     function isSameDay(d1, d2) {
         return(
             d1.getFullYear() === d2.getFullYear()
@@ -29,6 +58,7 @@ export default function CustomCalendar({ setLoadingState }) {
         );
     }
 
+    {/* Carga de datos */}
     useEffect(() => {
         const fetchCalendar = async () => {
         try {
@@ -40,7 +70,7 @@ export default function CustomCalendar({ setLoadingState }) {
             });
             if (response.status === 200) {
             let calendar = response.data.calendar;
-            // Parsear Activities y adaptar calendarDate para el calendario
+            {/* Adaptar las actividades para el calendario organizado */}
             calendar = calendar.map(day => ({
                 ...day,
                 Activities: JSON.parse(day.Activities).filter(activity => activity.ActivityName),
@@ -95,6 +125,7 @@ export default function CustomCalendar({ setLoadingState }) {
                         <p className="text-center text-gray-500">No hay actividades para este día.</p>
                     ))}
                 </div>
+                {/* Objeto del calendario utilizando React-Calendar */}
                 <div className="bg-white p-6 rounded-xl shadow-lg w-1/3 h-full">
                     <Calendar
                     view="month"

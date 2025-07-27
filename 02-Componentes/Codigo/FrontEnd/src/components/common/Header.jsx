@@ -23,18 +23,18 @@ const REDIRECTS = {
 }
 
 export default function Header({ showIndex, loadingInProgress }) {
-    
+    {/* Función común a todas las páginas para la creación de la cabecera y la pantalla de carga */}
     const [index, setIndex] = useState(0);
 
     const previous = () => {
-        // Mover la lista de titulos hacia atrás
+        {/* Mover la lista de títulos hacia atrás */}
         if (index - 4 >= 0) {
             setIndex(index - 4);
         }
     };
 
     const next = () => {
-        // Mover la lista de titulos hacia delante
+        {/* Mover la lista de títulos hacia delante */}
         if (index + 4 < TITULOS.length) {
             setIndex(index + 4);
         }
@@ -52,6 +52,7 @@ export default function Header({ showIndex, loadingInProgress }) {
                 {/* Cabecera de navegación para ordenador */}
                 {showIndex && (
                     <div className= "w-full h-[7.5vh] mt-[12.5vh] bg-white border-[0.37vh] border-main-dark-blue flex items-center justify-between px-[1.77vw]">
+                        {/* Botón de la izquierda */}
                         {index > 0 ? (
                             <button 
                                 className="w-[6.48vh] h-[6.48vh] custom-button rounded-full flex items-center justify-center"
@@ -73,6 +74,7 @@ export default function Header({ showIndex, loadingInProgress }) {
                             <div className="w-[6.48vh]" />
                         )}
 
+                        {/* Títulos de las distintas secciones */}
                         <div className="flex gap-[3.5vw] justify-center items-center flex-1">
                             {TITULOS.slice(index, index + 4).map((titulo, i) => (
                                 <button 
@@ -87,6 +89,7 @@ export default function Header({ showIndex, loadingInProgress }) {
                             ))}
                         </div>
 
+                        {/* Botón de la derecha */}
                         {index + 4 < TITULOS.length ? (
                             <button 
                                 className="w-[6.48vh] h-[6.48vh] custom-button rounded-full flex items-center justify-center"

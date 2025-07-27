@@ -1,4 +1,5 @@
 export default function Loading({ loadingInProgress }) {
+    {/* Función para colocar la pantalla de carga en todas las páginas */}
     return (
         <>
             {loadingInProgress && (

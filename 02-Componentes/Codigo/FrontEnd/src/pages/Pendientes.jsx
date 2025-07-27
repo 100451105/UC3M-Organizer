@@ -4,7 +4,6 @@ import PendingCalendar from "../components/data_related/Pending_Calendar"
 
 export default function Pendientes() {
   const [loading, setLoadingState] = useState(true);
-
   return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>

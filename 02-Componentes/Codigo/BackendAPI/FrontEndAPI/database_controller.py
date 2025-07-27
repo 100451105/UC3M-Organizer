@@ -5,10 +5,11 @@ from datetime import date
 import time
 import os
 
-""" Auxiliary functions in order to help JSON deserialization"""
+""" Funciones auxiliares para procesar inputs de tipo JSON """
 def date_converter(obj):
+    # Convierte el objeto 'date' a una cadena ISO
     if isinstance(obj, date):
-        return obj.isoformat()  # Convierte el objeto 'date' a una cadena ISO
+        return obj.isoformat()  
     raise TypeError(f"Type {obj.__class__.__name__} not serializable")
 
 """ Clase de Base de Datos que alberga todos los procesos necesarios para operar con ella"""
@@ -17,6 +18,7 @@ class Database:
         self.pool = None
 
     def connect(self):
+        # Creación de pool de SQL para realizar operaciones y conexiones
         attempts = 0
         while attempts < 5:
             try:
@@ -49,14 +51,14 @@ class Database:
     """ Operaciones permitidas en base de datos de lectura (casos de uso basicos) """
     
     def get_users(self, username=None):
-        """  Leer usuarios (uno o todos) """
+        """  Leer usuarios (uno o todos) en base al nombre de usuario """
         connection = self.get_connection()
         if not connection:
             return 503
         try:
             cursor = connection.cursor(dictionary=True)
             if username:
-                cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password, au.SeeAllSubjects FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
+                cursor.execute("SELECT p.Username, p.Id, p.Type, au.Password FROM person p JOIN user_authorization au ON p.Id = au.Id WHERE p.Username = %s;",(username,))
                 result = cursor.fetchone()
             else:
                 cursor.execute("SELECT * FROM person;")
@@ -76,7 +78,7 @@ class Database:
         return result
     
     def get_users_through_id(self, userId):
-        """  Leer usuarios a través del id """
+        """  Leer usuarios (uno) a través del id """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -151,7 +153,7 @@ class Database:
         return result
     
     def get_activities_main_info(self, actualDate):
-        """  Leer actividades (todas y solo la información principal) """
+        """  Leer actividades (todas) entre 1 mes atrás y 2 meses posterior de la fecha actual """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -173,7 +175,10 @@ class Database:
         return result
     
     def get_calendar(self, calendarDate=None):
-        """  Leer días del calendario (uno o varios) """
+        """ Leer días del organizador (uno o multiples).
+            - Sin especificar la fecha: recoge solo las actividades en el organizador para hoy
+            - Especificando la fecha: recoge las actividades diarias de un año académico completo (desde 1 de septiembre hasta 31 de octubre del siguiente año) en base a esa fecha proporcionada
+        """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -243,7 +248,10 @@ class Database:
         return result
     
     def get_calendar_scheduled_based_on_dates(self, startDate, endDate):
-        """  Leer días del organizador en base al activityId """
+        """ Leer días del organizador entre: 
+            - 3 días anterior a la fecha de inicio
+            - 3 días posterior a la fecha de fin
+        """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -287,7 +295,7 @@ class Database:
         return result
     
     def read_pending_activities(self, userId):
-        """  Leer días del organizador en base a la fecha """
+        """  Leer actividades pendientes en base al id de un coordinador """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -331,7 +339,7 @@ class Database:
         return result
     
     def get_subjects_of_coordinator(self, userId):
-        """  Leer para un usuario las asignaturas que tiene """
+        """  Leer las asignaturas que pertenecen a un coordinador """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -375,7 +383,7 @@ class Database:
         return result
     
     def get_users_state_on_subject(self, subjectId):
-        """ Leer para una asignatura los usuarios que tiene """
+        """ Leer el estado de los usuarios con respecto a una asignatura (asignados o desasignados) """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -441,7 +449,7 @@ class Database:
         return result
     
     def get_activities_of_user(self,userId):
-        """ Leer para una asignatura las distintas actividades que tiene """
+        """ Leer para un usuario las actividades de interés de sus asignaturas asignadas """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -462,7 +470,7 @@ class Database:
         connection.close()
         return result
     
-    """ Operaciones de creación/modificación """
+    """ Operaciones de creación/actualización """
 
     def create_user(self,username,password,userType):
         """ Crear usuario """
@@ -635,7 +643,7 @@ class Database:
         return 200
     
     def assign_user_to_subject(self,userList,subjectId):
-        """ Asignar asignatura a un usuario """
+        """ Asignar/desasignar asignatura a una lista de usuarios """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -657,7 +665,7 @@ class Database:
         return 200
     
     def change_subject_vision_of_user(self,userId,seeAllSubjects):
-        """ Asignar asignatura a un usuario """
+        """ Cambiar la visión de un usuario con respecto a las asignaturas """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -678,7 +686,7 @@ class Database:
         return 200
     
     def assign_coordinator_to_subject(self,adminId,subjectId):
-        """ Asignar asignatura a un usuario """
+        """ Asignar coordinador a una asignatura """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -699,7 +707,7 @@ class Database:
         return 200
     
     def assign_activity_to_day(self,scheduledActivities):
-        """ Asignar actividad al calendario """
+        """ Asignar una lista de actividades al organizador """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -722,7 +730,7 @@ class Database:
         return 200
     
     def change_status_of_activity(self,activityId,newStatus,newEndDate,newStartDate):
-        """ Asignar asignatura a un usuario """
+        """ Cambiar el estado de una actividad """
         connection = self.get_connection()
         if not connection:
             return 503
@@ -742,11 +750,11 @@ class Database:
         connection.close()
         return 200
     
-    """ Delete operations:
-    - User
-    - Subject
-    - Activity
-    - Scheduler
+    """ Operaciones de borrado:
+    - Usuario
+    - Asignatura
+    - Actividad
+    - Organizador
     """
 
     def delete_user(self,userId):
@@ -813,7 +821,7 @@ class Database:
         return 200
     
     def delete_scheduled_activities(self,activities):
-        """ Borrar una actividad de scheduler """
+        """ Borrar una actividad del organizador """
         connection = self.get_connection()
         if not connection:
             return 503

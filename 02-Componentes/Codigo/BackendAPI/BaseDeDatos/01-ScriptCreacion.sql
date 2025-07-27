@@ -1,6 +1,6 @@
 -- Script de creación de todas las tablas al iniciar la base de datos
 
--- Creating user, database and access
+-- Crear usuarios, base de datos correspondiente y permisos para cada usuario
 
 CREATE DATABASE IF NOT EXISTS central_database;
 CREATE USER 'data_admin'@'%' IDENTIFIED BY 'q30Gw1nnq560qOlVrWnJ';
@@ -9,11 +9,11 @@ GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 USE central_database;
 
--- Set UTC timezone
+-- Colocar timezone UTC para evitar discontinuidad en las fechas
 SET time_zone = '+00:00';
 
 
--- user_authorization
+-- Autorización del usuario
 CREATE TABLE user_authorization (
     Id INT AUTO_INCREMENT,
     Username NVARCHAR(100),
@@ -22,16 +22,16 @@ CREATE TABLE user_authorization (
     CONSTRAINT pk_user_auth PRIMARY KEY (Id, Username)
 );
 
--- person
+-- Información del usuario
 CREATE TABLE person (
     Id INT,
     Username NVARCHAR(100),
-    Type ENUM('Profesor','Estudiante','Administrador','Otros') NOT NULL,
+    Type ENUM('Profesor','Estudiante','Coordinador','Administrador','Otros') NOT NULL,
     CONSTRAINT pk_person PRIMARY KEY (Id, Username)
 );
 ALTER TABLE person ADD CONSTRAINT fk_person_id_username FOREIGN KEY (Id, Username) REFERENCES user_authorization(Id, Username) ON DELETE CASCADE;
 
--- subject
+-- Información de asignatura
 CREATE TABLE subject (
     IdSubject INT PRIMARY KEY,
     Name NVARCHAR(1024) NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE subject (
 );
 ALTER TABLE subject ADD CONSTRAINT fk_subject_adminId FOREIGN KEY (IdAdministrator) REFERENCES person(Id) ON DELETE SET NULL;
 
--- personPerSubject
+-- Relación entre usuarios y asignaturas
 CREATE TABLE personPerSubject (
     IdSubject INT,
     IdPerson INT,
@@ -51,7 +51,7 @@ CREATE TABLE personPerSubject (
 ALTER TABLE personPerSubject ADD CONSTRAINT fk_pps_subjectId FOREIGN KEY (IdSubject) REFERENCES subject(IdSubject) ON DELETE CASCADE;
 ALTER TABLE personPerSubject ADD CONSTRAINT fk_pps_personId FOREIGN KEY (IdPerson) REFERENCES person(Id) ON DELETE CASCADE;
 
--- activity
+-- Información de actividades
 CREATE TABLE activity (
     IdActivity INT AUTO_INCREMENT PRIMARY KEY,
     Name NVARCHAR(1024) NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE activity (
 );
 ALTER TABLE activity ADD CONSTRAINT fk_activity_subjectId FOREIGN KEY (IdSubject) REFERENCES subject(IdSubject) ON DELETE CASCADE;
 
--- calendar
+-- Información de días de calendario
 CREATE TABLE calendar (
     CalendarDate DATE PRIMARY KEY,
     DayType ENUM('Festivo','Normal') NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE calendar (
     Status ENUM('Ocupado','Libre') NOT NULL
 );
 
--- schedule
+-- Organización de actividades en base a días de calendario
 CREATE TABLE schedule (
     CalendarDate DATE,
     Hours INT NOT NULL CHECK(Hours >= 1),
@@ -85,7 +85,9 @@ CREATE TABLE schedule (
 ALTER TABLE schedule ADD CONSTRAINT fk_schedule_activityId FOREIGN KEY (IdActivity) REFERENCES activity(IdActivity) ON DELETE CASCADE;
 ALTER TABLE schedule ADD CONSTRAINT fk_schedule_calendarDate FOREIGN KEY (CalendarDate) REFERENCES calendar(CalendarDate) ON DELETE CASCADE;
 
--- Views for different optimized searchs
+-- Vistas definidas
+
+-- Información usuario-asignatura
 CREATE VIEW vPersonSubjectInfo AS
 SELECT 
     p.Id AS UserID, 
@@ -101,6 +103,7 @@ FROM personPerSubject pps
 JOIN person p ON pps.IdPerson = p.Id
 JOIN subject s ON pps.IdSubject = s.IdSubject;
 
+-- Información asignatura-actividades
 CREATE VIEW vSubjectActivityInfo AS
 SELECT 
     a.IdActivity AS ActivityID, 
@@ -121,6 +124,7 @@ SELECT
 FROM activity a
 JOIN subject s ON a.IdSubject = s.IdSubject;
 
+-- Información usuario con actividades relacionadas
 CREATE VIEW vUserInterestedActivities AS
 SELECT 
     psi.UserID, 
@@ -137,6 +141,7 @@ SELECT
 FROM vPersonSubjectInfo psi
 JOIN vSubjectActivityInfo sai ON psi.SubjectID = sai.SubjectID;
 
+-- Información sobre las actividades y asignaturas a las que pertenecen para cada día de calendario
 CREATE VIEW vActivitiesPerDay AS
 SELECT
     c.CalendarDate,
@@ -161,6 +166,7 @@ LEFT JOIN vSubjectActivityInfo a ON s.IdActivity = a.ActivityID AND a.Status = '
 GROUP BY
     c.CalendarDate, c.DayType, c.WeekDay, c.Status;
 
+-- Información sobre las actividades pendientes de ser asignadas
 CREATE VIEW vPendingActivitiesInformation AS
 SELECT
     a.IdActivity AS ActivityID,
@@ -189,9 +195,9 @@ FROM subject s
 JOIN activity a ON s.IdSubject = a.IdSubject
 WHERE a.Status = 'Confirmar';
 
+-- Procedimientos para gestionar la actualización/creación de datos
 
-
--- Store Procedures for create/update operations
+-- Crear o actualizar un usuario
 DELIMITER //
 CREATE PROCEDURE usp_CreateOrUpdateUser(
     IN p_Username NVARCHAR(100), 
@@ -214,7 +220,7 @@ BEGIN
         WHERE Id = p_Id;
         SET p_newId = p_Id;
     ELSE
-        -- Check if the username already exists
+        -- Comprobar si el correo del usuario ya existe
         IF EXISTS (SELECT 1 FROM user_authorization WHERE Username = p_Username) THEN
             SIGNAL SQLSTATE '45000' 
             SET MESSAGE_TEXT = '401';
@@ -241,7 +247,7 @@ BEGIN
     END IF;
 END //
 
-
+-- Crear o actualizar una asignatura
 CREATE PROCEDURE usp_CreateOrUpdateSubject(
     IN p_Credits INT, 
     IN p_Semester INT,
@@ -279,6 +285,7 @@ BEGIN
     END IF;
 END //
 
+-- Crear o actualizar una actividad
 CREATE PROCEDURE usp_CreateOrUpdateActivity(
     IN p_Name NVARCHAR(100), 
     IN p_Description NVARCHAR(1024),
@@ -331,11 +338,12 @@ BEGIN
         SET p_newId = LAST_INSERT_ID();
     END IF;
 
+    -- Si se actualiza, borrar la organización previa de dicha actividad
     DELETE FROM schedule WHERE IdActivity = p_newId;
 END //
 
+-- Crear o actualizar días de calendarios (recibe como input una lista de días)
 DELIMITER //
-
 CREATE PROCEDURE usp_CreateOrUpdateCalendarDays(
     IN p_Calendar JSON
 )
@@ -345,7 +353,7 @@ BEGIN
     DECLARE v_DayType ENUM('Festivo','Normal');
     DECLARE v_WeekDay ENUM('Lunes','Martes','Miercoles','Jueves','Viernes','Sabado','Domingo');
     DECLARE v_Status ENUM('Ocupado','Libre');
-    -- Collection of JSON input
+    -- Recoger la información del JSON
     DECLARE cur CURSOR FOR 
         SELECT 
             CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.calendarDate')) AS DATE) AS CalendarDate,
@@ -364,7 +372,7 @@ BEGIN
         IF done THEN
             LEAVE read_loop;
         END IF;
-        -- Insertion of day in the calendar
+        -- Insertar o actualizar un día en el calendario 
         INSERT INTO calendar (CalendarDate, DayType, WeekDay, Status)
         VALUES (v_CalendarDate, v_DayType, v_WeekDay, v_Status)
         ON DUPLICATE KEY UPDATE
@@ -378,8 +386,8 @@ BEGIN
     CLOSE cur;
 END //
 
+-- Asignar o desasignar una lista de usuarios de una asignatura
 DELIMITER //
-
 CREATE PROCEDURE usp_AssignOrUnassignUsersToSubject(
     IN p_SubjectId INT,
     IN p_Users JSON
@@ -401,12 +409,12 @@ BEGIN
         ) u;
 
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
-
+    -- Comprobar que la asignatura existe
     IF NOT EXISTS (SELECT 1 FROM subject WHERE IdSubject = p_SubjectId) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '401'; -- Subject not found
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '401'; 
     END IF;
 
-    -- Verificar existencia de todos los usuarios
+    -- Verificar que todos los usuarios existen previamente
     IF (
         SELECT COUNT(*) FROM (
             SELECT JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.userId')) AS UserId
@@ -419,7 +427,7 @@ BEGIN
             WHERE p.Id IS NULL
         ) AS MissingUsers
     ) > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '402'; -- Some users not found
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '402';
     END IF;
 
     OPEN cur;
@@ -431,11 +439,11 @@ BEGIN
         END IF;
 
         IF v_Assigned THEN
-            -- Insert only if not exists
+            -- Insertar solo si no existe
             INSERT IGNORE INTO personPerSubject (IdSubject, IdPerson)
             VALUES (p_SubjectId, v_UserId);
         ELSE
-            -- Remove the assignment if exists
+            -- Deasignar si está asignado
             DELETE FROM personPerSubject
             WHERE IdSubject = p_SubjectId AND IdPerson = v_UserId;
         END IF;
@@ -444,14 +452,14 @@ BEGIN
     CLOSE cur;
 END //
 
+-- Actualizar visión del usuario
 DELIMITER //
-
 CREATE PROCEDURE usp_ChangeSubjectVisionOfUser(
     IN p_Username INT, 
     IN p_SeeAllSubjects BOOLEAN
 )
 BEGIN
-    -- Verify user
+    -- Verificar que el usuario existe
     IF NOT EXISTS (SELECT 1 FROM person WHERE Username = p_Username) THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = '401';
@@ -461,14 +469,14 @@ BEGIN
     WHERE Username = p_Username;
 END //
 
+-- Asignar un coordinador a una asignatura
 DELIMITER //
-
 CREATE PROCEDURE usp_AssignCoordinatorToSubject(
     IN p_SubjectId INT, 
     IN p_CoordinatorId INT
 )
 BEGIN
-    -- Verify subject
+    -- Verificar que la asignatura existe
     IF NOT EXISTS (SELECT 1 FROM subject WHERE IdSubject = p_SubjectId) THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = '401';
@@ -482,8 +490,8 @@ BEGIN
     END IF;
 END //
 
+-- Cambiar el estado de una actividad
 DELIMITER //
-
 CREATE PROCEDURE usp_ChangeStatusOfActivity(
     IN p_ActivityId INT, 
     IN p_Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado'),
@@ -492,13 +500,13 @@ CREATE PROCEDURE usp_ChangeStatusOfActivity(
 )
 BEGIN
     DECLARE current_status VARCHAR(20);
-    -- Verify activity
+    -- Verificar que la actividad existe
     IF NOT EXISTS (SELECT 1 FROM activity WHERE IdActivity = p_ActivityId) THEN
         SIGNAL SQLSTATE '45000' 
         SET MESSAGE_TEXT = '401';
     END IF;
+    -- Si se quiere asignar, se actualiza la fecha de fin a la nueva
     IF p_Status = 'Asignado' THEN
-        
         SELECT Status INTO current_status 
         FROM activity 
         WHERE IdActivity = p_ActivityId;
@@ -513,6 +521,7 @@ BEGIN
             NewEndOfActivity = NULL
         WHERE IdActivity = p_ActivityId;
     END IF;
+    -- Si se quiere colocar para confirmar, se coloca la nueva fecha de inicio y la nueva fecha de fin
     IF p_Status = 'Confirmar' THEN
         UPDATE activity SET 
             Status = p_Status,
@@ -526,6 +535,7 @@ BEGIN
     END IF;
 END //
 
+-- Asignar organización de actividad para cada día
 CREATE PROCEDURE usp_AssignActivityToDay(
     IN p_Schedule JSON
 )
@@ -534,7 +544,7 @@ BEGIN
     DECLARE v_CalendarDate DATE;
     DECLARE v_Hours INT;
     DECLARE v_IdActivity INT;
-    -- Collection of JSON input
+    -- Recoger la información del JSON
     DECLARE cur CURSOR FOR 
         SELECT 
             CAST(JSON_UNQUOTE(JSON_EXTRACT(u.value, '$.calendarDate')) AS DATE) AS CalendarDate,
@@ -552,29 +562,27 @@ BEGIN
         IF done THEN
             LEAVE read_loop;
         END IF;
-        -- Verify activity
+        -- Verificar si la actividad existe
         IF NOT EXISTS (SELECT 1 FROM activity WHERE IdActivity = v_IdActivity) THEN
             SIGNAL SQLSTATE '45000' 
             SET MESSAGE_TEXT = '401';
         END IF;
-        -- Verify activity
+        -- Verificar si el día del calendario existe
         IF NOT EXISTS (SELECT 1 FROM calendar WHERE CalendarDate = v_CalendarDate) THEN
             SIGNAL SQLSTATE '45000' 
             SET MESSAGE_TEXT = '402';
         END IF;
-        -- Insertion of day in the calendar
+        -- Insertar la actividad organizada en el día
         INSERT INTO schedule (CalendarDate, Hours, IdActivity)
         VALUES (v_CalendarDate, v_Hours, v_IdActivity)
         ON DUPLICATE KEY UPDATE
             Hours = VALUES(Hours);
-
     END LOOP;
-
     CLOSE cur;
 END //
 DELIMITER ;
 
--- Examples to test
+-- Ejemplos para cada tabla para probar las funcionalidades
 INSERT INTO user_authorization (Username, Password) VALUES ('admin@alumnos.uc3m.es','password');
 INSERT INTO person (Id, Username, Type) VALUES (1,'admin@alumnos.uc3m.es','Administrador');
 INSERT INTO user_authorization (Username, Password) VALUES ('test@profesor.uc3m.es','password');

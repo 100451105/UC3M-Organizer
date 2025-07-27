@@ -4,6 +4,8 @@ import Header from "../components/common/Header";
 import { mainColors } from "../components/common/Colors";
 import { UserCache } from '../components/common/Cache';
 
+{/* Sección de colores asignados a las asignaturas */}
+
 let subjectColorMap = {};
 
 const getRandomColor = (subjectName) => {
@@ -11,7 +13,7 @@ const getRandomColor = (subjectName) => {
         return subjectColorMap[subjectName]
     }
 
-    // 1. Contar cuántas veces se ha asignado cada color
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
     const colorUsage = {};
     Object.keys(mainColors).forEach(colorKey => {
       colorUsage[colorKey] = 0;
@@ -24,25 +26,25 @@ const getRandomColor = (subjectName) => {
       }
     });
 
-    // 2. Encontrar el menor uso de colores
+    {/* 2. Encontrar el menor uso de colores */}
     const minUsage = Math.min(...Object.values(colorUsage));
 
-    // 3. Obtener todos los colores con el menor uso
+    {/* 3. Obtener todos los colores con el menor uso */}
     const leastUsedColors = Object.keys(colorUsage).filter(
       key => colorUsage[key] === minUsage
     );
 
-    // 4. Seleccionar uno aleatorio entre los menos usados
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
     const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
     const chosenColorValue = mainColors[chosenColorKey];
 
-    // 5. Asignar y devolver
+    {/* 5. Asignar y devolver */}
     subjectColorMap[subjectName] = chosenColorValue;
     return chosenColorValue;
 }
 
 export default function Perfil() {
-    {/* Cambiar entre modo edición y modo lectura */}
+    {/* Función para crear la página de información sobre el Usuario y las Asignaturas asignadas */}
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoadingState] = useState(true);
     const [show, setShownPassword] = useState(false);
@@ -50,6 +52,7 @@ export default function Perfil() {
     const [tempData, setTempData] = useState({...userData});
     const [subjectList, setSubjectList] = useState([]);
 
+    {/* Carga de datos */}
     useEffect(() => {
       const fetchUserData = async () => {
         await UserCache(false);
@@ -60,10 +63,10 @@ export default function Perfil() {
           type: user_info.Type,
           id: user_info.Id
         });
-        // Asignaturas a mostrar
         setSubjectList(user_info.relatedSubjectsList);
       }
       fetchUserData();
+      setLoadingState(false);
     }, []);
 
     const handleUpdate = () => {
@@ -73,10 +76,7 @@ export default function Perfil() {
 
     const handleConfirm = async () => {
       setLoadingState(true);
-      
       {/* Petición para actualizar la información del usuario en el backend */}
-      console.log(tempData);
-      
       try {
           if (!tempData.username || !tempData.password){
             alert("Alguno de los campos de texto introducidos está vacío. Por favor, rellene dichos campos antes de confirmar de nuevo")
@@ -89,7 +89,6 @@ export default function Perfil() {
               userType: tempData.type,
               userId: tempData.id
           });
-          console.log("Respuesta del servidor:", updateResponse.status);
           if (updateResponse.status == 200) {
             alert("Datos actualizados correctamente"); 
             setUserData({...tempData});
@@ -118,15 +117,12 @@ export default function Perfil() {
       setTempData({...userData});
       setEditMode(false);
     };
-
-    useEffect(() => {
-      setLoadingState(false);
-    })
     
     return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>
       <h2 className="page-title">Perfil</h2>
+      {/* Sección de información del Usuario / Formulario */}
       <section className="bg-white rounded-xl p-6 w-[50vw] text-left">
         {/* Usuario */}
         <div className="mb-[3vh]">
@@ -201,6 +197,7 @@ export default function Perfil() {
           </div>
         )}
       </section>
+      {/* Sección de información de las Asignaturas que tiene Asignadas */}
       <section className="absolute top-[25%] right-[5%] bg-white w-[40vw] text-center">
         <h2 className="section-title text-center mb-[1vh]">
           Asignaturas

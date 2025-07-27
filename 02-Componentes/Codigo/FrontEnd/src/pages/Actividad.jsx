@@ -4,19 +4,20 @@ import Header from "../components/common/Header";
 import { UserCache } from '../components/common/Cache';
 
 export default function Actividad() {
-    {/* Cambiar entre modo edición y modo lectura */}
+    {/* Función para crear la página de la información sobre una actividad */}
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoadingState] = useState(true);
     const [activityData, setactivityData] = useState({});
     const [userData, setUserData] = useState({});
     const [tempData, setTempData] = useState({...activityData});
 
+    {/* Carga de datos */}
     useEffect(() => {
       const fetchData = async () => {
             await UserCache(false);
             const user_info = JSON.parse(localStorage.getItem("user_info"))
 
-            {/* Get data of the subject in order to populate the page dinamically */}
+            {/* Actividad a recoger información */}
             const activityId = sessionStorage.getItem('selectedActivityID');
             try {
                 const activityInfo = await axios.get("http://localhost:8002/activities/specific/info/", {
@@ -25,7 +26,6 @@ export default function Actividad() {
                         activityId: activityId
                     }
                 });
-                console.log("Respuesta del servidor:", activityInfo.status);
                 if (activityInfo.status == 200) {
                     setactivityData(activityInfo.data.activityInfo);
                 }
@@ -45,9 +45,12 @@ export default function Actividad() {
                 }
             }
             setUserData(user_info);
+            setLoadingState(false);
         }
         fetchData();
     }, []);
+
+    {/* Funciones para cambios de modo y confirmación de modificaciones */}
 
     const handleUpdate = () => {
       setTempData({...activityData});
@@ -56,9 +59,6 @@ export default function Actividad() {
 
     const handleConfirm = async () => {
       setLoadingState(true);
-      
-      {/* Petición para actualizar la información del usuario en el backend */}
-      
       try {
           if (!tempData.Description || !tempData.ActivityType || !tempData.EndOfActivity){
             alert("Alguno de los campos de texto introducidos está vacío. Por favor, rellene dichos campos antes de confirmar de nuevo")
@@ -77,12 +77,10 @@ export default function Actividad() {
               strategy: tempData.Strategy
           });
           
-          console.log("Respuesta del servidor:", updateResponse.status);
           if (updateResponse.status == 200) {
             alert("Actividad actualizada y reorganizada correctamente"); 
           }
       } catch (error) {
-        console.log(error.response);
           if (axios.isAxiosError(error)) {
               if (error.response) {
                   const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
@@ -98,7 +96,6 @@ export default function Actividad() {
           }
       } finally {
         setLoadingState(false);
-        // Forzar refresh de las actividades
         localStorage.removeItem("activity_info");
         window.location.href = '/actividad'
       }
@@ -108,14 +105,11 @@ export default function Actividad() {
       setTempData({...activityData});
       setEditMode(false);
     };
-
-    useEffect(() => {
-      setLoadingState(false);
-    })
     
     return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>
+      {/* Sección de la información de Actividad / Formulario */}
       <h2 className="page-title">{activityData.ActivityName}</h2>
       <section className="bg-white rounded-xl p-6 w-[70vw] text-left">
         {/* Descripción */}

@@ -20,7 +20,7 @@ BEGIN
             WHEN 7 THEN 'Sabado'
         END;
 
-        -- Tipo de día (sábado y domingo = Festivo)
+        -- Tipo de día (sábado y domingo son festivo por defecto)
         SET v_daytype = CASE DAYOFWEEK(v_date)
             WHEN 1 THEN 'Festivo'  -- Domingo
             WHEN 7 THEN 'Festivo'  -- Sábado
@@ -37,10 +37,12 @@ END //
 
 DELIMITER ;
 
--- Ejecutar el procedimiento
+-- Ejecutar el procedimiento y borrarlo
 CALL usp_InitializeCalendar();
 DROP PROCEDURE usp_InitializeCalendar;
 
+
+-- Inserción de la organización de las actividades de ejemplo del script 01
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-14',2,1);
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-21',2,2);
 INSERT INTO schedule (CalendarDate, Hours, IdActivity) VALUES ('2025-07-22',2,2);

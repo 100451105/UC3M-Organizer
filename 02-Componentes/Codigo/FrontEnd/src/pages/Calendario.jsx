@@ -4,7 +4,6 @@ import GanttDiagram from "../components/data_related/Gantt";
 
 export default function Calendario() {
   const [loading, setLoadingState] = useState(true);
-
   return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>

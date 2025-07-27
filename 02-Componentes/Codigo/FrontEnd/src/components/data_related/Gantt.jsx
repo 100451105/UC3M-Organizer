@@ -17,6 +17,9 @@ const MONTHS = [
     "Noviembre",
     "Diciembre"
 ]
+
+{/* Sección de colores asignados a las asignaturas */}
+
 let COLORS = {};
 
 const getRandomColor = (subjectName) => {
@@ -24,7 +27,7 @@ const getRandomColor = (subjectName) => {
         return COLORS[subjectName]
     }
 
-    // 1. Contar cuántas veces se ha asignado cada color
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
     const colorUsage = {};
     Object.keys(mainColors).forEach(colorKey => {
       colorUsage[colorKey] = 0;
@@ -37,24 +40,25 @@ const getRandomColor = (subjectName) => {
       }
     });
 
-    // 2. Encontrar el menor uso de colores
+    {/* 2. Encontrar el menor uso de colores */}
     const minUsage = Math.min(...Object.values(colorUsage));
 
-    // 3. Obtener todos los colores con el menor uso
+    {/* 3. Obtener todos los colores con el menor uso */}
     const leastUsedColors = Object.keys(colorUsage).filter(
       key => colorUsage[key] === minUsage
     );
 
-    // 4. Seleccionar uno aleatorio entre los menos usados
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
     const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
     const chosenColorValue = mainColors[chosenColorKey];
 
-    // 5. Asignar y devolver
+    {/* 5. Asignar y devolver */}
     COLORS[subjectName] = chosenColorValue;
     return chosenColorValue;
 }
 
 export default function GanttDiagram({ setLoadingState }) {
+    {/* Sección relacionada con la construcción del diagrama de Gantt */}
     const [activity_list, setActivityList] = useState([]);
 
     {/* Definición de meses a utilizar */}
@@ -111,8 +115,6 @@ export default function GanttDiagram({ setLoadingState }) {
         getRandomColor(resource);
     });
 
-    console.log(resourceKeys);
-
     {/* Cálculo del tamaño del Gantt dinámicamente */}
     const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
@@ -160,8 +162,10 @@ export default function GanttDiagram({ setLoadingState }) {
         const lastDayTimestamp = Date.UTC(year, month + 1, 0);
         return lastDayTimestamp;
     });
-
+    
+    {/* Opciones personalizadas para el diagrama de Gantt */}
     const option = {
+        
         tooltip: {
             trigger: "item",
             formatter: (params) => {
@@ -270,9 +274,9 @@ export default function GanttDiagram({ setLoadingState }) {
                     xAxis: timestamp
                 })),
                 {
-                    xAxis: new Date(), // <-- añade la línea de hoy
+                    xAxis: new Date(), 
                     lineStyle: {
-                        color: "#2563eb", // azul (o tu color Tailwind si lo pasas como hex)
+                        color: "#2563eb",
                         type: "dashed",
                         width: 2
                     },

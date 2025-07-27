@@ -13,6 +13,7 @@ import CrearActividad from './pages/CrearActividad'
 
 
 export default function App() {
+  {/* Función principal para redirigir cada página a su correspondiente componente React */}
   return(  
     <BrowserRouter>
         <Routes>

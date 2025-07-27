@@ -5,19 +5,47 @@ import { UserCache } from "../common/Cache";
 import { useState, useEffect } from "react";
 import { mainColors } from "../common/Colors"
 
+{/* Sección de colores asignados a las asignaturas */}
+
 let subjectColorMap = {};
 
 const getRandomColor = (subjectName) => {
     if (subjectColorMap[subjectName]) {
         return subjectColorMap[subjectName]
     }
-    const keys = Object.keys(mainColors);
-    const randomColor = keys[Math.floor(Math.random() * keys.length)];
-    subjectColorMap[subjectName] = mainColors[randomColor];
-    return mainColors[randomColor];
+
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
+    const colorUsage = {};
+    Object.keys(mainColors).forEach(colorKey => {
+      colorUsage[colorKey] = 0;
+    });
+    
+    Object.values(subjectColorMap).forEach(colorValue => {
+      const colorKey = Object.keys(mainColors).find(key => mainColors[key] === colorValue);
+      if (colorKey) {
+        colorUsage[colorKey]++;
+      }
+    });
+
+    {/* 2. Encontrar el menor uso de colores */}
+    const minUsage = Math.min(...Object.values(colorUsage));
+
+    {/* 3. Obtener todos los colores con el menor uso */}
+    const leastUsedColors = Object.keys(colorUsage).filter(
+      key => colorUsage[key] === minUsage
+    );
+
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
+    const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
+    const chosenColorValue = mainColors[chosenColorKey];
+
+    {/* 5. Asignar y devolver */}
+    subjectColorMap[subjectName] = chosenColorValue;
+    return chosenColorValue;
 }
 
 export default function CustomCalendar({ setLoadingState }) {
+    {/* Función para crear el calendario para las actividades pendientes */}
     const [selectedDate, setSelectedDate] = useState(null);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [minDate, setMinDate] = useState(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1));
@@ -25,14 +53,6 @@ export default function CustomCalendar({ setLoadingState }) {
     const [selectedActivity, setSelectedActivity] = useState(null);
     const [pending_activities, setPendingActivities] = useState([]);
     const [popupPos, setPopupPos] = useState({ x: 0, y: 0 });
-
-    function isSameDay(d1, d2) {
-        return(
-            d1.getFullYear() === d2.getFullYear()
-            && d1.getMonth() === d2.getMonth()
-            && d1.getDate() === d2.getDate() 
-        );
-    }
 
     {/* Funciones para el manejo de fechas del schedule y calendario */}
 
@@ -71,6 +91,8 @@ export default function CustomCalendar({ setLoadingState }) {
         return match ? match.hours : 0;
     };
 
+    {/* Funciones relacionados con los eventos de click de botones y días de calendario */}
+
     const handleDayClick = (date, event) => {
         setSelectedDate(date);
         setPopupPos({ x: event.clientX, y: event.clientY });
@@ -85,7 +107,6 @@ export default function CustomCalendar({ setLoadingState }) {
             const confirmActivity = await axios.post("http://localhost:8002/activities/confirm/", {
                 activityId: selectedActivity.id
             });
-            console.log("Respuesta del servidor:", confirmActivity.status);
             if (confirmActivity.status === 200) {
                 alert("Confirmada actividad correctamente");
                 // Forzar refresh de las actividades
@@ -128,7 +149,7 @@ export default function CustomCalendar({ setLoadingState }) {
                 });
                 if (response.status === 200) {
                     let activities = response.data.pendingList;
-                    // Parsear Activities y adaptar calendarDate para el calendario
+                    {/* Parsear actividades pendientes */}
                     const parsedActivities = activities.map(activity => ({
                         id: activity.ActivityID,
                         name: activity.ActivityName,
@@ -267,6 +288,7 @@ export default function CustomCalendar({ setLoadingState }) {
                         return day_style;
                     }}
                     />
+                    {/* Sección física del popup del día de calendario */}
                     {selectedDate && (
                         <div
                         style={{
@@ -292,8 +314,8 @@ export default function CustomCalendar({ setLoadingState }) {
                     {!selectedActivity && <p className="mt-1 text-center">Seleccionado: Ninguno</p>}
                     
                 </div>
+
                 {/* Selector de actividades */}
-                
                 <div className="w-1/3 ml-[5vw] border-main-dark-blue bg-grey-300 border-[1vh] flex flex-col overflow-y-auto h-[70vh]">
                     <h2 className="text-center text-main-dark-blue font-montserrat font-bold text-xl py-4 border-b border-main-dark-blue">
                         Actividades pendientes

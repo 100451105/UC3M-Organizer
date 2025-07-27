@@ -4,11 +4,8 @@ import LoginForm from "../components/forms/LoginForm";
 import RegisterForm from "../components/forms/RegisterForm";
 import Header from "../components/common/Header";
 
-
-
 export default function Inicio() {
   const [loading, setLoadingState] = useState(false);
-
   return (
     <>
       <Header showIndex={false} loadingInProgress={loading} />

@@ -4,6 +4,8 @@ import Header from "../components/common/Header";
 import { UserCache } from '../components/common/Cache';
 import { mainColors } from "../components/common/Colors";
 
+{/* Sección de colores asignados a las asignaturas */}
+
 let subjectColorMap = {};
 
 const getRandomColor = (subjectName) => {
@@ -11,7 +13,7 @@ const getRandomColor = (subjectName) => {
         return subjectColorMap[subjectName]
     }
 
-    // 1. Contar cuántas veces se ha asignado cada color
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
     const colorUsage = {};
     Object.keys(mainColors).forEach(colorKey => {
       colorUsage[colorKey] = 0;
@@ -24,24 +26,25 @@ const getRandomColor = (subjectName) => {
       }
     });
 
-    // 2. Encontrar el menor uso de colores
+    {/* 2. Encontrar el menor uso de colores */}
     const minUsage = Math.min(...Object.values(colorUsage));
 
-    // 3. Obtener todos los colores con el menor uso
+    {/* 3. Obtener todos los colores con el menor uso */}
     const leastUsedColors = Object.keys(colorUsage).filter(
       key => colorUsage[key] === minUsage
     );
 
-    // 4. Seleccionar uno aleatorio entre los menos usados
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
     const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
     const chosenColorValue = mainColors[chosenColorKey];
 
-    // 5. Asignar y devolver
+    {/* 5. Asignar y devolver */}
     subjectColorMap[subjectName] = chosenColorValue;
     return chosenColorValue;
 }
 
 export default function Asignaturas() {
+  {/* Función para crear la página de la información sobre las distintas asignaturas y creación de estas */}
   const [subjectList, setSubjectList] = useState([]);
   const [loading, setLoadingState] = useState(true);
   const [createMode, setCreateMode] = useState(false);
@@ -54,6 +57,7 @@ export default function Asignaturas() {
     subjectCoordinator: ""
   });
 
+  {/* Carga de datos */}
   useEffect(() => {
     const fetchSubjectData = async () => {
       const user_info = JSON.parse(localStorage.getItem("user_info"));
@@ -63,10 +67,9 @@ export default function Asignaturas() {
       }
       const Id = user_info.Id;
       await UserCache(Id);
-      // Asignaturas a mostrar
+      {/* Asignaturas a mostrar */}
       try {
         const subjectInfo = await axios.get("http://localhost:8002/subject/info/");
-        console.log("Respuesta del servidor:", subjectInfo.status);
         if (subjectInfo.status === 200) {
           const subjects = subjectInfo.data.subjectList;
           setSubjectList(subjects);
@@ -93,7 +96,6 @@ export default function Asignaturas() {
 
   const handleConfirm = async () => {
     setLoadingState(true);
-          
     {/* Petición para actualizar/crear la asignatura en el backend */}
     try {
         if (!tempData.subjectId || !tempData.subjectName || !tempData.subjectCredits || !tempData.subjectSemester || !tempData.subjectYear){
@@ -109,7 +111,6 @@ export default function Asignaturas() {
             subjectId: tempData.subjectId,
             coordinator: tempData.subjectCoordinator
         });
-        console.log("Respuesta del servidor:", updateResponse);
         if (updateResponse.status == 200) {
           alert("Datos actualizados correctamente"); 
           window.location.href = '/asignaturas';
@@ -137,7 +138,9 @@ export default function Asignaturas() {
   return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>
+      
       <h2 className="page-title">Panel de Asignaturas</h2>
+      {/* Creación de Asignaturas */}
       <section className="bg-white rounded-xl p-6 w-[50vw] text-left">
         {/* Botón para crear asignatura */}
         {!createMode ? (
@@ -237,6 +240,7 @@ export default function Asignaturas() {
           </div>
         )}
       </section>
+      {/* Lista de Asignaturas Existentes */}
       <section className="absolute top-[25%] right-[5%] bg-white w-[40vw] text-center">
         <h2 className="section-title text-center mb-[1vh]">
           Asignaturas

@@ -4,6 +4,8 @@ import Header from "../components/common/Header";
 import { mainColors } from "../components/common/Colors";
 import { UserCache } from '../components/common/Cache';
 
+{/* Sección de colores asignados a las asignaturas */}
+
 let subjectColorMap = {};
 
 const getRandomColor = (subjectName) => {
@@ -11,7 +13,7 @@ const getRandomColor = (subjectName) => {
         return subjectColorMap[subjectName]
     }
 
-    // 1. Contar cuántas veces se ha asignado cada color
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
     const colorUsage = {};
     Object.keys(mainColors).forEach(colorKey => {
       colorUsage[colorKey] = 0;
@@ -24,25 +26,25 @@ const getRandomColor = (subjectName) => {
       }
     });
 
-    // 2. Encontrar el menor uso de colores
+    {/* 2. Encontrar el menor uso de colores */}
     const minUsage = Math.min(...Object.values(colorUsage));
 
-    // 3. Obtener todos los colores con el menor uso
+    {/* 3. Obtener todos los colores con el menor uso */}
     const leastUsedColors = Object.keys(colorUsage).filter(
       key => colorUsage[key] === minUsage
     );
 
-    // 4. Seleccionar uno aleatorio entre los menos usados
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
     const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
     const chosenColorValue = mainColors[chosenColorKey];
 
-    // 5. Asignar y devolver
+    {/* 5. Asignar y devolver */}
     subjectColorMap[subjectName] = chosenColorValue;
     return chosenColorValue;
 }
 
 export default function Asignatura() {
-    {/* Cambiar entre modo edición y modo lectura */}
+    {/* Función para crear la página de la información sobre una asignatura */}
     const [editMode, setEditMode] = useState(false);
     const [loading, setLoadingState] = useState(true);
     const [subjectData, setsubjectData] = useState({});
@@ -50,70 +52,72 @@ export default function Asignatura() {
     const [tempData, setTempData] = useState({...subjectData});
     const [activityList, setActivityList] = useState([]);
 
+    {/* Carga de datos */}
     useEffect(() => {
       const fetchData = async () => {
-            await UserCache(false);
-            const user_info = JSON.parse(localStorage.getItem("user_info"))
+        await UserCache(false);
+        const user_info = JSON.parse(localStorage.getItem("user_info"));
 
-            {/* Get data of the subject in order to populate the page dinamically */}
-            const subjectId = sessionStorage.getItem('selectedSubjectID');
-            try {
-                const subjectInfo = await axios.get("http://localhost:8002/subject/specific/info/", {
-                    withCredentials: true,
-                    params: {
-                        subjectId: subjectId
-                    }
-                });
-                console.log("Respuesta del servidor:", subjectInfo.status);
-                if (subjectInfo.status == 200) {
-                    setsubjectData(subjectInfo.data.subjectInfo);
+        {/* Asignatura a recoger información */}
+        const subjectId = sessionStorage.getItem('selectedSubjectID');
+          try {
+            const subjectInfo = await axios.get("http://localhost:8002/subject/specific/info/", {
+                withCredentials: true,
+                params: {
+                    subjectId: subjectId
                 }
-            } catch (error) {
-                if (axios.isAxiosError(error)) {
-                    if (error.response) {
-                        const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
-                        console.error(message);
-                        alert(message);
-                    } else if (error.request) {
-                        console.error("No se recibió respuesta del servidor:", error.request);
-                        alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
-                    } else {
-                        console.error("Error al configurar la solicitud:", error.message);
-                        alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
-                    }
+            });
+            if (subjectInfo.status == 200) {
+                setsubjectData(subjectInfo.data.subjectInfo);
+            }
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
+                    console.error(message);
+                    alert(message);
+                } else if (error.request) {
+                    console.error("No se recibió respuesta del servidor:", error.request);
+                    alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
+                } else {
+                    console.error("Error al configurar la solicitud:", error.message);
+                    alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
                 }
             }
-            setUserData(user_info);
-            try {
-                const activities_info = await axios.get("http://localhost:8002/activities/info/subject/", {
-                    withCredentials: true,
-                    params: {
-                        subjectId: subjectId
-                    }
-                });
-                console.log("Respuesta del servidor:", activities_info.status);
-                if (activities_info.status == 200) {
-                  console.log(activities_info.data.activities);
-                  setActivityList(activities_info.data.activities);
+          }
+          setUserData(user_info);
+          {/* Actividades relacionadas con esa asignatura */}
+          try {
+            const activities_info = await axios.get("http://localhost:8002/activities/info/subject/", {
+                withCredentials: true,
+                params: {
+                    subjectId: subjectId
                 }
-            } catch (error) {
-                if (axios.isAxiosError(error)) {
-                    if (error.response) {
-                        const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
-                        console.error(message);
-                        alert(message);
-                    } else if (error.request) {
-                        console.error("No se recibió respuesta del servidor:", error.request);
-                        alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
-                    } else {
-                        console.error("Error al configurar la solicitud:", error.message);
-                        alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
-                    }
+            });
+            if (activities_info.status == 200) {
+              setActivityList(activities_info.data.activities);
+            }
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response) {
+                    const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
+                    console.error(message);
+                    alert(message);
+                } else if (error.request) {
+                    console.error("No se recibió respuesta del servidor:", error.request);
+                    alert("No se recibió respuesta del servidor. Por favor, inténtalo de nuevo más tarde.");
+                } else {
+                    console.error("Error al configurar la solicitud:", error.message);
+                    alert("Error al configurar la solicitud. Por favor, inténtalo de nuevo más tarde.");
                 }
             }
+          }
         }
         fetchData();
+        setLoadingState(false);
     }, []);
+
+    {/* Funciones para cambios de modo y confirmación de modificaciones */}
 
     const handleUpdate = () => {
       setTempData({...subjectData});
@@ -122,9 +126,7 @@ export default function Asignatura() {
 
     const handleConfirm = async () => {
       setLoadingState(true);
-      
       {/* Petición para actualizar la información del usuario en el backend */}
-      
       try {
           if (!tempData.Credits || !tempData.Semester || !tempData.Year || !tempData.AdministratorName){
             alert("Alguno de los campos de texto introducidos está vacío. Por favor, rellene dichos campos antes de confirmar de nuevo")
@@ -139,7 +141,6 @@ export default function Asignatura() {
               subjectId: subjectData.IdSubject,
               coordinator: tempData.AdministratorName
           });
-          console.log("Respuesta del servidor:", updateResponse.status);
           if (updateResponse.status == 200) {
             alert("Datos actualizados correctamente"); 
             setsubjectData({...tempData});
@@ -168,14 +169,11 @@ export default function Asignatura() {
       setTempData({...subjectData});
       setEditMode(false);
     };
-
-    useEffect(() => {
-      setLoadingState(false);
-    })
     
     return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>
+      {/* Sección de la información de la Asignatura / Formulario */}
       <h2 className="page-title">{subjectData.Name}</h2>
       <section className="bg-white rounded-xl p-6 w-[50vw] text-left">
         {/* Créditos */}
@@ -291,6 +289,7 @@ export default function Asignatura() {
             )
         ) : null}
       </section>
+      {/* Sección de las actividades que pertenecen a esa Asignatura */}
       <section className="absolute top-[25%] right-[5%] bg-white w-[40vw] text-center">
         <h2 className="section-title text-center mb-[1vh]">
           Actividades

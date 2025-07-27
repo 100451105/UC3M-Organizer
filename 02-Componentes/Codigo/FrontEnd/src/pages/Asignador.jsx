@@ -4,14 +4,16 @@ import axios from 'axios'
 import { UserCache } from "../components/common/Cache";
 import { mainColors } from "../components/common/Colors";
 
+{/* Sección de colores asignados a las asignaturas */}
+
 let subjectColorMap = {};
 
-const getRandomColor = (userType) => {
-    if (subjectColorMap[userType]) {
-        return subjectColorMap[userType]
+const getRandomColor = (subjectName) => {
+    if (subjectColorMap[subjectName]) {
+        return subjectColorMap[subjectName]
     }
 
-    // 1. Contar cuántas veces se ha asignado cada color
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
     const colorUsage = {};
     Object.keys(mainColors).forEach(colorKey => {
       colorUsage[colorKey] = 0;
@@ -24,24 +26,25 @@ const getRandomColor = (userType) => {
       }
     });
 
-    // 2. Encontrar el menor uso de colores
+    {/* 2. Encontrar el menor uso de colores */}
     const minUsage = Math.min(...Object.values(colorUsage));
 
-    // 3. Obtener todos los colores con el menor uso
+    {/* 3. Obtener todos los colores con el menor uso */}
     const leastUsedColors = Object.keys(colorUsage).filter(
       key => colorUsage[key] === minUsage
     );
 
-    // 4. Seleccionar uno aleatorio entre los menos usados
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
     const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
     const chosenColorValue = mainColors[chosenColorKey];
 
-    // 5. Asignar y devolver
-    subjectColorMap[userType] = chosenColorValue;
+    {/* 5. Asignar y devolver */}
+    subjectColorMap[subjectName] = chosenColorValue;
     return chosenColorValue;
 }
 
 export default function Asignador() {
+  {/* Función para crear la página de la información sobre los usuarios asignados a distintas asignaturas */}
   const [loading, setLoadingState] = useState(true);
   const [userList, setUserList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
@@ -50,7 +53,6 @@ export default function Asignador() {
   const [searchTerm, setSearchTerm] = useState("");
 
   {/* Carga de datos de usuarios y asignaturas */}
-
   useEffect(() => {
     const fetchData = async () => {
       const user_info = JSON.parse(localStorage.getItem("user_info"));
@@ -59,11 +61,10 @@ export default function Asignador() {
         window.location.href = "/main";
         return;
       }
-
       const Id = user_info.Id;
       await UserCache(Id);
 
-      // Obtener asignaturas que el usuario es coordinador (si es administrador, todas las asignaturas)
+      {/* Obtener asignaturas que el usuario es coordinador (si es administrador, todas las asignaturas) */}
       try {
         let subjectInfo = 0
         if (user_info.Type === "Administrador") {
@@ -77,10 +78,9 @@ export default function Asignador() {
             }
           });
         }
-        console.log("Respuesta del servidor:", subjectInfo.status);
         if (subjectInfo.status === 200) {
           let subjects = subjectInfo.data.subjectList;
-          // Asignatura por defecto, ninguno
+          {/* Asignatura por defecto, ninguno */}
           const noneSubject = { IdSubject: -1, Name: "Ninguno" };
           subjects = [noneSubject, ...subjects];
           setSubjectList(subjects);
@@ -100,11 +100,9 @@ export default function Asignador() {
           }
         }
       }
-
       setSelectedSubject({ IdSubject: -1, Name: "Ninguno" });
       setLoadingState(false);
     };
-
     fetchData();
   }, []);
 
@@ -147,7 +145,6 @@ export default function Asignador() {
       return;
     }
     try {
-      console.log(userList)
       const changedUsers = userList
         .filter((u) => {
           const wasAssigned = u.assigned;
@@ -158,12 +155,10 @@ export default function Asignador() {
           userId: Number(u.id),
           assigned: selectedUsers.includes(u.user),
         }));
-      console.log(changedUsers);
       const confirmation = await axios.post("http://localhost:8002/subject/assignments/", {
         users: changedUsers,
         subjectId: Number(selectedSubject.IdSubject)
       });
-      console.log("Respuesta del servidor:", confirmation.status);
       if (confirmation.status === 200) {
         alert("Usuarios asignados correctamente a la asignatura");
         window.location.href = '/asignador';
@@ -196,7 +191,7 @@ export default function Asignador() {
     setSelectedSubject(selected);
 
     if (selectedId === -1) {
-      // Asignatura "Ninguno" seleccionada → vaciar usuarios
+      {/* Asignatura "Ninguno" seleccionada → vaciar usuarios */}
       setUserList([]);
       setSelectedUsers([]);
       setLoadingState(false);
@@ -226,19 +221,17 @@ export default function Asignador() {
     } catch (error) {
       console.error("Error al cargar los usuarios de la asignatura:", error);
       alert("Hubo un error al obtener los usuarios de esta asignatura.");
-      setUserList([]); // Vaciar como fallback de error
+      setUserList([]);
     }
     setLoadingState(false);
-  }
-
-  
+  };
 
   return (
     <>
       <Header showIndex={true} loadingInProgress={loading} />
       <h2 className="page-title">Asignador</h2>
 
-      {/* 🔴 Parte Izquierda */}
+      {/* Parte Izquierda */}
       <section className="absolute top-[30%] left-[2%] bg-white w-[45vw] h-[60vh] text-left rounded-xl">
         <p className="text-[3vh] font-bold text-main-dark-blue font-montserrat mb-4">
           Asignando Usuarios a la Asignatura:
@@ -293,11 +286,11 @@ export default function Asignador() {
         </button>
       </section>
 
-      {/* 🟢 Parte Derecha */}
+      {/* Parte Derecha */}
       <section className="absolute top-[20%] right-[5%] bg-white w-[40vw] text-left p-4 rounded-xl">
         <h2 className="section-title mb-2 text-center">Usuarios</h2>
 
-        {/* Search */}
+        {/* Buscador */}
         <div className="mb-2 relative">
           <input
             type="text"
@@ -308,7 +301,7 @@ export default function Asignador() {
           />
         </div>
 
-        {/* Select All */}
+        {/* Seleccionar Todos */}
         <div className="flex items-center mb-2">
           <input
             type="checkbox"
@@ -319,7 +312,7 @@ export default function Asignador() {
           <label className="text-[2.5vh] font-semibold">Select All</label>
         </div>
 
-        {/* User List */}
+        {/* Lista de Usuarios */}
         <div className="h-[40vh] overflow-y-auto border border-main-dark-blue">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((u, i) => {

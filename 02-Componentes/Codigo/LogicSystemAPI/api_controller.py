@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-""" Payload definition """
+""" Definición del formato de peticiones """
 class UserLoginRegister(BaseModel):
     email: str
     password: str
@@ -77,10 +77,10 @@ def obtener_dia_semana(fecha_str):
     dias = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
     return dias[fecha.weekday()]
 
-""" User Action Endpoints """
-@app.post("/user/login/", description= "Login of the User", tags=["User"])
+""" Endpoints relacionados con acciones de Usuario """
+@app.post("/user/login/", description= "Inicio de Sesión del Usuario", tags=["User"])
 def user_login(information: UserLoginRegister):
-    # Check if the user exists and the password is correct
+    # Comprobar si el usuario existe y si la contraseña es correcta
     user_info = requests.get("http://backend_api:8000/users/", params={"username": information.email})
     if user_info.status_code != 200:
         raise HTTPException(status_code=user_info.status_code, detail=user_info.text)
@@ -98,9 +98,9 @@ def user_login(information: UserLoginRegister):
         })
     )
 
-@app.post("/user/register/", description= "Register of the User", tags=["User"])
+@app.post("/user/register/", description= "Registro del Usuario", tags=["User"])
 def user_register(information: UserLoginRegister):
-    # Checks if the user already exists and, if not, creates it
+    # Comprobar si el usuario existe y, si no existe, crearlo
     result = requests.post("http://backend_api:8000/users/", json={
         "username": information.email,
         "password": information.password,
@@ -119,9 +119,9 @@ def user_register(information: UserLoginRegister):
         })
     )
 
-@app.post("/user/update/", description= "User Update", tags=["User"])
+@app.post("/user/update/", description= "Actualizar Usuario", tags=["User"])
 def user_update(info: UserUpdate):
-    # Checks if the user already exists and, if not, creates it
+    # Actualizar el usuario si existe
     user_info = requests.put("http://backend_api:8000/users/", json={
         "username": info.username,
         "password": info.password,
@@ -143,9 +143,8 @@ def user_update(info: UserUpdate):
 
 """ Endpoints de información """
 
-@app.get("/user/info/", description= "User Information", tags=["User"])
+@app.get("/user/info/", description= "Información del Usuario", tags=["User"])
 def user_information(userId: int):
-    # Checks if the user already exists and, if not, creates it
     user_info = requests.get("http://backend_api:8000/users/id", params={
         "userId": userId
     })
@@ -166,9 +165,8 @@ def user_information(userId: int):
         })
     )
 
-@app.get("/activities/info/", description= "Activities Information", tags=["Activity"])
+@app.get("/activities/info/", description= "Información de las Actividades", tags=["Activity"])
 def activities_information(actualDate: date):
-    # Checks if the user already exists and, if not, creates it
     activity_info = requests.get("http://backend_api:8000/activities/info",params={
         "actualDate": actualDate
     })
@@ -183,9 +181,8 @@ def activities_information(actualDate: date):
         })
     )
 
-@app.get("/activities/info/subject/", description= "Activities Information Based On Subject", tags=["Activity"])
+@app.get("/activities/info/subject/", description= "Información de las Actividades basado en la Asignatura", tags=["Activity"])
 def activities_information_based_on_subject(subjectId: int):
-    # Checks if the user already exists and, if not, creates it
     activity_info = requests.get("http://backend_api:8000/activities/subject/",params={
         "subjectId": subjectId
     })
@@ -200,9 +197,8 @@ def activities_information_based_on_subject(subjectId: int):
         })
     )
 
-@app.get("/activities/specific/info/", description= "Activities Specific Information", tags=["Activity"])
+@app.get("/activities/specific/info/", description= "Información Específica de una Actividad", tags=["Activity"])
 def activity_information(activityId: int):
-    # Checks if the user already exists and, if not, creates it
     activity_info = requests.get("http://backend_api:8000/activities/", params={
         "activityId": activityId
     })
@@ -218,7 +214,23 @@ def activity_information(activityId: int):
         })
     )
 
-@app.get("/calendar/info/daily/", description= "Calendar Daily Information", tags=["Calendar"])
+@app.get("/activities/pending/info/", description= "Información de las Actividades Pendientes", tags=["Activities"])
+def pending_activities_information(userId: int):
+    pending_activities_information = requests.get("http://backend_api:8000/scheduler/activities/pending/", params={
+        "userId": userId
+    })
+    if pending_activities_information.status_code != 200:
+        raise HTTPException(status_code=pending_activities_information.status_code, detail=pending_activities_information.text)
+    pending_list = pending_activities_information.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "pendingList": pending_list
+        })
+    )
+
+@app.get("/calendar/info/daily/", description= "Información del Organizador Diaria", tags=["Calendar"])
 def calendar_daily_information():
     # Checks if the user already exists and, if not, creates it
     calendar_info = requests.get("http://backend_api:8000/scheduler/calendar")
@@ -233,7 +245,7 @@ def calendar_daily_information():
         })
     )
 
-@app.get("/calendar/info/", description= "Calendar Information", tags=["Calendar"])
+@app.get("/calendar/info/", description= "Información del Organizador", tags=["Calendar"])
 def calendar_information(calendarDate: date):
     # Checks if the user already exists and, if not, creates it
     calendar_info = requests.get("http://backend_api:8000/scheduler/calendar",params={
@@ -250,7 +262,7 @@ def calendar_information(calendarDate: date):
         })
     )
 
-@app.get("/subject/info/", description= "Subject Information", tags=["Subject"])
+@app.get("/subject/info/", description= "Información de Asignaturas", tags=["Subject"])
 def subject_information():
     # Checks if the user already exists and, if not, creates it
     subject_info = requests.get("http://backend_api:8000/subjects/")
@@ -265,7 +277,7 @@ def subject_information():
         })
     )
 
-@app.get("/subject/specific/info/", description= "Subject Specific Information", tags=["Subject"])
+@app.get("/subject/specific/info/", description= "Información Específica de una Asignatura", tags=["Subject"])
 def subject_information(subjectId: int):
     # Checks if the user already exists and, if not, creates it
     subject_info = requests.get("http://backend_api:8000/subjects/", params={
@@ -283,7 +295,7 @@ def subject_information(subjectId: int):
         })
     )
 
-@app.get("/subject/coordinator/info/", description= "Subjects of a Coordinator", tags=["Subject"])
+@app.get("/subject/coordinator/info/", description= "Información de Asignaturas de un Coordinador", tags=["Subject"])
 def subject_coordinator_information(userId: int = None):
     # Checks if the user already exists and, if not, creates it
     subject_coordinator_info = 0
@@ -305,7 +317,7 @@ def subject_coordinator_information(userId: int = None):
         })
     )
 
-@app.get("/subject/assigned/info/", description= "Users Assigned To Subject", tags=["Subject"])
+@app.get("/subject/assigned/info/", description= "Información de Usuarios asignados a una Asignatura", tags=["Subject"])
 def subject_information(subjectId: int):
     # Checks if the user already exists and, if not, creates it
     subject_info = requests.get("http://backend_api:8000/users/assigned/subject/", params={
@@ -321,6 +333,8 @@ def subject_information(subjectId: int):
             "userList": userList
         })
     )
+
+""" Endpoints relacionados con acciones de Asignaturas """
 
 @app.post("/subject/update/", description= "Subject Update/Creation", tags=["Subject"])
 def subject_update(information: UpdateSubject):
@@ -356,6 +370,24 @@ def subject_update(information: UpdateSubject):
             "message": return_message_OK
         })
     )
+
+@app.post("/subject/assignments/", description= "Cambiar Usuarios Asignados de una Asignatura", tags=["Subject"])
+def change_user_assigments_to_subject(information: AssignUserToSubject):
+    # Checks if the user already exists and, if not, creates it
+    print("Petition arrived: ", information.dict())
+    confirmed_assignments = requests.post("http://backend_api:8000/subjects/assign/user/", json=information.dict())
+    if confirmed_assignments.status_code != 200:
+        raise HTTPException(status_code=confirmed_assignments.status_code, detail=confirmed_assignments.text)
+    confirmation_message = confirmed_assignments.json()
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder({
+            "result": 200,
+            "message": confirmation_message
+        })
+    )
+
+""" Endpoints relacioandos con acciones de Actividades """
 
 @app.post("/activities/update/", description= "Update/Create Activity and Attemp Organize", tags=["Activity"])
 def activity_information(information: UpdateActivity):
@@ -488,26 +520,8 @@ def activity_information(information: UpdateActivity):
         })
     )
 
-@app.get("/activities/pending/info/", description= "Pending Activities Information", tags=["Activities"])
-def pending_activities_information(userId: int):
-    # Checks if the user already exists and, if not, creates it
-    pending_activities_information = requests.get("http://backend_api:8000/scheduler/activities/pending/", params={
-        "userId": userId
-    })
-    if pending_activities_information.status_code != 200:
-        raise HTTPException(status_code=pending_activities_information.status_code, detail=pending_activities_information.text)
-    pending_list = pending_activities_information.json()
-    return JSONResponse(
-        status_code=200,
-        content=jsonable_encoder({
-            "result": 200,
-            "pendingList": pending_list
-        })
-    )
-
-@app.post("/activities/confirm/", description= "Confirm Activity", tags=["Activities"])
+@app.post("/activities/confirm/", description= "Confirmar Actividad", tags=["Activities"])
 def confirm_activity(information: ConfirmActivity):
-    # Checks if the user already exists and, if not, creates it
     confirmed_activity = requests.post("http://backend_api:8000/activities/change/status/", json={
         "activityId": information.activityId,
         "newStatus": "Asignado"
@@ -523,19 +537,5 @@ def confirm_activity(information: ConfirmActivity):
         })
     )
 
-@app.post("/subject/assignments/", description= "Change Assignments of User", tags=["Subject"])
-def change_user_assigments_to_subject(information: AssignUserToSubject):
-    # Checks if the user already exists and, if not, creates it
-    print("Petition arrived: ", information.dict())
-    confirmed_assignments = requests.post("http://backend_api:8000/subjects/assign/user/", json=information.dict())
-    if confirmed_assignments.status_code != 200:
-        raise HTTPException(status_code=confirmed_assignments.status_code, detail=confirmed_assignments.text)
-    confirmation_message = confirmed_assignments.json()
-    return JSONResponse(
-        status_code=200,
-        content=jsonable_encoder({
-            "result": 200,
-            "message": confirmation_message
-        })
-    )
+
 

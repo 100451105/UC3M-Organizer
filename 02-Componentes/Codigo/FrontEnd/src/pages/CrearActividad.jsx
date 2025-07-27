@@ -4,17 +4,18 @@ import Header from "../components/common/Header";
 import { UserCache } from '../components/common/Cache';
 
 export default function CrearActividad() {
-    {/* Cambiar entre modo edición y modo lectura */}
+    {/* Función para crear la página de creación de actividades para una Asignatura */}
     const [loading, setLoadingState] = useState(true);
     const [userData, setUserData] = useState({});
     const [tempData, setTempData] = useState({});
 
+    {/* Carga de datos */}
     useEffect(() => {
       const fetchData = async () => {
             await UserCache(false);
             const user_info = JSON.parse(localStorage.getItem("user_info"))
 
-            {/* Get data of the subject in order to populate the page dinamically */}
+            {/* Asignatura a la que pertenece la actividad */}
             const subjectIdFrom = sessionStorage.getItem('selectedSubjectID');
             const subjectNameFrom = sessionStorage.getItem('fromSubjectName');
             setUserData(user_info);
@@ -31,13 +32,12 @@ export default function CrearActividad() {
             })
         }
         fetchData();
+        setLoadingState(false);
     }, []);
 
     const handleConfirm = async () => {
       setLoadingState(true);
-      
       {/* Petición para actualizar la información del usuario en el backend */}
-      
       try {
           if (!tempData.Description || !tempData.ActivityType || !tempData.EndOfActivity || !tempData.ActivityName){
             alert("Alguno de los campos de texto introducidos está vacío. Por favor, rellene dichos campos antes de confirmar de nuevo")
@@ -54,14 +54,11 @@ export default function CrearActividad() {
               estimatedHours: tempData.EstimatedHours,
               strategy: tempData.Strategy
           });
-          
-          console.log("Respuesta del servidor:", updateResponse.status);
           if (updateResponse.status == 200) {
             alert("Actividad actualizada y reorganizada correctamente"); 
             window.location.href = '/asignatura'  
           }
       } catch (error) {
-        console.log(error.response);
           if (axios.isAxiosError(error)) {
               if (error.response) {
                   const message = "Error al modificar los datos:\n" + error.response.status || "Error desconocido. Por favor, inténtalo de nuevo.";
@@ -77,7 +74,6 @@ export default function CrearActividad() {
           }
       } finally {
         setLoadingState(false);
-        // Forzar refresh de las actividades
         localStorage.removeItem("activity_info");
       }
     };
@@ -86,14 +82,11 @@ export default function CrearActividad() {
       setTempData({});
       window.location.href = '/asignatura'
     };
-
-    useEffect(() => {
-      setLoadingState(false);
-    })
     
     return (
     <>
       <Header showIndex={true} loadingInProgress={loading}/>
+      {/* Formulario para Crear Actividad */}
       <h2 className="page-title">Crear Actividad</h2>
       <section className="bg-white rounded-xl p-6 w-[70vw] text-left">
         {/* Nombre */}

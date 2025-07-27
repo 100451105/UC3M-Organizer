@@ -1,3 +1,4 @@
+{/* Paleta de colores utilizada para la aplicación */}
 export const mainColors = {
     "main-dark-blue": "#171796",
     "main-blue": "#3949AB",

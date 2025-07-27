@@ -3,7 +3,7 @@ from datetime import timedelta
 
 
 class MultipleSolutionsCollector(cp_model.CpSolverSolutionCallback):
-    """ Class in order to collect multiple solutions of the constraint model"""
+    """ Clase relacionada con la librería ORTools para recoger múltiples soluciones con restricciones """
     def __init__(self, variables, valid_days, estimated_hours, max_solutions=5):
         cp_model.CpSolverSolutionCallback.__init__(self)
         self.variables = variables
@@ -35,8 +35,9 @@ class MultipleSolutionsCollector(cp_model.CpSolverSolutionCallback):
         return self.solutions
     
 class Scheduler():
-    """ Scheduler class with all the implementations"""
+    """ Clase del Organizador con las implementaciones de las distintas lógicas de organización """
     def __check_available_days(self, activity, calendar, busy_days):
+        """ Devuelve los días que se pueden utilizar para organizar y el tiempo disponible de cada día """
         fecha_inicio = activity["startDate"]
         fecha_fin = activity["endDate"]
         if not fecha_inicio:
@@ -63,7 +64,7 @@ class Scheduler():
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 
-        # Constraint: addition of all hours assigned must cover all the estimated hours
+        # Restricción: la suma de todas las horas asignadas deben cubrir todas las horas estimadas
         day_availability = []
         for i, day in enumerate(available_days):
             limit = min(day["timeAvailable"], 4 if day["dayType"] == "Normal" else 8)
@@ -71,7 +72,7 @@ class Scheduler():
             day_availability.append(var)
         model.Add(sum(day_availability) == total_hours)
 
-        # Aggresive strategy: Prioritize the first days from the range with max value
+        # Estrategia agresiva: Prioriza siempre los primeros días del rango con todas las horas asignadas
         solver.parameters.search_branching = cp_model.FIXED_SEARCH
         model.AddDecisionStrategy(
             day_availability,
@@ -97,7 +98,7 @@ class Scheduler():
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 
-        # Constraint: addition of all hours assigned must cover all the estimated hours
+        # Restricción: la suma de todas las horas asignadas deben cubrir todas las horas estimadas
         day_availability = []
         for i, day in enumerate(available_days):
             limit = min(day["timeAvailable"], 4 if day["dayType"] == "Normal" else 8)
@@ -105,7 +106,7 @@ class Scheduler():
             day_availability.append(var)
         model.Add(sum(day_availability) == total_hours)
 
-        # Calm strategy: Distribute evenly the assigned hours between the days
+        # Estrategia calmada: Distribuye equitativamente las horas asignadas entre todos los días del rango
         solver.parameters.search_branching = cp_model.FIXED_SEARCH
         model.AddDecisionStrategy(
             day_availability,
@@ -127,7 +128,7 @@ class Scheduler():
         available_days = self.__check_available_days(activity, calendar, busy_days)
         total_hours = activity["estimatedHours"]
 
-        # Constraint: addition of all hours assigned must cover all the estimated hours
+        # Restricción: la suma de todas las horas asignadas deben cubrir todas las horas estimadas
         day_availability = []
         for i, day in enumerate(available_days):
             limit = min(day["timeAvailable"], 4 if day["dayType"] == "Normal" else 8)
@@ -145,7 +146,7 @@ class Scheduler():
 
 
     def search_day_to_assign(self, activity, calendar):
-        # Input processing
+        # Procesado de la entrada
         schedulerOutput = None
         end_date_margin = [activity["endOfActivity"]] + \
             [activity["endOfActivity"] + timedelta(days=i) for i in range(1,4)] + \
@@ -156,7 +157,7 @@ class Scheduler():
         for day in calendar:
             busy_days[day["calendarDate"]] = day["totalHoursBusy"]
         
-        # Strategy processing
+        # Procesado de la estrategia
         match activity["strategy"]:
             case "Agresiva":
                 for endDate in end_date_margin:
@@ -194,7 +195,7 @@ class Scheduler():
             case _:
                 return 505
         
-        # Output set up
+        # Preparación de la salida
         if schedulerOutput:
             solutions = []
             for solution in schedulerOutput[0]:
@@ -218,11 +219,11 @@ class Scheduler():
                     "modifiedCalendar": newCalendar
                 })
             if (schedulerOutput[1] == activity["endOfActivity"]):
-                # Assigned correctly
+                # Asignado correctamente
                 return 200, solutions
             else:
-                # Assigned correctly with endDate change
+                # Asignado correctamente con la fecha de fin cambiada
                 return 201, solutions   
         else:
-            # Not possible to assign
+            # No ha sido posible asignar la actividad
             return 401, None

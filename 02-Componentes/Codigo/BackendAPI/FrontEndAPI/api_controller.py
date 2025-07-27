@@ -7,11 +7,11 @@ import database_controller as Database
 app = FastAPI()
 db = Database.db
 
-""" Payload definition """
+""" Definición de peticiones y requisitos minimos para cada una """
 class CreateUser(BaseModel):
     username: constr(min_length=0,max_length=100)
     password: constr(min_length=0,max_length=100)
-    userType: Literal["Profesor","Estudiante","Administrador","Otros"]
+    userType: Literal["Profesor","Estudiante","Coordinador","Administrador","Otros"]
 
     class Config:
         extra = "forbid"
@@ -19,7 +19,7 @@ class CreateUser(BaseModel):
 class UpdateUser(BaseModel):
     username: constr(min_length=0,max_length=100)
     password: constr(min_length=0,max_length=100)
-    userType: Literal["Profesor","Estudiante","Administrador","Otros"]
+    userType: Literal["Profesor","Estudiante","Coordinador","Administrador","Otros"]
     seeAllSubjects: bool
     userId: int
 
@@ -114,44 +114,44 @@ class DeleteSubject(BaseModel):
 class DeleteActivity(BaseModel):
     activityId: int
 
-""" User Endpoints """
+""" Endpoints relacionados con usuarios """
 
-@app.get("/users/", description= "GetUsers", tags=["Users"])
+@app.get("/users/", description= "Leer Usuarios", tags=["Users"])
 def read_users(username: Optional[constr(min_length=0,max_length=100)] = None):
     result = db.get_users(username)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/users/id/", description= "GetUsersThroughId", tags=["Users"])
+@app.get("/users/id/", description= "Leer Usuarios en base al Id", tags=["Users"])
 def read_users(userId: int):
     result = db.get_users_through_id(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/users/assigned/subject/", description= "GetUsersStateOnSubject", tags=["Users"])
+@app.get("/users/assigned/subject/", description= "Leer Estado de un Usuario sobre una Asignatura", tags=["Users"])
 def get_users_state_on_subject(subjectId: int):
     result = db.get_users_state_on_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/users/subject/", description= "GetUsersOfSubject", tags=["Users"])
+@app.get("/users/subject/", description= "Leer Usuarios de una Asignatura", tags=["Users"])
 def read_users_of_subject(subjectId: int = None):
     result = db.get_users_of_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/users/subject/proffesors/", description= "GetUsersOfSubject", tags=["Users"])
+@app.get("/users/subject/proffesors/", description= "Leer Profesores de una Asignatura", tags=["Users"])
 def read_proffesors_of_subject(subjectId: int = None):
     result = db.get_proffesors_of_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.post("/users/", description= "CreateUser", tags=["Users"])
+@app.post("/users/", description= "Crear Usuario", tags=["Users"])
 def create_user(item: CreateUser):
     result = db.create_user(item.username, item.password, item.userType)
     match result[0]:
@@ -166,7 +166,7 @@ def create_user(item: CreateUser):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.put("/users/", description= "UpdateUser", tags=["Users"])
+@app.put("/users/", description= "Actualizar Usuario", tags=["Users"])
 def update_user(item: UpdateUser):
     result = db.update_user(item.username, item.password, item.userType, item.seeAllSubjects, item.userId)
     match result[0]:
@@ -179,7 +179,7 @@ def update_user(item: UpdateUser):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.post("/users/delete/", description= "DeleteUser", tags=["Users"])
+@app.post("/users/delete/", description= "Borrar Usuario", tags=["Users"])
 def delete_user(item: DeleteUser):
     result = db.delete_user(item.userId)
     match result:
@@ -192,7 +192,7 @@ def delete_user(item: DeleteUser):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
     
-@app.post("/users/subject/vision/", description= "ChangeSubjectVisionOfUser", tags=["Users"])
+@app.post("/users/subject/vision/", description= "Cambiar Visión de un Usuario sobre las Asignaturas", tags=["Users"])
 def change_subject_vision_of_user(item: ChangeSubjectVisionOfUser):
     result = db.assign_user_to_subject(item.userId,item.seeAllSubjects)
     match result:
@@ -207,30 +207,30 @@ def change_subject_vision_of_user(item: ChangeSubjectVisionOfUser):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
         
-""" Subject Endpoints """
+""" Endpoints relacionados con las Asignaturas """
 
-@app.get("/subjects/", description= "GetSubjects", tags=["Subjects"])
+@app.get("/subjects/", description= "Leer Asignaturas", tags=["Subjects"])
 def read_subjects(subjectId: Optional[int] = None):
     result = db.get_subjects(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/subjects/user/", description= "GetSubjectsPerUser", tags=["Subjects"])
+@app.get("/subjects/user/", description= "Leer Asignaturas de un Usuario", tags=["Subjects"])
 def read_subjects_of_user(userId: int = None):
     result = db.get_subjects_of_user(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/subjects/coordinator/", description= "GetSubjectsPerUser", tags=["Subjects"])
+@app.get("/subjects/coordinator/", description= "Leer Asignaturas de un Coordinador", tags=["Subjects"])
 def get_subjects_of_coordinator(userId: int):
     result = db.get_subjects_of_coordinator(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.post("/subjects/", description= "CreateSubject", tags=["Subjects"])
+@app.post("/subjects/", description= "Crear Asignatura", tags=["Subjects"])
 def create_subject(item: UpdateSubject):
     result = db.update_subject(item.credits, item.semester, item.year, item.name, item.subjectId)
     match result[0]:
@@ -243,7 +243,7 @@ def create_subject(item: UpdateSubject):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.put("/subjects/", description= "UpdateSubject", tags=["Subjects"])
+@app.put("/subjects/", description= "Actualizar Asignatura", tags=["Subjects"])
 def update_subject(item: UpdateSubject):
     result = db.update_subject(item.credits, item.semester, item.year, item.name, item.subjectId)
     match result[0]:
@@ -256,7 +256,7 @@ def update_subject(item: UpdateSubject):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.post("/subjects/delete/", description= "DeleteSubject", tags=["Subjects"])
+@app.post("/subjects/delete/", description= "Borrar Asignatura", tags=["Subjects"])
 def delete_subject(item: DeleteSubject):
     result = db.delete_subject(item.subjectId)
     match result:
@@ -269,7 +269,7 @@ def delete_subject(item: DeleteSubject):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
         
-@app.post("/subjects/assign/user/", description= "AssignUserToSubject", tags=["Subjects"])
+@app.post("/subjects/assign/user/", description= "Asignar Usuario a una Asignatura", tags=["Subjects"])
 def assign_user_to_subject(item: AssignUserToSubject):
     result = db.assign_user_to_subject(item.users,item.subjectId)
     match result:
@@ -286,7 +286,7 @@ def assign_user_to_subject(item: AssignUserToSubject):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.post("/subjects/assign/coordinator/", description= "AssignCoordinatorToSubject", tags=["Subjects"])
+@app.post("/subjects/assign/coordinator/", description= "Asignar Coordinador a una Asignatura", tags=["Subjects"])
 def assign_coordinator_to_subject(item: AssignCoordinatorToSubject):
     result = db.assign_coordinator_to_subject(item.adminId,item.subjectId)
     match result:
@@ -301,37 +301,37 @@ def assign_coordinator_to_subject(item: AssignCoordinatorToSubject):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
         
-""" Activity Endpoints """
+""" Endpoints relacionados con las Actividades """
 
-@app.get("/activities/", description= "GetActivities", tags=["Activities"])
+@app.get("/activities/", description= "Leer Actividades", tags=["Activities"])
 def read_activities(activityId: Optional[int] = None):
     result = db.get_activities(activityId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/activities/info/", description= "GetActivities", tags=["Activities"])
+@app.get("/activities/info/", description= "Leer Actividades en base a la fecha actual", tags=["Activities"])
 def read_activities_main_info(actualDate: date):
     result = db.get_activities_main_info(actualDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/activities/subject/", description= "GetActivitiesOfSubject", tags=["Activities"])
+@app.get("/activities/subject/", description= "Leer Actividades de una Asignatura", tags=["Activities"])
 def read_activities_of_subject(subjectId: int):
     result = db.get_activities_of_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/activities/user/", description= "GetActivitiesOfUser", tags=["Activities"])
+@app.get("/activities/user/", description= "Leer Actividades de interés para un Usuario", tags=["Activities"])
 def read_activities_of_user(userId: int):
     result = db.get_activities_of_user(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.post("/activities/", description= "CreateActivity", tags=["Activities"])
+@app.post("/activities/", description= "Crear Actividad", tags=["Activities"])
 def create_activity(item: CreateActivity):
     result = db.create_activity(item.name, item.description, item.type, item.estimatedHours, item.subjectId, item.strategy, item.startOfActivity, item.endOfActivity)
     match result[0]:
@@ -344,7 +344,7 @@ def create_activity(item: CreateActivity):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.put("/activities/", description= "UpdateActivity", tags=["Activities"])
+@app.put("/activities/", description= "Actualizar Actividad", tags=["Activities"])
 def update_activity(item: UpdateActivity):
     result = db.update_activity(item.name, item.description, item.type, item.estimatedHours, item.subjectId, item.activityId, item.strategy, item.startOfActivity, item.endOfActivity)
     match result[0]:
@@ -357,7 +357,7 @@ def update_activity(item: UpdateActivity):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
 
-@app.post("/activities/delete/", description= "DeleteActivity", tags=["Activities"])
+@app.post("/activities/delete/", description= "Borrar Actividad", tags=["Activities"])
 def delete_activity(item: DeleteActivity):
     result = db.delete_activity(item.activityId)
     match result:
@@ -370,7 +370,7 @@ def delete_activity(item: DeleteActivity):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
         
-@app.post("/activities/change/status/", description= "ChangeStatusOfActivity", tags=["Activities"])
+@app.post("/activities/change/status/", description= "Cambiar el Estado de una Actividad", tags=["Activities"])
 def change_status_of_activity(item: ChangeStatusOfActivity):
     result = db.change_status_of_activity(item.activityId,item.newStatus,item.newEndDate,item.newStartDate)
     match result:
@@ -388,50 +388,50 @@ def change_status_of_activity(item: ChangeStatusOfActivity):
             raise HTTPException(status_code=400, detail="Unknown Code")
         
 
-""" Scheduler Endpoints """  
-@app.get("/scheduler/calendar/", description= "GetCalendar", tags=["Scheduler"])
+""" Endpoints relacionados con el Calendario y el Organizador """  
+@app.get("/scheduler/calendar/", description= "Leer Organizador", tags=["Scheduler"])
 def read_calendar(calendarDate: Optional[date] = None):
     result = db.get_calendar(calendarDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/scheduler/date/", description= "GetSchedulerCalendarBasedOnDate", tags=["Scheduler"])
+@app.get("/scheduler/date/", description= "Leer Organizador en base a la fecha", tags=["Scheduler"])
 def read_calendar_scheduled_on_date(calendarDate: date):
     result = db.get_calendar_scheduled_based_on_date(calendarDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/scheduler/dates/", description= "GetSchedulerCalendarBasedOnActivityAndDates", tags=["Scheduler"])
+@app.get("/scheduler/dates/", description= "Leer Organizador entre dos fechas", tags=["Scheduler"])
 def read_calendar_scheduled_on_activity_between_dates(startDate: date, endDate: date):
     result = db.get_calendar_scheduled_based_on_dates(startDate, endDate)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/scheduler/activity/", description= "GetSchedulerCalendarBasedOnActivity", tags=["Scheduler"])
+@app.get("/scheduler/activity/", description= "Leer Organizador en base a una Actividad", tags=["Scheduler"])
 def read_calendar_scheduled_on_activity(activityId: int):
     result = db.get_calendar_scheduled_based_on_activity(activityId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/scheduler/subject/", description= "GetSchedulerCalendarBasedOnSubject", tags=["Scheduler"])
+@app.get("/scheduler/subject/", description= "Leer Organizador en base a una Asignatura", tags=["Scheduler"])
 def read_calendar_scheduled_on_subject(subjectId: int):
     result = db.get_calendar_scheduled_based_on_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.get("/scheduler/activities/pending/", description= "GetPendingActivities", tags=["Scheduler"])
+@app.get("/scheduler/activities/pending/", description= "Leer Actividades Pendientes para un Coordinador", tags=["Scheduler"])
 def read_pending_activities(userId: int):
     result = db.read_pending_activities(userId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
     return result
 
-@app.post("/scheduler/days/", description= "CreateCalendarDays", tags=["Scheduler"])
+@app.post("/scheduler/days/", description= "Crear Días del Calendario", tags=["Scheduler"])
 def create_calendar_days(days: List[CreateCalendarDay]):
     result = db.create_calendar_days(days)
     match result:
@@ -444,7 +444,7 @@ def create_calendar_days(days: List[CreateCalendarDay]):
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
         
-@app.post("/scheduler/days/activities/", description= "CreateCalendarScheduledActivities", tags=["Scheduler"])
+@app.post("/scheduler/days/activities/", description= "Crear Organización de Actividades", tags=["Scheduler"])
 def create_calendar_scheduled_activities(days: List[CreateCalendarScheduledActivities]):
     result = db.assign_activity_to_day(days)
     match result:
@@ -461,7 +461,7 @@ def create_calendar_scheduled_activities(days: List[CreateCalendarScheduledActiv
         case _:
             raise HTTPException(status_code=400, detail="Unknown Code")
     
-@app.post("/scheduler/activities/delete/", description= "DeleteCalendarScheduledActivities", tags=["Scheduler"])
+@app.post("/scheduler/activities/delete/", description= "Borrar Organización de Actividades", tags=["Scheduler"])
 def delete_calendar_scheduled_activities(activities: List[DeleteCalendarScheduledActivities]):
     result = db.delete_scheduled_activities(activities)
     match result:

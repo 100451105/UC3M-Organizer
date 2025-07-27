@@ -4,33 +4,61 @@ import { ActivityCache } from "../components/common/Cache";
 import { useState, useEffect } from "react";
 import Header from "../components/common/Header";
 
+{/* Sección de colores asignados a las asignaturas */}
+
 let subjectColorMap = {};
 
 const getRandomColor = (subjectName) => {
-  if (subjectColorMap[subjectName]) {
-    return subjectColorMap[subjectName]
-  }
-  const keys = Object.keys(mainColors);
-  const randomColor = keys[Math.floor(Math.random() * keys.length)];
-  subjectColorMap[subjectName] = mainColors[randomColor];
-  return mainColors[randomColor];
+    if (subjectColorMap[subjectName]) {
+        return subjectColorMap[subjectName]
+    }
+
+    {/* 1. Contar cuántas veces se ha asignado cada color */}
+    const colorUsage = {};
+    Object.keys(mainColors).forEach(colorKey => {
+      colorUsage[colorKey] = 0;
+    });
+    
+    Object.values(subjectColorMap).forEach(colorValue => {
+      const colorKey = Object.keys(mainColors).find(key => mainColors[key] === colorValue);
+      if (colorKey) {
+        colorUsage[colorKey]++;
+      }
+    });
+
+    {/* 2. Encontrar el menor uso de colores */}
+    const minUsage = Math.min(...Object.values(colorUsage));
+
+    {/* 3. Obtener todos los colores con el menor uso */}
+    const leastUsedColors = Object.keys(colorUsage).filter(
+      key => colorUsage[key] === minUsage
+    );
+
+    {/* 4. Seleccionar uno aleatorio entre los menos usados */}
+    const chosenColorKey = leastUsedColors[Math.floor(Math.random() * leastUsedColors.length)];
+    const chosenColorValue = mainColors[chosenColorKey];
+
+    {/* 5. Asignar y devolver */}
+    subjectColorMap[subjectName] = chosenColorValue;
+    return chosenColorValue;
 }
 
 export default function Inicio() {
+    {/* Función para crear la página de Inicio */}
     const [loading, setLoadingState] = useState(true);
     const [activities_list, setActivityList] = useState([]);
     const [daily_calendar, setDailyCalendar] = useState({
       "Activities": []
     });
 
-    // Cargar cache de usuario (comprobar inicio de sesión)
+    {/* Cargar cache de usuario (comprobar inicio de sesión) */}
     const user_info = JSON.parse(localStorage.getItem("user_info"))
     if (!user_info && !user_info.Id) {
       alert("No has iniciado sesión");
       window.location.href = "/";
     }
     
-    // Cargar cache de actividades (refrescar si no existe)
+    {/* Cargar cache de actividades (refrescar si no existe) */}
     useEffect(() => {
       const getActivities = async () => {
         const activities = await ActivityCache();
@@ -39,10 +67,9 @@ export default function Inicio() {
       getActivities();
     }, []);
 
-    // Cargar información de hoy del calendario
+    {/* Cargar información de hoy del calendario */}
     useEffect(() => {
       if (activities_list.length === 0) return;
-
       const fetchCalendarDaily = async () => {
         try {
           const response = await axios.get("http://localhost:8002/calendar/info/daily/");
@@ -53,15 +80,13 @@ export default function Inicio() {
             let dailyCalendar = response.data.calendar[0];
             
             dailyCalendar.Activities = JSON.parse(dailyCalendar.Activities);
-            // Filtrar por asignaturas que afecten al usuario
+            {/* Filtrar por asignaturas que afecten al usuario */}
             const subjectMap = {};
             user_info.relatedSubjectsList.forEach(subject => {
               subjectMap[subject.SubjectID] = subject.SubjectName;
             });
             dailyCalendar.Activities = dailyCalendar.Activities
               .filter(activity => subjectMap.hasOwnProperty(activity.Subject));
-
-            console.log(dailyCalendar);
             
             setDailyCalendar(dailyCalendar);
           }
@@ -73,20 +98,13 @@ export default function Inicio() {
         }
       }
       fetchCalendarDaily();
+      setLoadingState(false);
     }, [activities_list]);
     
-    // Actividades a mostrar relevantes (4 más recientes mayores que hoy)
+    {/* Actividades a mostrar relevantes (4 más recientes mayores que hoy) */}
     const relevantActivities = activities_list
-      // .filter(activity => new Date(activity.StartOfActivity) >= now)
       .sort((a,b) => new Date(a.StartOfActivity) - new Date(b.StartOfActivity))
       .slice(0,4);
-
-    
-    useEffect(() => {
-      setLoadingState(false);
-    }, []);
-
-    console.log(daily_calendar.Activities);
 
     return (
     <>

@@ -1,6 +1,7 @@
 import axios from "axios";
 
 export async function ActivityCache() {
+    {/* Si necesita refrescar la caché, obtiene la información de nuevo de las actividades de hoy */}
     const now = new Date();
 
     const activity_info = JSON.parse(localStorage.getItem("activity_info"));
@@ -20,7 +21,6 @@ export async function ActivityCache() {
             const month = String(today.getUTCMonth() + 1).padStart(2, '0');
             const day = String(today.getUTCDate()).padStart(2, '0');
             const dateString = `${year}-${month}-${day}`;
-            console.log(dateString)
             const response = await axios.get("http://localhost:8002/activities/info/",{
                     withCredentials: true,
                     params: {
@@ -47,6 +47,7 @@ export async function ActivityCache() {
 }
 
 export async function UserCache(Id) {
+    {/* Si necesita refrescar la caché, obtiene la información de nuevo del usuario */}
     const now = new Date();
 
     const user_info = JSON.parse(localStorage.getItem("user_info"));
@@ -68,7 +69,6 @@ export async function UserCache(Id) {
     if (!user_info.relatedSubjectsList) {
         refreshCache = true
     }
-    {/* Si necesita refrescar la caché, obtiene la información de nuevo del usuario */}
     if (refreshCache) {
         try {
             let userId = 0;
