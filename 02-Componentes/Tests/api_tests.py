@@ -1628,5 +1628,412 @@ class TestDeleteCalendarScheduledActivities(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json()["detail"], "Unknown Code")
 
+class TestReadUsersThroughId(unittest.TestCase):
+    # read_users_through_id
+    @patch("database_controller.Database.get_connection")
+    def test_get_users_through_id(self, mock_get_connection):
+        """88 Test: Recoger usuarios en base al id"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "Id": 1,
+                    "Username": "100451105@alumnos.uc3m.es",
+                    "UserType": "Estudiante"
+                }],
+            callType="GETONE"
+        )
+        response = client.get("/users/id/", params={"userId": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "Id": 1,
+                    "Username": "100451105@alumnos.uc3m.es",
+                    "UserType": "Estudiante"
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_get_users_through_id_non_connection(self, mock_get_connection):
+        """89 Test: Recoger usuarios en base al id sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/users/id/", params={"userId": 1})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+class TestGetUsersStateOnSubject(unittest.TestCase):
+    # get_users_state_on_subject
+    @patch("database_controller.Database.get_connection")
+    def test_get_users_state_on_subject(self, mock_get_connection):
+        """90 Test: Recoger el estado de los usuarios con respecto a una asigantura"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "Id": 1,
+                    "Username": "100451105@alumnos.uc3m.es",
+                    "UserType": "Estudiante",
+                    "IsAssigned": True
+                }],
+            callType="GETALL"
+        )
+        response = client.get("/users/assigned/subject/", params={"subjectId": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "Id": 1,
+                    "Username": "100451105@alumnos.uc3m.es",
+                    "UserType": "Estudiante",
+                    "IsAssigned": True
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_get_users_state_on_subject_non_connection(self, mock_get_connection):
+        """91 Test: Recoger el estado de los usuarios con respecto a una asigantura sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/users/assigned/subject/", params={"subjectId": 1})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+class TestReadProffesorsOfSubject(unittest.TestCase):
+    # read_proffesors_of_subject
+    @patch("database_controller.Database.get_connection")
+    def test_read_proffesors_of_subject(self, mock_get_connection):
+        """92 Test: Recoger profesores de una asignatura"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "UserID": 1,
+                    "Username": "100451105@alumnos.uc3m.es"
+                },
+                {
+                    "UserID": 2,
+                    "Username": "test@profesor.uc3m.es"
+                }],
+            callType="GETALL"
+        )
+        response = client.get("/users/subject/proffesors/", params={"subjectId": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "UserID": 1,
+                    "Username": "100451105@alumnos.uc3m.es"
+                },
+                {
+                    "UserID": 2,
+                    "Username": "test@profesor.uc3m.es"
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_read_proffesors_of_subject_non_connection(self, mock_get_connection):
+        """93 Test: Recoger profesores de una asignatura sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/users/subject/proffesors/", params={"subjectId": 1})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+class TestChangeSubjectVisionOfUser(unittest.TestCase):
+    # change_subject_vision_of_user
+    @patch("database_controller.Database.get_connection")
+    def change_subject_vision_of_user(self, mock_get_connection):
+        """94 Test: Cambiar la visión de asignaturas de un usuario"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue={"subjectId": 1},
+            callType="POST"
+        )
+        payload = {
+            "userId": 1,
+            "seeAllSubjects": True
+        }
+        response = client.post("/users/subject/vision/", json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"result": 200, "message": "Changed Subject vision of the user succesfully"})
+
+    @patch("database_controller.Database.assign_user_to_subject")
+    def test_change_subject_vision_of_user_user_not_existing(self, mock_assign_activity_to_day):
+        """95 Test: Cambiar la visión de asignaturas de un usuario sin existir el usuario"""
+        mock_assign_activity_to_day.return_value = 401
+        payload = {
+            "userId": 1,
+            "seeAllSubjects": True
+        }
+        response = client.post("/users/subject/vision/", json=payload)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "User doesn't exist")
+    
+    @patch("database_controller.Database.get_connection")
+    def test_change_subject_vision_of_user_non_connection(self, mock_get_connection):
+        """96 Test: Cambiar la visión de asignaturas de un usuario sin conexión a la base de datos"""
+        mock_get_connection.return_value = None
+        payload = {
+            "userId": 1,
+            "seeAllSubjects": True
+        }
+        response = client.post("/users/subject/vision/", json=payload)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+    @patch("database_controller.Database.assign_user_to_subject")
+    def test_change_subject_vision_of_user_unknown_error(self, mock_assign_activity_to_day):
+        """97 Test: Cambiar la visión de asignaturas de un usuario habiendo un error inesperado en base de datos"""
+        mock_assign_activity_to_day.return_value = 505
+        payload = {
+            "userId": 1,
+            "seeAllSubjects": True
+        }
+        response = client.post("/users/subject/vision/", json=payload)
+        self.assertEqual(response.status_code, 505)
+        self.assertEqual(response.json()["detail"], "Unknown Error")
+    
+    @patch("database_controller.Database.assign_user_to_subject")
+    def test_change_subject_vision_of_user_unknown_code(self, mock_assign_activity_to_day):
+        """98 Test: Cambiar la visión de asignaturas de un usuario habiendo un error con codigo desconocido"""
+        mock_assign_activity_to_day.return_value = 478
+        payload = {
+            "userId": 1,
+            "seeAllSubjects": True
+        }
+        response = client.post("/users/subject/vision/", json=payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"], "Unknown Code")
+
+class TestGetSubjectsOfCoordinator(unittest.TestCase):
+    # get_subjects_of_coordinator
+    @patch("database_controller.Database.get_connection")
+    def test_get_subjects_of_coordinator(self, mock_get_connection):
+        """99 Test: Recoger asignaturas de un coordinador"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "SubjectID": 1,
+                    "SubjectName": "Test Asignatura"
+                }],
+            callType="GETALL"
+        )
+        response = client.get("/subjects/coordinator/", params={"userId": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "SubjectID": 1,
+                    "SubjectName": "Test Asignatura"
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_get_subjects_of_coordinator_non_connection(self, mock_get_connection):
+        """100 Test: Recoger asignaturas de un coordinador sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/subjects/coordinator/", params={"userId": 1})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+class TestReadActivitiesMainInfo(unittest.TestCase):
+    # read_activities_main_info
+    @patch("database_controller.Database.get_connection")
+    def test_read_activities_main_info(self, mock_get_connection):
+        """101 Test: Recoger información principal de las actividades de una fecha"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "ActivityId": 1,
+                    "ActivityName": "100451105@alumnos.uc3m.es",
+                    "ActivityType": "Estudiante",
+                    "StartOfActivity": None,
+                    "EndOfActivity": "2025-07-07",
+                    "SubjectId": 1,
+                    "SubjectName": "Test Asignatura"
+                },
+                {
+                    "ActivityId": 2,
+                    "ActivityName": "100451105@alumnos.uc3m.es",
+                    "ActivityType": "Estudiante",
+                    "StartOfActivity": "2025-07-08",
+                    "EndOfActivity": "2025-07-21",
+                    "SubjectId": 1,
+                    "SubjectName": "Test Asignatura"
+                }],
+            callType="GETALL"
+        )
+        response = client.get("/activities/info/", params={"actualDate": "2025-07-07"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "ActivityId": 1,
+                    "ActivityName": "100451105@alumnos.uc3m.es",
+                    "ActivityType": "Estudiante",
+                    "StartOfActivity": None,
+                    "EndOfActivity": "2025-07-07",
+                    "SubjectId": 1,
+                    "SubjectName": "Test Asignatura"
+                },
+                {
+                    "ActivityId": 2,
+                    "ActivityName": "100451105@alumnos.uc3m.es",
+                    "ActivityType": "Estudiante",
+                    "StartOfActivity": "2025-07-08",
+                    "EndOfActivity": "2025-07-21",
+                    "SubjectId": 1,
+                    "SubjectName": "Test Asignatura"
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_read_activities_main_info_non_connection(self, mock_get_connection):
+        """102 Test: Recoger información principal de las actividades de una fecha sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/activities/info/", params={"actualDate": "2025-07-07"})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+class TestChangeStatusOfActivity(unittest.TestCase):
+    # change_status_of_activity
+    @patch("database_controller.Database.get_connection")
+    def change_status_of_activity(self, mock_get_connection):
+        """103 Test: Cambiar el status de una actividad"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue={"subjectId": 1},
+            callType="POST"
+        )
+        payload = [{
+            "activityId": 1,
+            "newStatus": "Organizar"
+        }]
+        response = client.post("/activities/change/status/", json=payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"result": 200, "message": "Changed the status of the activity succesfully"})
+
+    @patch("database_controller.Database.change_status_of_activity")
+    def test_change_status_of_activity_activity_not_existing(self, mock_assign_activity_to_day):
+        """104 Test: Cambiar el status de una actividad sin existir la actividad"""
+        mock_assign_activity_to_day.return_value = 401
+        payload = {
+            "activityId": 1,
+            "newStatus": "Organizar"
+        }
+        response = client.post("/activities/change/status/", json=payload)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()["detail"], "Activity doesn't exist")
+    
+    @patch("database_controller.Database.change_status_of_activity")
+    def test_change_status_of_activity_not_pending_status(self, mock_assign_activity_to_day):
+        """105 Test: Cambiar el status de una actividad a Asignado sin la actividad estar pendiente previamente"""
+        mock_assign_activity_to_day.return_value = 402
+        payload = {
+            "activityId": 1,
+            "newStatus": "Asignado"
+        }
+        response = client.post("/activities/change/status/", json=payload)
+        self.assertEqual(response.status_code, 402)
+        self.assertEqual(response.json()["detail"], "Cannot confirm an activity without it being in pending status")
+    
+    @patch("database_controller.Database.get_connection")
+    def test_change_status_of_activity_non_connection(self, mock_get_connection):
+        """106 Test: Cambiar el status de una actividad sin conexión a la base de datos"""
+        mock_get_connection.return_value = None
+        payload = {
+            "activityId": 1,
+            "newStatus": "Organizar"
+        }
+        response = client.post("/activities/change/status/", json=payload)
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+    @patch("database_controller.Database.change_status_of_activity")
+    def test_change_status_of_activity_unknown_error(self, mock_assign_activity_to_day):
+        """107 Test: Cambiar el status de una actividad habiendo un error inesperado en base de datos"""
+        mock_assign_activity_to_day.return_value = 505
+        payload = {
+            "activityId": 1,
+            "newStatus": "Organizar"
+        }
+        response = client.post("/activities/change/status/", json=payload)
+        self.assertEqual(response.status_code, 505)
+        self.assertEqual(response.json()["detail"], "Unknown Error")
+    
+    @patch("database_controller.Database.change_status_of_activity")
+    def test_change_status_of_activity_unknown_code(self, mock_assign_activity_to_day):
+        """108 Test: Cambiar el status de una actividad habiendo un error con codigo desconocido"""
+        mock_assign_activity_to_day.return_value = 478
+        payload = {
+            "activityId": 1,
+            "newStatus": "Organizar"
+        }
+        response = client.post("/activities/change/status/", json=payload)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"], "Unknown Code")
+
+class TestReadCalendarScheduledOnActivityBetweenDates(unittest.TestCase):
+    # read_calendar_scheduled_on_activity_between_dates
+    @patch("database_controller.Database.get_connection")
+    def test_read_calendar_scheduled_on_activity_between_dates(self, mock_get_connection):
+        """109 Test: Recoger las actividades para cada uno de los días entre dos fechas de calendario"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "CalendarDate": "2025-07-07",
+                    "DayType": "Normal",
+                    "WeekDay": "Lunes",
+                    "Status": "Ocupado",
+                    "Activities": "[]"
+                }],
+            callType="GETALL"
+        )
+        response = client.get("/scheduler/dates/", params={"startDate": "2025-07-07", "endDate": "2025-07-07"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "CalendarDate": "2025-07-07",
+                    "DayType": "Normal",
+                    "WeekDay": "Lunes",
+                    "Status": "Ocupado",
+                    "Activities": "[]"
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_read_calendar_scheduled_on_activity_between_dates_non_connection(self, mock_get_connection):
+        """110 Test: Recoger las actividades para cada uno de los días entre dos fechas de calendario sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/scheduler/dates/", params={"startDate": "2025-07-07", "endDate": "2025-07-07"})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+class TestReadPendingActivities(unittest.TestCase):
+    # read_pending_activities
+    @patch("database_controller.Database.get_connection")
+    def test_read_pending_activities(self, mock_get_connection):
+        """111 Test: Recoger actividades pendientes de un coordinador"""
+        mock_get_connection.return_value = prepare_mock_db_function(
+            returnValue=[
+                {
+                    "IdActivity": 1,
+                    "Name": "Test Actividad",
+                    "StartOfActivity": "2025-07-07",
+                    "EndOfActivity": "2025-07-08",
+                    "NewEndOfActivity": "2025-07-09",
+                    "IdSubject": 1,
+                    "Name": "Test Asignatura",
+                    "IdAdministrator": 1
+                }],
+            callType="GETALL"
+        )
+        response = client.get("/scheduler/activities/pending/", params={"userId": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [
+                {
+                    "IdActivity": 1,
+                    "Name": "Test Actividad",
+                    "StartOfActivity": "2025-07-07",
+                    "EndOfActivity": "2025-07-08",
+                    "NewEndOfActivity": "2025-07-09",
+                    "IdSubject": 1,
+                    "Name": "Test Asignatura",
+                    "IdAdministrator": 1
+                }])
+        
+    @patch("database_controller.Database.get_connection")
+    def test_read_pending_activities_non_connection(self, mock_get_connection):
+        """112 Test: Recoger actividades pendientes de un coordinador sin conexión a base de datos"""
+        mock_get_connection.return_value = None
+        response = client.get("/scheduler/activities/pending/", params={"userId": 1})
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["detail"], "Service Unavailable: Could not connect to the database")
+
+
+
 if __name__ == "__main__":
     unittest.main()

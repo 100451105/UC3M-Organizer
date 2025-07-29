@@ -145,7 +145,7 @@ def read_users_of_subject(subjectId: int = None):
     return result
 
 @app.get("/users/subject/proffesors/", description= "Leer Profesores de una Asignatura", tags=["Users"])
-def read_proffesors_of_subject(subjectId: int = None):
+def read_proffesors_of_subject(subjectId: int):
     result = db.get_proffesors_of_subject(subjectId)
     if result == 503:
         raise HTTPException(status_code=503, detail="Service Unavailable: Could not connect to the database")
