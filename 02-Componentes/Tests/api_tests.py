@@ -77,7 +77,7 @@ class TestGetUser(unittest.TestCase):
                 }],
             callType="GETONE"
         )
-        response = client.get("/users/",params={"userId": 1})
+        response = client.get("/users/",params={"username": "100451105@alumnos.uc3m.es"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [
                 {
@@ -197,6 +197,7 @@ class TestUpdateUser(unittest.TestCase):
             "username": "100451105@alumnos.uc3m.es", 
             "password": "boo", 
             "userType": "Estudiante",
+            "seeAllSubjects": False,
             "userId": 1
         }
         response = client.put("/users/", json=payload)
@@ -211,6 +212,7 @@ class TestUpdateUser(unittest.TestCase):
             "username": "100451105@alumnos.uc3m.es", 
             "password": "boo", 
             "userType": "Estudiante",
+            "seeAllSubjects": False,
             "userId": 1
         }
         response = client.put("/users/", json=payload)
@@ -225,6 +227,7 @@ class TestUpdateUser(unittest.TestCase):
             "username": "100451105@alumnos.uc3m.es", 
             "password": "boo", 
             "userType": "Estudiante",
+            "seeAllSubjects": False,
             "userId": 1
         }
         response = client.put("/users/", json=payload)
@@ -240,6 +243,7 @@ class TestUpdateUser(unittest.TestCase):
             "username": "100451105@alumnos.uc3m.es", 
             "password": "boo", 
             "userType": "Estudiante",
+            "seeAllSubjects": False,
             "userId": 1
         }
         response = client.put("/users/", json=payload)
@@ -606,19 +610,25 @@ class TestAssignUserToSubject(unittest.TestCase):
             callType="ASSIGN"
         )
         payload = {
-            "userId": 1,
+            "users": [{
+                "userId": 1,
+                "assigned": True
+            }],
             "subjectId": 1
         }
         response = client.post("/subjects/assign/user/", json=payload)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"result": 200, "message": "Assigned user to subject successfully"})
+        self.assertEqual(response.json(), {"result": 200, "message": "Changed assignments of users to subject successfully"})
 
     @patch("database_controller.Database.get_connection")
     def test_assign_user_to_subject_non_connection(self, mock_get_connection):
         """36 Test: Asignar un usuario a una asignatura sin conexión a la base de datos"""
         mock_get_connection.return_value = None
         payload = {
-            "userId": 1,
+            "users": [{
+                "userId": 1,
+                "assigned": True
+            }],
             "subjectId": 1
         }
         response = client.post("/subjects/assign/user/", json=payload)
@@ -630,7 +640,10 @@ class TestAssignUserToSubject(unittest.TestCase):
         """37 Test: Asignar un usuario a una asignatura habiendo un error inesperado en base de datos"""
         mock_assign_user_to_subject.return_value = 505
         payload = {
-            "userId": 1,
+            "users": [{
+                "userId": 1,
+                "assigned": True
+            }],
             "subjectId": 1
         }
         response = client.post("/subjects/assign/user/", json=payload)
@@ -642,7 +655,10 @@ class TestAssignUserToSubject(unittest.TestCase):
         """38 Test: Asignar un usuario a una asignatura habiendo un error con codigo desconocido"""
         mock_assign_user_to_subject.return_value = 478
         payload = {
-            "userId": 1,
+            "users": [{
+                "userId": 1,
+                "assigned": True
+            }],
             "subjectId": 1
         }
         response = client.post("/subjects/assign/user/", json=payload)
@@ -654,24 +670,30 @@ class TestAssignUserToSubject(unittest.TestCase):
         """39 Test: Asignar un usuario a una asignatura sin existir el usuario"""
         mock_assign_user_to_subject.return_value = 401
         payload = {
-            "userId": 1,
+            "users": [{
+                "userId": 1,
+                "assigned": True
+            }],
             "subjectId": 1
         }
         response = client.post("/subjects/assign/user/", json=payload)
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(response.json()["detail"], "User doesn't exist")
+        self.assertEqual(response.json()["detail"], "Subject doesn't exist")
     
     @patch("database_controller.Database.assign_user_to_subject")
     def test_assign_user_to_subject_subject_not_existing(self, mock_assign_user_to_subject):
         """40 Test: Asignar un usuario a una asignatura sin existir la asignatura"""
         mock_assign_user_to_subject.return_value = 402
         payload = {
-            "userId": 1,
+            "users": [{
+                "userId": 1,
+                "assigned": True
+            }],
             "subjectId": 1
         }
         response = client.post("/subjects/assign/user/", json=payload)
         self.assertEqual(response.status_code, 402)
-        self.assertEqual(response.json()["detail"], "Subject doesn't exist")
+        self.assertEqual(response.json()["detail"], "One of the users given in the JSON does not exist")
 
 class TestAssignCoordinatorToSubject(unittest.TestCase):
     # assign_coordinator_to_subject
@@ -1014,7 +1036,7 @@ class TestUpdateActivity(unittest.TestCase):
             "name": "Laboratorio de Prácticas de Testeo", 
             "description": "Laboratorio para practicar y testear la aplicación", 
             "type": "Laboratorio",
-            "estimatedHours": 0,
+            "estimatedHours": 1,
             "strategy": "Completa",
             "subjectId": 1,
             "activityId": 1
@@ -1031,7 +1053,7 @@ class TestUpdateActivity(unittest.TestCase):
             "name": "Laboratorio de Prácticas de Testeo", 
             "description": "Laboratorio para practicar y testear la aplicación", 
             "type": "Laboratorio",
-            "estimatedHours": 0,
+            "estimatedHours": 1,
             "strategy": "Completa",
             "subjectId": 1,
             "activityId": 1
@@ -1048,7 +1070,7 @@ class TestUpdateActivity(unittest.TestCase):
             "name": "Laboratorio de Prácticas de Testeo", 
             "description": "Laboratorio para practicar y testear la aplicación", 
             "type": "Laboratorio",
-            "estimatedHours": 0,
+            "estimatedHours": 1,
             "strategy": "Completa",
             "subjectId": 1,
             "activityId": 1
@@ -1066,7 +1088,7 @@ class TestUpdateActivity(unittest.TestCase):
             "name": "Laboratorio de Prácticas de Testeo", 
             "description": "Laboratorio para practicar y testear la aplicación", 
             "type": "Laboratorio",
-            "estimatedHours": 0,
+            "estimatedHours": 1,
             "strategy": "Completa",
             "subjectId": 1,
             "activityId": 1
@@ -1172,7 +1194,7 @@ class TestReadCalendar(unittest.TestCase):
                     "WeekDay": "Lunes",
                     "Status": "Ocupado"
                 }],
-            callType="GETONE"
+            callType="GETALL"
         )
         response = client.get("/scheduler/calendar/", params={"calendarDate": "2025-04-28"})
         self.assertEqual(response.status_code, 200)
