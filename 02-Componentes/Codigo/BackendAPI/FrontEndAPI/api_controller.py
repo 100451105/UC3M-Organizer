@@ -42,11 +42,11 @@ class CreateActivity(BaseModel):
     name: constr(min_length=0,max_length=1024)
     description: constr(min_length=0,max_length=1024)
     type: Literal["Examen","Actividad","Laboratorio","Clase","Otros"]
-    estimatedHours: conint(ge=0)
+    estimatedHours: conint(ge=1)
     strategy: Literal["Agresiva","Calmada","Completa"]
     subjectId: int
     startOfActivity: Optional[date] = None
-    endOfActivity: date = None
+    endOfActivity: date
 
     class Config:
         extra = "forbid"
@@ -59,7 +59,7 @@ class UpdateActivity(BaseModel):
     strategy: Literal["Agresiva","Calmada","Completa"]
     subjectId: int
     startOfActivity: Optional[date] = None
-    endOfActivity: date = None
+    endOfActivity: date
     activityId: int
 
 class CreateCalendarDay(BaseModel):

@@ -60,8 +60,8 @@ CREATE TABLE activity (
     StartOfActivity DATE,
     Status ENUM('Organizar','Confirmar','Sin Asignar','Asignado') NOT NULL,
     Strategy ENUM('Agresiva','Calmada','Completa'),
-    EstimatedHours INT NOT NULL CHECK(EstimatedHours >= 0),
-    EndOfActivity DATE,
+    EstimatedHours INT NOT NULL CHECK(EstimatedHours >= 1),
+    EndOfActivity DATE NOT NULL,
     NewEndOfActivity DATE,
     IdSubject INT NOT NULL
 );
