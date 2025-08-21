@@ -309,7 +309,7 @@ export default function Asignador() {
             onChange={handleSelectAll}
             className="mr-2 w-5 h-5 accent-main-dark-blue"
           />
-          <label className="text-[2.5vh] font-semibold">Select All</label>
+          <label className="text-[2.5vh] font-semibold">Seleccionar Todos</label>
         </div>
 
         {/* Lista de Usuarios */}
